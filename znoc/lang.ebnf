@@ -1,0 +1,46 @@
+(* LANGUAGE REFERENCE FOR ZnO *)
+(* Language design by Eliyahu Gluschove-Koppel *)
+(* RFCs made many many times to Oliver Hiorns *)
+
+identifier = (LETTER | "_") (LETTER | NUMBER | "_")*;
+
+binary_expr = unary_expr (binary_op binary_expr)?;
+break = 'break' binary_expr?;
+return = 'return' binary_expr?;
+codeblock = '{' statement* '}';
+fallthrough = 'fallthrough';
+function_prototype = 'inline'? 'func' identifier '(' (identifier ':' type ',')+ ')' ('->' type)?;
+function = function_prototype (codeblock | ';');
+identifier_expr = identifier |
+                  identifier '(' (binary_expr ',')* ')';
+if = 'if' binary_expr codeblock ('else' (codeblock | if))?;
+numeric_const = NUMBER+;
+parenthesis_expr = '(' binary_expr ')';
+switch = 'switch' binary_expr '{' switch_case* | 'default' codeblock '}';
+switch_case = 'case' (numeric_const ',')+ codeblock;
+unary_expr = r_value |
+             unary_op unary_expr;
+variable_def = 'let' identifier (':' type)? ('=' binary_expr)?;
+while_loop = 'while' binary_expr codeblock;
+
+string = '\'' CHARACTER* '\'';
+uses = 'uses' string;
+
+r_value = numeric_const |
+          identifier_expr |
+          variable_def |
+          non_semicolon_statement |
+          parenthesis_expr;
+
+non_semicolon_statement = codeblock |
+                          function |
+                          while_loop |
+                          switch |
+                          if;
+
+semicolon_statement = break |
+                      return |
+                      fallthrough;
+
+statement = binary_expr ';' | non_semicolon_statement | semicolon_statement ';';
+file = (non_semicolon_statement | uses ';' | variable_def ';')*;

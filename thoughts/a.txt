@@ -1,0 +1,52 @@
+uses 'stdio';
+
+struct test {
+	bool is_empty,
+
+}
+
+enum thing {
+
+}
+
+error func main(argCount: int, args: string[argCount]) {
+	println("Hello");
+	for (arg in args) {
+		println(arg);
+	}
+
+	i8[4] vec = [1,2,3,4];
+	i8[4] oddNums = (vec * 2) -1;
+	// oddNums is now [1,3,5,7];
+
+	int b;
+	b = returnsErrorSometimes(5);
+	println(b); // Should print 5
+
+	catch (b = returnsErrorSometimes(25) -> e) {
+		println(b); // Should still be 5 since `returnsErrorSometimes` errored?
+		println(e); // Should print 1 since error code returned by `returnsErrorSometimes`
+	}
+
+	catch (b = returnsErrorSometimes(3) -> e) {
+		// Never runs
+		// b now holds 3
+	}
+
+	propagate b = returnsErrorSometimes(30); // Should cause main to exit with error code 1
+}
+
+error func returnsErrorSometimes(a: int::16) -> int::16 {
+	if (a > 20) {
+		error 1;
+	} else {
+		return a;
+	}
+}
+
+optional func sometimesReturnsValue(a: int::128) -> 
+
+func printSomething() -> string {
+	print("hello world");
+	return "hello world";
+}

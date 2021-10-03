@@ -1,0 +1,10 @@
+uses 'stdio.zno'
+
+func main() {
+	let x = 6;
+	let y = 1;
+	printI(x);
+	x = if (y == 1) { 8; } else {x;};
+	printI(x);
+	return;
+}

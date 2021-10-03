@@ -1,0 +1,15 @@
+uses 'stdio.zno'
+
+func main() {
+	let x_ptr: __llvm_ptr = allocate();
+	printI(x_ptr);
+	printI(*x_ptr);
+	set_ptr(x_ptr, 7);
+	printI(*x_ptr);
+	deallocate(x_ptr);
+	let y = 65;
+	let y_ptr = &y;
+	printI(y_ptr);
+	printI(*y_ptr);
+	return;
+}

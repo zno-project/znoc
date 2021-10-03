@@ -1,0 +1,4 @@
+#[extern] func printI(x: __llvm_i32);
+#[extern] func allocate() -> __llvm_ptr;
+#[extern] func deallocate(p: __llvm_ptr);
+#[extern] func set_ptr(p: __llvm_ptr, v: __llvm_i32);

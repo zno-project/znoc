@@ -1,0 +1,26 @@
+uses 'stdio.zno'
+
+class OtherThingy {
+	d: __llvm_i32,
+	e: __llvm_i32
+}
+
+struct Thingy {
+	a: __llvm_i32,
+	b: __llvm_i32,
+	c: OtherThingy
+}
+
+func printAStructThing(s: Thingy) -> __llvm_i32 {
+	printI(s.a);
+	return s.b;
+}
+
+func main() {
+	let s: Thingy;
+	s.a = 32;
+	s.b = 65;
+	let x = s.b;
+	printI(x);
+	return;
+}

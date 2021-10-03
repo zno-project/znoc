@@ -1,0 +1,213 @@
+errorTable a { // How does this differ from an enum tho
+	UNIMPLEMENTED,
+	CBA
+}
+
+error (a) func throwError() {
+	throw UNIMPLEMENTED;
+}
+
+error [HAD_A_PROBLEM] func throwOtherError() {
+	throw HAD_A_PROBLEM;
+}
+
+error [HAD_A_PROBLEM, DIFFERENT_PROBLEM] func throwMoreError() {
+	throw HAD_A_PROBLEM;
+	throw DIFFERENT_PROBLEM; // Both are legal error codes
+}
+
+
+// Or do you just use an enum?
+enum b {
+	PROBLEM,
+	BIGGER_PROBLEM
+}
+
+error (b) func problematic() {
+	throw BIGGER_PROBLEM;
+}
+
+enum c {
+	EVEN_BIGGER_PROBLEM
+}
+
+error (b, c) func veryProblematic() {
+	// Both are valid since both b and c are error types for this function
+	throw PROBLEM; // From b
+	throw EVEN_BIGGER_PROBLEM; // From c
+}
+
+
+
+// But `error [HELP, MORE_HELP, TOTAL_LOSS] func ...` feels too crowded at the start
+// kinda
+// maybe
+// or maybe it's `error (...)` looking weird
+// idk anymore
+// or should func come before error?
+// Cause originally `error` was just an attribute, like `const func` is a constant function `error func` is an errorable function
+// help
+// maybe just use `error [...] func` syntax? and then any enums/errorTables are expanded out and anything else becomes an error type?
+// so like
+
+errorTable thing {
+	PROBLEM,
+	BIGGER_PROBLEM
+}
+
+error [thing, VERY_BIG_PROBLEM] func help() {
+	throw PROBLEM;
+	throw VERY_BIG_PROBLEM;
+}
+
+// Although now the distinction between `thing` and `VERY_BIG_PROBLEM` looks a bit weird
+// maybe
+// i don't know anymore
+// And then optionals.........
+
+func optionalReturn() -> optional int {
+	return NULL;
+}
+
+// Is it null? or something closer to nothing like None? but then that's different to C
+// i don't know
+// and then how does unwrapping them work
+// Cause in rust all the `.unwrap()` just gets annoying
+// Or do you implicitly unwrap and `throw NULL_VALUE_ERROR` unless the unwrapping is explicit?
+// so
+
+error func main() {
+	int a = optionalReturn();
+}
+
+// Would error with `NULL_VALUE_ERROR`
+// But
+
+error func main() {
+	int a = optionalReturn().or_else(53);
+}
+
+// And then `a` is 53 if `NULL` returned, otherwise the returned value
+// And is an optional type `optional int` or `optional<int>` or `optional::int` or something else
+// Cause the first is consistent with function definition
+// But then having it as an attribute feels a bit weird? Maybe? kinda starting to grow on me now
+
+// hmmmmm
+// (oh no) optimization of structs containing optionals
+// cause if you have
+
+struct optionalStruct {
+	optional int a;
+	optional int b;
+}
+
+// and you can prove that one of `a` and `b` is always `NULL` (so at any time `a = NULL, b = ...` or other way round),
+// then you can store them both in the same space
+// and save memory
+// but how do you prove that
+// or just give up and don't
+
+// But back to the other problems
+error [NetworkError, HTTPError(int)] func getDataFromServer(fieldToGet: string) -> optional string {
+	...
+}
+
+// Is starting to look a bit long
+// hmmmmm
+// i don't want to copy swift here
+// idk how i feel about
+
+func getDataFromServer(fieldToGet: string) -> optional string throws [NetworkError, HTTPError(int)] {
+	...
+}
+
+// This might look nicer with some syntax highlighting
+// do i do this in word? that seems horrible
+// ok the following is going to start using ansi escape codes so may render weirdly
+[35mfunc[0m [34mgetDataFromServer[0m([36mfieldToGet:[0m [32mstring[34m[0m) -> [35moptional[0m [32mstring[0m [35mthrows[0m [0m[[32mNetworkError[0m, [32mHTTPError[0m([32mi8[0m)[0m] { ... }
+
+// hmmmmm
+// with the syntax highlighting i actually quite like that
+// but still, the question of typedefing errors
+// using some kind of `or` feels weird
+// even though if you think about combining bitmasks it kinda makes sense
+// or maybe just `+`?
+// this feels like it's going to be a pain to parse
+// but something like
+[35mfunc[0m [34mgetDataFromServer[0m([36mfieldToGet:[0m [32mstring[34m[0m) -> [35moptional[0m [32mstring[0m [35mthrows[0m [0m[[32mNetworkError[0m, [32mHTTPError[0m([32mi8[0m)[0m] + [[32mOtherError[0m] { ... }
+// i think could work
+// and then you can do
+[32menum[0m [34mServerErrors[0m {
+	[36mServerError[0m,
+	[36mHTTPError[0m([36m[32mi8[0m)
+[0m}
+
+[35mfunc[0m [34mgetDataFromServer[0m([36mfieldToGet:[0m [32mstring[34m[0m) -> [35moptional[0m [32mstring[0m [35mthrows[0m [34mServerErrors[0m + [[32mVeryBigProblem[0m] { ... }
+
+// Although the error table isn't exactly an enum
+// Cause if its just a raw enum, then error propogation makes no sense
+// like say you have
+[32menum[0m [34mServerErrors[0m {
+	[36mServerError[0m,
+	[36mHTTPError[0m([36m[32mi8[0m)
+[0m}
+
+[32menum[0m [34mStandardErrors[0m {
+	[36mUnknownProblem[0m,
+	[36mUnimplemented[0m
+[0m}
+
+// then both [36mServerError[0m and [36mUnknownProblem[0m would be `0`, and [36mHTTPError[0m and [36mUnimplemented[0m are both `1`
+// which means then
+
+[35mfunc[0m ... [35mthrows[0m [34mServerErrors[0m + [34mStandardErrors[0m { ... }
+
+// means if treating them as raw enums, differentiating between catching [36mServerError[0m and [36mUnknownProblem[0m is impossible
+// but then introducing a whole new [32merrorTable[0m type and keyword feels a bit duplicating of an enum
+// but then also makes it clear that its not treated as an enum
+// although now i'm trying to figure out how to implement this in LLVM IR
+// it looks like there's some kind of exception table thing
+// so i guess there are two ways of doing this
+// dynamically modify the exception table as you enter and leave functions
+// but that feels like slow runtime
+// or as you compile, build up a list of every possible exception that can be thrown
+// so when you find a `throw` statement, you lookup the exception type in the table
+// if it exists, retrieve the code and turn it into a 
+
+// discussed with oliver
+// made it
+[32merror[0m [34mServerErrors[0m {
+	[34mServerError[0m,
+	[34mHTTPError[0m([36m[32mi8[0m)
+[0m}
+
+[35mconst[0m [32merror[0m [34mOtherErrors[0m = [34mServerErrors[0m | [32mMallocError[0m;
+
+[35mfunc[0m [34mgetDataFromServer[0m([36mfieldToGet:[0m [32mstring[34m[0m, [36mvarArgs:[0m...) [35mthrows[0m [32mRuntimeError[0m | [34mOtherErrors[0m -> [35moptional[0m<[32mstring[0m> {
+	[32mi64[0m [36mfirstArg[0m = [36mvarArgs[0m.[34mnext[0m()::[32mi32[0m;
+	[35mif[0m ([36mfirstArg[0m > [33m10[0m) {
+		[35mptr[0m<[32mi64[0m>[36mthing[0m = [34mmalloc[0m([34msizeof[0m([32mi64[0m));
+		[35mthrow[0m [34mHTTPError[0m([36m[33m404[0m);
+	} [35melse[0m {
+		[35mreturn[0m [31m"Hello world!"[0m;
+	}
+	[35mreturn[0m [32mNothing[0m;
+}
+
+[35mfunc[0m [34mmain[0m() -> [32mi32[0m {
+	[35mtry[0m {
+		[34mgetDataFromServer[0m([31m"name"[0m, [33m2[0m);
+	} [35mcatch[0m ([34mHTTPError[0m([36me[0m)) {
+		[34mprintln[0m([31m"HTTP error code %d"[0m, [36me[0m);
+	} [35mcatch[0m {
+		[34mprintln[0m([31m"Some error occured"[0m);
+	}
+}
+
+struct Omni {
+	ptr Tracker,
+	bool is_captain,
+	...
+}
+
+Omni data = new Omni;

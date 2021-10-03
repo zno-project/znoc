@@ -1,0 +1,11 @@
+#[inline] func hello() {
+	printI(8);
+	return;
+}
+
+uses 'stdio.zno'
+
+func main() {
+	hello();
+	return;
+}

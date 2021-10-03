@@ -1,0 +1,56 @@
+class Closure<RT, T...> {
+	localData: *void;
+	func: (*void, T...) -> RT;
+
+	init(_localData: *void, _func: (*void, T...) -> RT) {
+		self.localData = _localData;
+		self.func = _func;
+	}
+
+	operator ()(args: T...) -> RT {
+		return self.func(self.localData, args...);
+	}
+}
+
+class TransactionPointerWrapper<T> {
+	values: *map<*void, *void>;
+	inner: T;
+
+	TransactionPointerWrapper(_values: *map<*void, *void>, _inner: T) {
+		self.values = _values;
+		self.inner = _inner;
+	}
+
+	operator =(rhs: T) {
+		let vals = *(self.values);
+		let ptr = &inner;
+		if (vals[ptr].isNone()) {
+			vals[ptr] = malloc(sizeof(inner));
+			*vals[ptr] = inner;
+		}
+		inner = rhs;
+	}
+
+	operator *() {
+		return TransactionPointerWrapper<typeof(*T)>(values, *T);
+	}
+
+	operator .(field: ?) {
+		return TransactionPointerWrapper<typeof(T.field)>(T.field, *T);
+	}
+}
+
+class Transaction<RT, T...> {
+	func do(closure: Closure<RT, T...>, args: T...) -> RT {
+		let values = new map<*void, *void>;
+
+		try {
+			return closure(TransactionPointerWrapper<typeof(args)>(values, args)...);
+		} catch (...) {
+			for ((source: *void, val: *void) in values) {
+				*source = *val;
+			}
+			rethrow;
+		}
+	}
+}

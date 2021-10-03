@@ -1,0 +1,8 @@
+uses 'stdio.zno'
+
+func main() {
+	let x = 32;
+	let xp = &x;
+	printI(*xp);
+	return;
+}
