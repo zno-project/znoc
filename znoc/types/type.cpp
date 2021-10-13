@@ -37,6 +37,11 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	std::string type_name = parsed_namespace_data.next_identifier;
 	auto type_base = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
 
+	auto ret_type = AST::TypeInstance {
+		.base_type = type_base,
+		.template_instance_id = 0
+	};
+
 	if (currentToken == '<') {
 		std::vector<AST::TypeInstance> template_types;
 		get_next_token(f);
@@ -48,13 +53,10 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		if (currentToken != '>') throw UNEXPECTED_CHAR(currentToken, "`>` to end template type list");
 		get_next_token(f);
 		//t.type->templatedTypes.push_back(template_types);
-		//t.template_instance = t.type->templatedTypes.size()-1; // The template instance of the type used - TODO: For a templated type, actually look up which instance it is, or create a new one
+		ret_type.template_instance_id = type_base->add_generic_instance(template_types);
 	}
 
-	return AST::TypeInstance {
-		.base_type = std::move(type_base),
-		.template_instance_id = 0
-	};
+	return ret_type;
 }
 
 std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {

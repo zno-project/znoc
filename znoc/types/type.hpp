@@ -69,8 +69,6 @@ namespace AST {
 		std::string name;
 		std::map<size_t, llvm::Type*> generated;
 
-		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
-
 		protected:
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
@@ -90,6 +88,7 @@ namespace AST {
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name, size_t template_instance_id);
 		FieldInfo get_field_info_by_name(std::string name, size_t template_instance_id);
 		FieldInfo get_field_info_by_index(size_t idx, size_t template_instance_id);
+		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
 	};
 
 	struct TypeInstance {
