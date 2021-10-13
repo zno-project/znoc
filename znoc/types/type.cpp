@@ -141,7 +141,12 @@ llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
 
 		std::vector<llvm::Type*> f;
 		for (auto &fT : fields_by_index) {
-			f.push_back(std::get<AST::TypeInstance>(fT).codegen());
+			if (std::holds_alternative<AST::TypeInstance>(fT)) {
+				f.push_back(std::get<AST::TypeInstance>(fT).codegen());
+			} else {
+				auto field_idx = std::get<AST::GenericInstance>(fT).generic_type_index;
+				f.push_back(generic_types.at(template_instance).at(field_idx).codegen());
+			}
 		}
 		auto gen = llvm::StructType::create(*TheContext, llvm::ArrayRef<llvm::Type*>(f));
 		gen->setName(fmt::format("{}_instance{}", name, template_instance));
