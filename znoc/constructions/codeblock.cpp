@@ -1,35 +1,37 @@
 #include "codeblock.hpp"
 
-#include "expression.hpp"
-#include "../parsing.hpp"
 #include <vector>
 #include <map>
+
+#include "expression.hpp"
+#include "../parsing.hpp"
+#include "../macros.hpp"
+#include "construction_parse.hpp"
+#include "../memory/memory_location.hpp"
+
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/IRBuilder.h>
-#include "reference.hpp"
-#include "../macros.hpp"
-#include "../main.hpp"
-#include "../casting.hpp"
+
 #include <fmt/format.h>
 
 std::vector<AST::CodeBlock*> codeblocks;
 
 llvm::Value* AST::CodeBlock::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
-	NamedValues.push_front(std::map<std::string, std::shared_ptr<AST::Variable>>()); // Create new scope
+	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
 
 	llvm::Value *returnExp = nullptr;
 	for (auto &exp: body) {
 		returnExp = exp->codegen(builder); // Set returned expression to last statement in block
 	}
 
-	NamedValues.pop_front(); // Close new scope
+	stack_allocations.pop_front(); // Close new scope
 	return returnExp;
 }
 
 // CODE BLOCK
 // codeblock = '{' statement* '}';
-std::unique_ptr<AST::CodeBlock> Parser::parse_code_block(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_code_block(FILE* f) {
 	std::vector<std::unique_ptr<AST::Expression>> body;
 
 	if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start code block");

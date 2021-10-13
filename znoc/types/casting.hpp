@@ -7,14 +7,14 @@
 namespace AST {
 	class Cast: public AST::Expression {
 		std::unique_ptr<AST::Expression> from;
-		AST::type_usage_t to;
+		AST::TypeInstance to;
 
 		public:
-		Cast(std::unique_ptr<AST::Expression> from, AST::type_usage_t to): Expression(to), from(std::move(from)), to(to) {}
+		Cast(std::unique_ptr<AST::Expression> from, AST::TypeInstance to): Expression(to), from(std::move(from)), to(to) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
 	};
 
-	std::unique_ptr<AST::Cast> make_cast(std::unique_ptr<AST::Expression> from, AST::type_usage_t to);
+	std::unique_ptr<AST::Cast> make_cast(std::unique_ptr<AST::Expression> from, AST::TypeInstance to);
 }
 
 #endif

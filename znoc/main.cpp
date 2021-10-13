@@ -13,9 +13,8 @@
 
 #include "main.hpp"
 #include "parsing.hpp"
-#include "constructions/variable.hpp"
 #include "constructions/reference.hpp"
-#include "constructions/function.hpp"
+#include "constructions/function_def.hpp"
 #include "constructions/namespace.hpp"
 #include "types/type.hpp"
 
@@ -156,14 +155,13 @@ int main(int argc, char *argv[]) {
 
 	makeLLVMModule(path.string());
 
-	NamedValues.push_front(std::map<std::string, std::shared_ptr<AST::Variable>>());
-
-	AST::init_builtin_types();
+	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>());
 
 	//std::vector<std::pair<std::unique_ptr<AST::VariableDef>, bool>> variableDeclarations;
 	//std::vector<std::pair<std::unique_ptr<AST::Type>, bool>> typeDeclarations;
 
 	GlobalNamespace = std::make_unique<AST::Namespace>("_G");
+	AST::init_builtin_types();
 
 	parse_file(path, GlobalNamespace);
 

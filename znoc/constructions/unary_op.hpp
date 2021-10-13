@@ -3,6 +3,7 @@
 
 #include "expression.hpp"
 #include "reference.hpp"
+#include "../types/builtins.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
@@ -18,14 +19,9 @@ namespace AST {
 		public:
 		char op;
 		std::unique_ptr<Expression> operand;
-		UnaryExpression(char op, std::unique_ptr<Expression> operand): Expression(op == '&' ? AST::get_type_by_name("__llvm_ptr") : (op == '*' ? AST::get_type_by_name("__llvm_i32") : operand->getType())), op(op), operand(std::move(operand)) {}
+		UnaryExpression(char op, std::unique_ptr<Expression> operand): Expression(op == '&' ? AST::get_fundamental_type("ptr") : (op == '*' ? AST::get_fundamental_type("i32") : operand->getType())), op(op), operand(std::move(operand)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
 	};
-}
-
-namespace Parser {
-	//AST::UnaryOpType parseUnaryOp();
-	std::unique_ptr<AST::Expression> parse_unary_expression(FILE* f);
 }
 
 #endif

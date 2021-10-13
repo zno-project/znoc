@@ -2,11 +2,11 @@ uses 'stdio.zno'
 
 func main() {
 	let a = 1;
-	printI(a);
-	printI(!a);
+	stdio::printI(a);
+	stdio::printI(!a);
 	let b = 2;
-	printI(b);
-	printI(!b);
-	printI(~b);
+	stdio::printI(b);
+	stdio::printI(!b);
+	stdio::printI(~b);
 	return;
 }

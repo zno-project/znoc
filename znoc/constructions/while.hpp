@@ -19,8 +19,4 @@ namespace AST {
 	};
 }
 
-namespace Parser {
-	std::unique_ptr<AST::WhileDef> parse_while(FILE* f);
-}
-
 #endif

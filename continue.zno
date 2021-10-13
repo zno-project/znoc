@@ -5,7 +5,7 @@ func main() {
 	while (x > 0) {
 		x = x - 1;
 		if (x == 5) { continue; }
-		printI(x);
+		stdio::printI(x);
 	}
 	return;
 }

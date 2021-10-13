@@ -12,6 +12,8 @@
 #include "binary_op.hpp"
 #include <fmt/format.h>
 #include <llvm/IR/BasicBlock.h>
+#include "../types/builtins.hpp"
+#include "construction_parse.hpp"
 
 llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//emitLocation(builder, this);
@@ -53,7 +55,7 @@ llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((
 
 // SWITCH STATEMENT
 // switch = 'switch' binary_expr '{' switch_case* | 'default' codeblock '}';
-std::unique_ptr<AST::SwitchDef> Parser::parse_switch(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	get_next_token(f); // Trim switch
 	auto condition = parse_binary_expression(f);
 	if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start switch body");
@@ -66,7 +68,7 @@ std::unique_ptr<AST::SwitchDef> Parser::parse_switch(FILE* f) {
 		if (currentToken == tok_default) {
 			get_next_token(f);
 			if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start switch default code block");
-			default_body = parse_code_block(f);
+			default_body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 		} else body.push_back(parse_switch_case(f));
 
 		if (currentToken == '}') break;
@@ -94,7 +96,7 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	}
 	
 	//if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start case code block");
-	std::unique_ptr<AST::CodeBlock> caseBody = parse_code_block(f);
+	std::unique_ptr<AST::CodeBlock> caseBody = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 
 	return std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>(meta, std::move(caseBody));
 }

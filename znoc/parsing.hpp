@@ -5,7 +5,6 @@
 #include <variant>
 #include <string>
 #include <filesystem>
-#include "location.hpp"
 
 int advance(FILE* f);
 int get_token(FILE* f);

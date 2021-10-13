@@ -7,9 +7,12 @@
 #include <llvm/IR/Type.h>
 #include "../macros.hpp"
 #include "../main.hpp"
-#include "variable.hpp"
+#include "../memory/variable.hpp"
+#include "../memory/memory_ref.hpp"
+#include "../memory/gep.hpp"
 #include "binary_op.hpp"
-#include "function.hpp"
+#include "construction_parse.hpp"
+#include "function_call.hpp"
 #include "../parsing.hpp"
 
 /*std::unique_ptr<AST::ASTRef> parseStructRef(std::unique_ptr<AST::ASTRef> v) {
@@ -21,40 +24,64 @@
 	return parseStructRef(std::make_unique<AST::StructFieldRef>(std::move(v), fieldName));
 }*/
 
-enum class IdentifierPart {
-	Namespace,
-	FieldContainer,
-	Function
-};
-
 // IDENTIFIER EXPRESSION
 // identifier_expr = identifier |
 //                   identifier '(' (binary_expr ',')* ')';
 std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
-	std::vector<std::pair<std::string, IdentifierPart>> parts;
+	std::vector<std::string> fields;
 
-	while (1) {
-		std::string identifier = *std::get_if<std::string>(&currentTokenVal);
-		get_next_token(f); // Trim the identifier
-		if (currentToken == '.') {
-			parts.push_back(std::pair(identifier, IdentifierPart::FieldContainer);
-			get_next_token(f);
-		} else if (currentToken == ':') {
-			parts.push_back(std::pair(identifier, IdentifierPart::Namespace);
-			get_next_token(f);
-		} else break;
+	std::cout << "==== Parsing identifier ====" << std::endl;
+
+	auto parsed_namespace = Parser::parse_namespace(f);
+
+	if (parsed_namespace.next_token == '(') { // Function call
+		get_next_token(f); // Trim (
+		auto func_name = parsed_namespace.next_identifier;
+		std::cout << "call to func " << parsed_namespace.parsed_namespace->get_name() << ":" << func_name << "(...)" << std::endl;
+
+		std::vector<std::unique_ptr<AST::Expression>> args;
+	
+		if (currentToken != ')') {
+			while (1) {
+				args.push_back(parse_binary_expression(f));
+
+				if (currentToken == ')') break;
+				if (currentToken != ',') throw UNEXPECTED_CHAR(currentToken, ", after argument");
+				get_next_token(f); // Trim ,
+			}
+		}
+		
+		get_next_token(f); // Trim )
+		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
+	} else {
+		std::cout << "Variable reference - ignoring namespaces" << std::endl;
+		std::cout << "Variable reference - current tok is " << currentToken << std::endl;
+		std::shared_ptr<AST::MemoryLoc> variable = AST::get_var(parsed_namespace.next_identifier);
+
+		if (parsed_namespace.next_token == '.') while (1) {
+			get_next_token(f); // Trim `.`
+			auto field_name = *std::get_if<std::string>(&currentTokenVal);
+			get_next_token(f); // Trim field name
+
+			auto field_info = variable->underlying_type.get_field_info_by_name(field_name);
+			variable = std::make_unique<AST::GEP>(variable, field_info.index);
+
+			if (currentToken != '.') break;
+		}
+
+		return std::make_unique<AST::MemoryRef>(variable);
 	}
 
-	if (currentToken != '(') {
+	/*if (currentToken != '(') {
 		return std::make_unique<AST::VariableRef>(identifier, fields);; // Make variable reference if not function call
-	}
+	}*/
 	/*if (currentToken == '.') {
 		std::cout << "struct ref" << std::endl;
 		return parseStructRef(std::move(v));
 	}*/
 
-	std::string fullFuncLookupName;
-	fullFuncLookupName += fields.size() > 0 ? "" : identifier;
+	/*std::string fullFuncLookupName;
+	fullFuncLookupName += fields.size() > 0 ? "" : identifier;*/
 
 	/*if (fields.size() > 0) {
 		// Get type of last field
@@ -72,7 +99,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 		fullFuncLookupName += ty->name + "::" + funcN;
 	}*/
 
-	std::cout << "full internal func name is " << fullFuncLookupName << std::endl;
+	/*std::cout << "full internal func name is " << fullFuncLookupName << std::endl;
 
 	get_next_token(f); // Trim (
 	std::vector<std::unique_ptr<AST::Expression>> args;
@@ -86,5 +113,5 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 	}
 	
 	get_next_token(f); // Trim )
-	return std::make_unique<AST::FunctionCall>(fullFuncLookupName, std::move(args));
+	return std::make_unique<AST::FunctionCall>(fullFuncLookupName, std::move(args));*/
 }

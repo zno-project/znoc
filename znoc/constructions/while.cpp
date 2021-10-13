@@ -13,6 +13,7 @@
 #include "binary_op.hpp"
 #include "../parsing.hpp"
 #include "expression.hpp"
+#include "construction_parse.hpp"
 
 llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//emitLocation(builder, this);
@@ -45,12 +46,12 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((u
 
 // WHILE LOOP
 // while_loop = 'while' binary_expr codeblock;
-std::unique_ptr<AST::WhileDef> Parser::parse_while(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_while(FILE* f) {
 	get_next_token(f); // Trim while
 	auto condition = parse_binary_expression(f);
 	if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start while body");
 	
-	auto body = parse_code_block(f);
+	std::unique_ptr<AST::CodeBlock> body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 
 	return std::make_unique<AST::WhileDef>(std::move(condition), std::move(body));
 }

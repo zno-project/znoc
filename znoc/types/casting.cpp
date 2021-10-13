@@ -1,7 +1,7 @@
 #include "casting.hpp"
 #include <fmt/format.h>
 
-std::unique_ptr<AST::Cast> AST::make_cast(std::unique_ptr<AST::Expression> from, AST::type_usage_t to) {
+std::unique_ptr<AST::Cast> AST::make_cast(std::unique_ptr<AST::Expression> from, AST::TypeInstance to) {
 	return std::make_unique<AST::Cast>(std::move(from), std::move(to));
 }
 

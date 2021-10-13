@@ -4,8 +4,9 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/LegacyPassManager.h>
-#include "constructions/namespace.hpp"
 #include <vector>
+
+namespace AST { class Namespace; }
 
 extern std::unique_ptr<llvm::LLVMContext> TheContext;
 extern std::unique_ptr<llvm::Module> TheModule;
