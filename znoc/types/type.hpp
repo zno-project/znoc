@@ -56,7 +56,7 @@ namespace AST {
 	class Function;
 
 	struct GenericInstance {
-		std::vector<AST::TypeInstance> generic_types;
+		size_t generic_type_index;
 	};
 
 	struct FieldInfo {
@@ -71,12 +71,13 @@ namespace AST {
 		protected:
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
+		std::vector<std::vector<AST::TypeInstance>> generic_types;
 		std::map<std::string, std::shared_ptr<AST::Function>> functions;
 
 		public:
-		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generated(nullptr) {}
+		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated(nullptr) {}
 		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::map<std::string, std::shared_ptr<AST::Function>> functions): name(std::move(name)), fields_by_name(std::move(fields_by_name)), fields_by_index(std::move(fields_by_index)), functions(std::move(functions)), generated(nullptr) {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<std::vector<AST::TypeInstance>> generic_types, std::map<std::string, std::shared_ptr<AST::Function>> functions): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(std::move(generic_types)), fields_by_index(std::move(fields_by_index)), functions(std::move(functions)), generated(nullptr) {}
 
 		virtual llvm::Type* codegen(int template_instance);
 
