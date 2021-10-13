@@ -6,5 +6,5 @@ thoughts/**
 tmp/**
 **/build/**
 *.d
-**/znoc
+znoc/znoc
 **/*.plist
