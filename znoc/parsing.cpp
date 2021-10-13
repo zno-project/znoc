@@ -1,10 +1,8 @@
 #include "parsing.hpp"
 
 #include "constructions/expression.hpp"
-#include "constructions/variable.hpp"
-#include "constructions/function.hpp"
-#include "types/class.hpp"
-#include "types/struct.hpp"
+#include "constructions/function_def.hpp"
+#include "types/type.hpp"
 #include "attributes.hpp"
 #include "types/type.hpp"
 #include "macros.hpp"
@@ -28,14 +26,18 @@ int advance(FILE *f) {
 	if (LastChar == '\n' || LastChar == '\r') {
 		LexLoc.Line++;
 		LexLoc.Col = 0;
-	} else
-		LexLoc.Col++;
+	} else LexLoc.Col++;
+	if (LastChar == ')') {
+		__asm__("nop");
+	}
 	return LastChar;
 }
 
 int get_token(FILE *f) {
 	//std::cout << "get_token" << std::endl;
-	static char lastChar = advance(f);
+	static std::map<FILE*, char> lastChars = std::map<FILE*, char>();
+	if (lastChars[f] == 0) lastChars[f] = advance(f);
+	char &lastChar = lastChars[f];
 	//std::cout << "after advance should be called" << std::endl;
 
 	// skip whitespace
@@ -95,7 +97,9 @@ int get_token(FILE *f) {
 
 int get_next_token(FILE *f) {
 	//std::cout << "getnexttoken" << std::endl;
-	return currentToken = get_token(f);
+	currentToken = get_token(f);
+	std::cout << "Tok: " << (char)currentToken << "(" << currentToken << ")" << std::endl;
+	return currentToken;
 }
 
 std::vector<std::filesystem::path> searchedIncludes;
@@ -164,13 +168,9 @@ int parse_file(std::filesystem::path path,
 				Parser::clear_attributes();
 				break;
 			}
-			case tok_struct: {
-				*current_namespace << Parser::parse_struct_def(f);
-				Parser::clear_attributes();
-				break;
-			}
+			case tok_struct:
 			case tok_class: {
-				*current_namespace << Parser::parse_class_def(f);
+				*current_namespace << Parser::parse_aggregate_type_definition(f);
 				Parser::clear_attributes();
 				break;
 			}

@@ -4,6 +4,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/BasicBlock.h>
 #include "../parsing.hpp"
+#include "construction_parse.hpp"
 
 // FALLTHROUGH
 // fallthrough = 'fallthrough';
@@ -22,4 +23,9 @@ llvm::Value* AST::FallthroughExpression::codegen(llvm::IRBuilder<> *builder, __a
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(b);
 
 	return nullptr;
+}
+
+std::unique_ptr<AST::Expression> Parser::parse_fallthrough(FILE* f) {
+	get_next_token(f);
+	return std::make_unique<AST::FallthroughExpression>();
 }

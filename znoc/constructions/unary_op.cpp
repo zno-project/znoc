@@ -10,6 +10,9 @@
 #include "expression.hpp"
 #include "../macros.hpp"
 #include "../main.hpp"
+#include "../types/builtins.hpp"
+#include "../memory/memory_ref.hpp"
+#include "construction_parse.hpp"
 
 llvm::Value* AST::UnaryExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
 	//emitLocation(builder, this);
@@ -28,9 +31,9 @@ llvm::Value* AST::UnaryExpression::codegen(llvm::IRBuilder<> *builder, std::stri
 		case '~': return builder->CreateNot(OPv, name);
 		case '*': return builder->CreateLoad(OPv);
 		case '&': {
-			auto v = dynamic_cast<AST::VariableRef*>(operand.get());
+			auto v = dynamic_cast<AST::MemoryRef*>(operand.get());
 			if (!v) throw std::runtime_error("Cannot get pointer to non variable");
-			return v->getAlloca();
+			return v->codegen_to_underlying_ptr(builder);
 		}
 		//case '{': return OPv;
 		

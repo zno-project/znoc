@@ -1,31 +1,63 @@
 #include "namespace.hpp"
+#include "../types/type.hpp"
+#include "../parsing.hpp"
+#include "../main.hpp"
+#include "../macros.hpp"
 
 #include <fmt/format.h>
+#include <iostream>
 
-AST::type_usage_t AST::Namespace::get_type_by_name(std::string name) {
+std::shared_ptr<AST::TypeBase> AST::Namespace::get_type_by_name(std::string type_name) {
 	try {
-		return {
-			named_types.at(name), // type
-			-1                    // index into template list - `-1` since not from templated type
-		};
+		return named_types.at(type_name);
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Could not find type {}", name));
+		throw std::runtime_error(fmt::format("Could not find type {}:{}", name, type_name));
 	}
 }
 
-std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string name) {
+std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string func_name) {
 	try {
-		auto f = named_functions.at(name);
+		auto f = named_functions.at(func_name);
 		return f;
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find function {}", name));
+		throw std::runtime_error(fmt::format("Cannot find function {}:{}(...)", name, func_name));
 	}
 }
 
-AST::Namespace* AST::Namespace::get_namespace_by_name(std::string name) {
+AST::Namespace* AST::Namespace::get_namespace_by_name(std::string namespace_name) {
 	try {
-		return namespaces.at(name).get();
+		return &*namespaces.at(namespace_name);
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find namespace {}", name));
+		throw std::runtime_error(fmt::format("Cannot find namespace {}:{}", name, namespace_name));
 	}
+}
+
+Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
+	auto n = &*GlobalNamespace;
+	std::string identifier;
+	while (1) {
+		identifier = *std::get_if<std::string>(&currentTokenVal);
+		get_next_token(f);
+		std::cout << currentToken << std::endl;
+		std::cout << identifier << std::endl;
+		std::cout << "-----" << std::endl;
+		if (currentToken == ':') {
+			get_next_token(f);
+			if (currentToken != ':') throw UNEXPECTED_CHAR(currentToken, "`::` in namespace accessor");
+			n = n->get_namespace_by_name(identifier);
+			get_next_token(f);
+		}
+		else break;
+	}
+
+	std::cout << "=== PARSED NAMESPACE ===" << std::endl;
+	std::cout << ".parsed_namespace = " << n->get_name() << std::endl;
+	std::cout << ".next_identifier = " << identifier << std::endl;
+	std::cout << ".next_token = " << currentToken << std::endl;
+
+	return Parser::NamespaceParseReturn {
+		.parsed_namespace = n,
+		.next_identifier = std::move(identifier),
+		.next_token = currentToken
+	};
 }

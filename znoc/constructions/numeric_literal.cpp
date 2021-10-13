@@ -1,5 +1,7 @@
 #include "numeric_literal.hpp"
 #include "../parsing.hpp"
+#include "../types/builtins.hpp"
+#include "construction_parse.hpp"
 
 #include <llvm/IR/Constant.h>
 #include <llvm/ADT/APFloat.h>
@@ -15,12 +17,12 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 	}
 	auto v = llvm::ConstantFP::get(*TheContext, llvm::APFloat(value.f));
 	if (value.f > FLT_MAX) return v;
-	else return builder->CreateFPCast(v, AST::get_type_by_name("__llvm_float").codegen());
+	else return builder->CreateFPCast(v, AST::get_fundamental_type("float").codegen());
 }
 
 // NUMERIC LITERAL
 // numeric_literal = NUMBER+;
-std::unique_ptr<AST::NumericLiteral> Parser::parse_numeric_literal(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 	double val = *std::get_if<double>(&currentTokenVal);
 	auto result = std::make_unique<AST::NumericLiteral>(val);
 	get_next_token(f); // Move onto token after number

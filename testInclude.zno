@@ -1,12 +1,12 @@
-uses 'stdio.zno'
-func addOne(x: __llvm_i32) -> __llvm_i64 {
+#[extern] func printI(x: _fundamentals:i32);
+func main(x: _fundamentals:i32) -> _fundamentals:i64 {
 	let i = 0;
 	while (i < 10) {
 		i = i + 1;
 		printI(i);
 	}
 	
-	switch (x+6) {
+	switch (x) {
 		case 1 {
 			return 16;
 		}

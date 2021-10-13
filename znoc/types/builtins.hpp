@@ -9,61 +9,63 @@
 
 namespace AST {
 	template <unsigned int N>
-	class llvm_builtin_type_int: public Type {
+	class fundamental_int: public TypeBase {
 		public:
-		llvm_builtin_type_int() : Type(fmt::format("__llvm_i{}", N)) {}
+		fundamental_int() : TypeBase(fmt::format("i{}", N)) {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::IntegerType::get(*TheContext, N);
 		}
 	};
 
-	class llvm_builtin_type_half: public Type {
+	class fundamental_half: public TypeBase {
 		public:
-		llvm_builtin_type_half() : Type("__llvm_half") {}
+		fundamental_half() : TypeBase("half") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getHalfTy(*TheContext);
 		}
 	};
 
-	class llvm_builtin_type_float: public Type {
+	class fundamental_float: public TypeBase {
 		public:
-		llvm_builtin_type_float() : Type("__llvm_float") {}
+		fundamental_float() : TypeBase("float") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getFloatTy(*TheContext);
 		}
 	};
 
-	class llvm_builtin_type_double: public Type {
+	class fundamental_double: public TypeBase {
 		public:
-		llvm_builtin_type_double() : Type("__llvm_double") {}
+		fundamental_double() : TypeBase("double") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getDoubleTy(*TheContext);
 		}
 	};
 
-	class llvm_builtin_type_fp128: public Type {
+	class fundamental_fp128: public TypeBase {
 		public:
-		llvm_builtin_type_fp128() : Type("__llvm_fp128") {}
+		fundamental_fp128() : TypeBase("fp128") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getFP128Ty(*TheContext);
 		}
 	};
 
-	class llvm_builtin_type_void: public Type {
+	class fundamental_void: public TypeBase {
 		public:
-		llvm_builtin_type_void() : Type("__llvm_void") {}
+		fundamental_void() : TypeBase("void") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getVoidTy(*TheContext);
 		}
 	};
 
-	class llvm_builtin_type_ptr: public Type {
+	class fundamental_ptr: public TypeBase {
 		public:
-		llvm_builtin_type_ptr() : Type("__llvm_ptr") {}
+		fundamental_ptr() : TypeBase("ptr") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
 			return llvm::Type::getInt32PtrTy(*TheContext);
 		}
 	};
+
+	AST::TypeInstance get_fundamental_type(std::string name);
 }
 
 #endif

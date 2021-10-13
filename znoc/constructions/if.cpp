@@ -5,8 +5,7 @@
 #include "../macros.hpp"
 #include "../parsing.hpp"
 #include "reference.hpp"
-#include "codeblock.hpp"
-#include "binary_op.hpp"
+#include "construction_parse.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
@@ -18,7 +17,7 @@
 
 llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//emitLocation(builder, this);
-	NamedValues.push_front(std::map<std::string, std::shared_ptr<AST::Variable>>()); // Create new scope
+	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
 	auto conditionCond = condition->codegen(builder, "__if_condition");
 	//auto condition = builder->CreateFCmpONE(conditionCond, llvm::ConstantFP::get(*TheContext, llvm::APFloat(0.0f)), "__if_condition_casted");
 
@@ -44,7 +43,7 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 	}
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(MergeBB);
 
-	NamedValues.pop_front(); // Remove scope of condition
+	stack_allocations.pop_front(); // Remove scope of condition
 
 	TheFunction->getBasicBlockList().push_back(MergeBB);
 	builder->SetInsertPoint(MergeBB);
@@ -61,7 +60,7 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 
 // IF STATEMENT
 // if = 'if' binary_expr codeblock ('else' (codeblock | if))?;
-std::unique_ptr<AST::IfDef> Parser::parse_if_def(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
 	get_next_token(f); // Trim if
 	auto condition = parse_binary_expression(f);
 

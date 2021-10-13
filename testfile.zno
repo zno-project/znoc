@@ -1,14 +1,14 @@
 uses 'stdio.zno'
 
-func main() -> __llvm_i32 {
+func main() -> _fundamentals::i32 {
 	let t = 76;
 	let j = 8589934592;
-	printI(65);
-	printI(t);
-	printI(j);
+	stdio::printI(65);
+	stdio::printI(t);
+	stdio::printI(j);
 	t = 7;
-	printI(t);
+	stdio::printI(t);
 	let f = 6.46;
-	printI(f);
+	stdio::printI(f);
 	return t;
 }

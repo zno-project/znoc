@@ -15,8 +15,4 @@ namespace AST {
 	};
 }
 
-namespace Parser {
-	std::unique_ptr<AST::IfDef> parse_if_def(FILE* f);
-}
-
 #endif

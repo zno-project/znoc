@@ -1,0 +1,19 @@
+#ifndef _ZNO_CLASS_H
+#define _ZNO_CLASS_H
+
+#include "type.hpp"
+#include <llvm/IR/Type.h>
+#include "../constructions/function_def.hpp"
+
+namespace AST {
+	class ClassType: public TypeBase {
+		public:
+		ClassType(std::string name, std::map<std::string, AST::field_type_t> fields, std::map<std::string, std::shared_ptr<AST::Function>> functions) : TypeBase(name, std::move(fields), std::move(functions)), generated(nullptr) {}
+	};
+}
+
+namespace Parser {
+	std::shared_ptr<AST::TypeBase>  parse_class_def(FILE* f);
+}
+
+#endif

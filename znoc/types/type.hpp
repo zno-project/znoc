@@ -6,9 +6,6 @@
 #include <vector>
 #include <llvm/IR/DerivedTypes.h>
 #include <variant>
-#include "../mangling.hpp"
-#include "../constructions/function.hpp"
-#include "../constructions/expression.hpp"
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -47,11 +44,83 @@
  */
 
 namespace AST {
+	void init_builtin_types();
+	class TypeBase;
+	struct TypeInstance;
+	struct GenericInstance;
+	typedef std::variant<AST::GenericInstance, AST::TypeInstance> field_type_t;
+	class TypeBase;
+}
+
+namespace AST {
+	class Function;
+
+	struct GenericInstance {
+		std::vector<AST::TypeInstance> generic_types;
+	};
+
+	struct FieldInfo {
+		AST::TypeInstance& type;
+		int index;
+	};
+
+	class TypeBase {
+		std::string name;
+		llvm::Type *generated;
+
+		protected:
+		std::map<std::string, size_t> fields_by_name;
+		std::vector<AST::field_type_t> fields_by_index;
+		std::map<std::string, std::shared_ptr<AST::Function>> functions;
+
+		public:
+		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generated(nullptr) {}
+		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::map<std::string, std::shared_ptr<AST::Function>> functions): name(std::move(name)), fields_by_name(std::move(fields_by_name)), fields_by_index(std::move(fields_by_index)), functions(std::move(functions)), generated(nullptr) {}
+
+		virtual llvm::Type* codegen(int template_instance);
+
+		virtual std::string get_name() { return name; }
+		virtual ~TypeBase() = default;
+
+		std::shared_ptr<AST::Function> get_function_by_name(std::string name, int template_instance_id);
+		FieldInfo get_field_info_by_name(std::string name, int template_instance_id);
+		FieldInfo get_field_info_by_index(int idx, int template_instance_id);
+	};
+
+	struct TypeInstance {
+		std::shared_ptr<AST::TypeBase> base_type;
+		int template_instance_id;
+
+		std::shared_ptr<AST::Function> get_function_by_name(std::string name) {
+			return base_type->get_function_by_name(name, template_instance_id);
+		}
+
+		FieldInfo get_field_info_by_name(std::string name) {
+			return base_type->get_field_info_by_name(name, template_instance_id);
+		}
+
+		FieldInfo get_field_info_by_index(int idx) {
+			return base_type->get_field_info_by_index(idx, template_instance_id);
+		}
+
+		llvm::Type* codegen() {
+			return base_type->codegen(template_instance_id);
+		}
+	};
+}
+
+/*namespace AST {
 	typedef struct TypeUsage type_usage_t;
 	typedef struct TemplatedFieldType templated_field_type_t;
 
 	typedef std::variant<AST::templated_field_type_t, AST::type_usage_t> field_type_t;
+}*/
 
+//#include "../mangling.hpp"
+//#include "../constructions/function.hpp"
+
+/*namespace AST {
 	class Type {
 		//std::vector<int> get_field_idxs(std::vector<std::string> fieldNames, int template_instance);
 		friend type_usage_t;
@@ -72,7 +141,7 @@ namespace AST {
 
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
 		AST::Namespace* get_namespace_by_name(std::string name);
-		std::pair<std::unique_ptr<AST::Expression>, AST::type_usage_t> get_field(std::string field_name, int template_instance);
+		std::pair<std::unique_ptr<AST::GEP>, AST::type_usage_t> get_field(std::string field_name, int template_instance);
 	};
 
 	// An instance of the usage of a type
@@ -102,20 +171,11 @@ namespace AST {
 	};
 
 	void init_builtin_types();
-}
+}*/
 
 namespace Parser {
-	AST::type_usage_t parse_type(FILE* f);
-}
-
-namespace AST {
-	class GEP: public AST::Expression {
-		int idx;
-		
-		public:
-		GEP(int idx, AST::type_usage_t t): Expression(t), idx(idx) {}
-		virtual llvm::Value* codegen(__attribute__((unused)) llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name = "");
-	};
+	AST::TypeInstance parse_type(FILE* f);
+	std::shared_ptr<AST::TypeBase> parse_aggregate_type_definition(FILE* f);
 }
 
 //extern std::map<std::string, std::shared_ptr<AST::Type>> named_types;

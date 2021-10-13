@@ -1,18 +1,7 @@
 #include "expression.hpp"
 #include "../parsing.hpp"
 #include "../macros.hpp"
-#include "binary_op.hpp"
-#include "function.hpp"
-#include "variable.hpp"
-#include "codeblock.hpp"
-#include "return.hpp"
-#include "switch.hpp"
-#include "while.hpp"
-#include "numeric_literal.hpp"
-#include "fallthrough.hpp"
-//#include "throw.hpp"
-#include "if.hpp"
-#include "break_continue.hpp"
+#include "construction_parse.hpp"
 
 #include <iostream>
 
@@ -72,6 +61,7 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 			return parse_numeric_literal(f);
 		}
 		case tok_let: {
+			//throw std::runtime_error("variable def");
 			return parse_variable_def(f);
 		}
 		case '(': {
@@ -97,9 +87,7 @@ std::unique_ptr<AST::Expression> Parser::parse_semicolon_statement(FILE* f) {
 			return parse_return(f);
 		}
 		case tok_fallthrough: {
-			auto fallthrough = std::make_unique<AST::FallthroughExpression>();
-			get_next_token(f);
-			return fallthrough;
+			return parse_fallthrough(f);
 		}
 		default: return nullptr;
 	}

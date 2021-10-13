@@ -2,7 +2,10 @@
 #define _BINARY_OP_H
 
 #include "expression.hpp"
-#include "reference.hpp"
+
+#include <memory>
+#include <string>
+#include <stdio.h>
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
@@ -48,7 +51,6 @@ namespace AST {
 
 namespace Parser {
 	AST::OpType parse_binary_op(FILE* f);
-	std::unique_ptr<AST::Expression> parse_binary_expression(FILE* f);
 }
 
 #endif

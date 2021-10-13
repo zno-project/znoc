@@ -14,15 +14,15 @@ extern llvm::BasicBlock *condBB; // Condition block of current control flow code
 namespace AST {
 	class Expression {
 		SourceLocation Loc;
-		AST::type_usage_t expressionType;
+		AST::TypeInstance expressionType;
 
 		public:
-		Expression(AST::type_usage_t t, SourceLocation Loc = LexLoc) : Loc(Loc), expressionType(std::move(t)) {}
+		Expression(AST::TypeInstance t, SourceLocation Loc = LexLoc) : Loc(Loc), expressionType(std::move(t)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") = 0;
 		virtual ~Expression() = default;
 		int getLine() const { return Loc.Line; }
 		int getCol() const { return Loc.Col; }
-		AST::type_usage_t getType() { return expressionType; }
+		AST::TypeInstance getType() { return expressionType; }
 	};
 }
 

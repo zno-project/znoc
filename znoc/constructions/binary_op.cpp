@@ -1,21 +1,28 @@
 #include "binary_op.hpp"
 
-#include <llvm/IR/Value.h>
-#include <llvm/IR/IRBuilder.h>
-#include <fmt/format.h>
-#include <iostream>
-#include "../types/casting.hpp"
 #include "../parsing.hpp"
 #include "reference.hpp"
 #include "expression.hpp"
 #include "../macros.hpp"
 #include "unary_op.hpp"
+#include "construction_parse.hpp"
+#include "../memory/memory_ref.hpp"
+
+#include <memory>
+#include <stdio.h>
+#include <iostream>
+#include <string>
+
+#include <llvm/IR/Value.h>
+#include <llvm/IR/IRBuilder.h>
+
+#include <fmt/format.h>
 
 llvm::Value* AST::BinaryExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
 	llvm::Value *RHSv_value = RHS->codegen(builder, fmt::format("{}_RHS", name)); // Codegen the RHS
 
 	if (op == op_assign) {
-		ASTRef *LHS_variable_ref = dynamic_cast<ASTRef*>(LHS.get()); // Check if LHS is direct variable access
+		/*ASTRef *LHS_variable_ref = dynamic_cast<ASTRef*>(LHS.get()); // Check if LHS is direct variable access
 		if (!LHS_variable_ref) { // If not direct variable assignment
 			// Check is dereference
 			Expression *LHS_deref = LHS.get();
@@ -31,7 +38,23 @@ llvm::Value* AST::BinaryExpression::codegen(llvm::IRBuilder<> *builder, std::str
 		} else if (VariableRef *LHSv = dynamic_cast<VariableRef*>(LHS.get())) {
 			builder->CreateStore(RHSv_value, LHSv->getFieldAlloca(builder));
 			return LHSv->codegen(builder);
-		} else throw std::runtime_error(fmt::format("2 assign op only for vars, found {} instead", typeid(*LHS.get()).name()));
+		} else throw std::runtime_error(fmt::format("2 assign op only for vars, found {} instead", typeid(*LHS.get()).name()));*/
+		Expression *LHS_deref = LHS.get();
+
+		int deref_count = 0;
+		while (auto LHS_unary = dynamic_cast<AST::UnaryExpression*>(LHS_deref)) { // If dereference, check if unary op with `*` operator
+			if (LHS_unary->op != '*') throw std::runtime_error(fmt::format("can only have `*` unary op in l-value"));
+			LHS_deref = LHS_unary->operand.get(); // Recursively descend through dereferences
+			deref_count++;
+		}
+
+		if (auto LHS_variable_ref = dynamic_cast<AST::MemoryRef*>(LHS_deref)) {
+			llvm::Value *final_alloca = LHS_variable_ref->codegen_to_underlying_ptr(builder);
+			for (int i = 0; i < deref_count; i++) final_alloca = builder->CreateLoad(final_alloca);
+
+			builder->CreateStore(RHSv_value, final_alloca);
+			return LHS_variable_ref->codegen(builder);
+		} else throw std::runtime_error("Can only deref an l-value");
 	}
 
 	llvm::Value *LHS_value = LHS->codegen(builder, fmt::format("{}_LHS", name)); // If not assignment, codegen LHS
@@ -153,7 +176,7 @@ AST::OpType Parser::parse_binary_op(FILE* f) {
 // binary_expr = unary_expr (binary_op binary_expr)?;
 std::unique_ptr<AST::Expression> Parser::parse_binary_expression(FILE* f) {
 	auto LHS = parse_unary_expression(f);
-	
+	std::cout << "bin expr - current tok is " << currentToken << std::endl;
 	AST::OpType op = parse_binary_op(f);
 	if (op < 0) return LHS; // If no `op + RHS` return the LHS on its own
 

@@ -1,18 +1,18 @@
 uses 'stdio.zno'
 
 class OtherThingy {
-	d: __llvm_i32,
-	e: __llvm_i32
+	d: _fundamentals::i32,
+	e: _fundamentals::i32
 }
 
 struct Thingy {
-	a: __llvm_i32,
-	b: __llvm_i32,
+	a: _fundamentals::i32,
+	b: _fundamentals::i32,
 	c: OtherThingy
 }
 
-func printAStructThing(s: Thingy) -> __llvm_i32 {
-	printI(s.a);
+func printAStructThing(s: Thingy) -> _fundamentals::i32 {
+	stdio::printI(s.c.d);
 	return s.b;
 }
 
@@ -21,6 +21,6 @@ func main() {
 	s.a = 32;
 	s.b = 65;
 	let x = s.b;
-	printI(x);
+	stdio::printI(printAStructThing(s));
 	return;
 }
