@@ -6,6 +6,7 @@
 #include <vector>
 #include <llvm/IR/DerivedTypes.h>
 #include <variant>
+#include <optional>
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -67,6 +68,8 @@ namespace AST {
 	class TypeBase {
 		std::string name;
 		llvm::Type *generated;
+
+		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
 
 		protected:
 		std::map<std::string, size_t> fields_by_name;

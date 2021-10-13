@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 #include <fmt/format.h>
+#include <optional>
+#include <algorithm>
 
 //std::map<std::string, std::shared_ptr<AST::Type>> named_types;
 
@@ -147,6 +149,16 @@ llvm::Type* AST::TypeBase::codegen(int template_instance) {
 	}
 	return generated;
 };
+
+size_t AST::TypeBase::add_generic_instance(std::vector<AST::TypeInstance> types) {
+	auto res = std::find(generic_types.begin(), generic_types.end(), types);
+	if (res == generic_types.end()) {
+		generic_types.push_back(std::move(types));
+		return generic_types.size() - 1;
+	} else {
+		return res - generic_types.begin();
+	}
+}
 
 /*#include <iostream>
 
