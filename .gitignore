@@ -1,0 +1,10 @@
+*.zno
+*.ansi
+*.zip
+.vscode
+thoughts/**
+tmp/**
+**/build/**
+*.d
+**/znoc
+**/*.plist
