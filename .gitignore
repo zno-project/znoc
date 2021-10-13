@@ -9,3 +9,4 @@ tmp/**
 znoc/znoc
 *.plist
 *.ll
+*.o
