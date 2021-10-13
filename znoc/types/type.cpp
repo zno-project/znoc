@@ -53,11 +53,11 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 
 	return AST::TypeInstance {
 		.base_type = std::move(type_base),
-		.template_instance_id = -1
+		.template_instance_id = 0
 	};
 }
 
-std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, int template_instance_id) {
+std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {
 	try {
 		auto f = functions.at(func_name);
 		return f;
@@ -66,7 +66,7 @@ std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string f
 	}
 }
 
-AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, int template_instance_id) {
+AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, size_t template_instance_id) {
 	try {
 		auto f_idx = fields_by_name.at(field_name);
 		return get_field_info_by_index(f_idx, template_instance_id);
@@ -75,7 +75,7 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, int
 	}
 }
 
-AST::FieldInfo AST::TypeBase::get_field_info_by_index(int idx, int template_instance_id) {
+AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t template_instance_id) {
 	auto f = AST::FieldInfo {
 		.type = std::get<AST::TypeInstance>(fields_by_index.at(idx)),
 		.index = idx
@@ -130,8 +130,8 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 	return s;
 }
 
-llvm::Type* AST::TypeBase::codegen(int template_instance) {
-	if (!generated) {
+llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
+	if (!generated[template_instance]) {
 		for (auto &func : functions) {
 			func.second->codegen_prototype();
 		}
@@ -144,10 +144,10 @@ llvm::Type* AST::TypeBase::codegen(int template_instance) {
 			f.push_back(std::get<AST::TypeInstance>(fT).codegen());
 		}
 		auto gen = llvm::StructType::create(*TheContext, llvm::ArrayRef<llvm::Type*>(f));
-		gen->setName(name);
-		generated = gen;
+		gen->setName(fmt::format("{}_instance{}", name, template_instance));
+		generated[template_instance] = gen;
 	}
-	return generated;
+	return generated[template_instance];
 };
 
 size_t AST::TypeBase::add_generic_instance(std::vector<AST::TypeInstance> types) {
