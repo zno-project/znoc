@@ -33,6 +33,7 @@ sources:
 
 clean:
 	rm -rf build
+	rm znoc
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
