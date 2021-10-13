@@ -1,3 +1,0 @@
-#[extern] func printI(x: _fundamentals::i32);
-#[extern] func allocate() -> _fundamentals::ptr;
-#[extern] func deallocate(x: _fundamentals::ptr);

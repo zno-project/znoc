@@ -7,4 +7,5 @@ tmp/**
 **/build/**
 *.d
 znoc/znoc
-**/*.plist
+*.plist
+*.ll
