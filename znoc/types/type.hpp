@@ -66,10 +66,9 @@ namespace AST {
 	};
 
 	class TypeBase {
+		protected:
 		std::string name;
 		std::map<size_t, llvm::Type*> generated;
-
-		protected:
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
 		std::vector<std::vector<AST::TypeInstance>> generic_types;
