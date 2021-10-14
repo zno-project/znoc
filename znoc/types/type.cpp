@@ -195,6 +195,12 @@ size_t AST::TypeBase::add_generic_instance(std::vector<AST::TypeInstance> types)
 	}
 }
 
+AST::TypeInstance AST::TypeInstance::get_pointer_to() {
+	auto t = AST::get_fundamental_type("ptr");
+	t.template_instance_id = t.base_type->add_generic_instance({*this});
+	return t;
+}
+
 /*#include <iostream>
 
 std::pair<std::unique_ptr<AST::Expression>, AST::type_usage_t> AST::Type::get_field(std::string field_name, int template_instance) {

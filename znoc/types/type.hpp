@@ -106,6 +106,8 @@ namespace AST {
 			return base_type->get_field_info_by_index(idx, template_instance_id);
 		}
 
+		AST::TypeInstance get_pointer_to();
+
 		llvm::Type* codegen() {
 			return base_type->codegen(template_instance_id);
 		}
