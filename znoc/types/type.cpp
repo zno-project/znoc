@@ -91,10 +91,27 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 	std::string name = *std::get_if<std::string>(&currentTokenVal);
 	get_next_token(f);
 
+	std::map<std::string, size_t> template_type_names;
+	size_t i = 0;
+
+	if (currentToken == '<') {
+		get_next_token(f);
+		if (currentToken != '>') while (1) {
+			std::string template_type_name = *std::get_if<std::string>(&currentTokenVal);
+			template_type_names[template_type_name] = i;
+			i++;
+			get_next_token(f);
+			if (currentToken != ',') break;
+			get_next_token(f); 
+		}
+		if (currentToken != '>') throw UNEXPECTED_CHAR(currentToken, "`>` to end template type list");
+		get_next_token(f);
+	}
+
 	if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ after class/struct name");
 	get_next_token(f);
 
-	std::vector<std::pair<std::string, AST::TypeInstance>> fields;
+	std::vector<std::pair<std::string, AST::field_type_t>> fields;
 	std::map<std::string, std::shared_ptr<AST::Function>> functions;
 
 	if (currentToken != '}') while (1) {
@@ -109,9 +126,20 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 			if (currentToken != ':') throw UNEXPECTED_CHAR(currentToken, ": after class/struct field name");
 			get_next_token(f);
 
-			AST::TypeInstance fieldType = parse_type(f);
+			AST::field_type_t fieldType;
 
-			fields.push_back(std::pair<std::string, AST::TypeInstance>(fieldName, std::move(fieldType)));
+			try {
+				std::string t_name = *std::get_if<std::string>(&currentTokenVal);
+				auto template_type_idx = template_type_names.at(t_name);
+				fieldType = AST::GenericInstance {
+					.generic_type_index = template_type_idx
+				};
+				get_next_token(f);
+			} catch (std::out_of_range) {
+				fieldType = parse_type(f);
+			}
+
+			fields.push_back(std::pair<std::string, AST::field_type_t>(fieldName, std::move(fieldType)));
 		}
 
 		if (currentToken == '}') break;
