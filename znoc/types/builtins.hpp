@@ -61,7 +61,8 @@ namespace AST {
 		public:
 		fundamental_ptr() : TypeBase("ptr") {}
 		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
-			return llvm::Type::getInt32PtrTy(*TheContext);
+			auto t = generic_types.at(template_instance).at(0).codegen();
+			return t->getPointerTo();
 		}
 	};
 
