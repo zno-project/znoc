@@ -95,7 +95,7 @@ llvm::Value* AST::VariableRef::codegen(llvm::IRBuilder<> *builder, std::string n
 std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
 	get_next_token(f); // Trim the let
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "identifier after 'let'");
-	std::string name = *std::get_if<std::string>(&currentTokenVal);
+	std::string name = std::get<std::string>(currentTokenVal);
 	get_next_token(f); // Trim the identifier
 
 	std::optional<AST::TypeInstance> type;

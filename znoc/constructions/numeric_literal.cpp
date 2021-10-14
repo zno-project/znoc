@@ -23,7 +23,7 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 // NUMERIC LITERAL
 // numeric_literal = NUMBER+;
 std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
-	double val = *std::get_if<double>(&currentTokenVal);
+	double val = std::get<double>(currentTokenVal);
 	auto result = std::make_unique<AST::NumericLiteral>(val);
 	get_next_token(f); // Move onto token after number
 	return result;

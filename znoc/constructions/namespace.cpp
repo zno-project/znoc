@@ -36,7 +36,7 @@ Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
 	auto n = &*GlobalNamespace;
 	std::string identifier;
 	while (1) {
-		identifier = *std::get_if<std::string>(&currentTokenVal);
+		identifier = std::get<std::string>(currentTokenVal);
 		get_next_token(f);
 		std::cout << currentToken << std::endl;
 		std::cout << identifier << std::endl;

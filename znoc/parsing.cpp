@@ -140,7 +140,7 @@ int parse_file(std::filesystem::path path,
 				while (1) {
 					get_next_token(f);
 					if (currentToken == '\'') break;
-					else if (currentToken == tok_identifier) filePath += *std::get_if<std::string>(&currentTokenVal);
+					else if (currentToken == tok_identifier) filePath += std::get<std::string>(currentTokenVal);
 					else filePath += currentToken;
 				}
 

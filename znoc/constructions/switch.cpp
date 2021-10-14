@@ -87,7 +87,7 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	get_next_token(f);
 	while (1) {
 		if (currentToken != tok_numeric_literal) throw UNEXPECTED_CHAR(currentToken, "numeric literal for case value");
-		int val = *std::get_if<double>(&currentTokenVal);
+		int val = std::get<double>(currentTokenVal);
 		meta.num.push_back(llvm::ConstantInt::get(llvm::IntegerType::get(*TheContext, 32), val));
 		get_next_token(f);
 		if (currentToken == '{') break;

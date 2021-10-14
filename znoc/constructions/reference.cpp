@@ -60,7 +60,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 
 		if (parsed_namespace.next_token == '.') while (1) {
 			get_next_token(f); // Trim `.`
-			auto field_name = *std::get_if<std::string>(&currentTokenVal);
+			auto field_name = std::get<std::string>(currentTokenVal);
 			get_next_token(f); // Trim field name
 
 			auto field_info = variable->underlying_type.get_field_info_by_name(field_name);

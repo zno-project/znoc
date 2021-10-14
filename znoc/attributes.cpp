@@ -7,7 +7,7 @@ attributes_t currentAttributes;
 
 Attributes tok_to_attribute() {
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "attribute name");
-	auto attr = *std::get_if<std::string>(&currentTokenVal);
+	auto attr = std::get<std::string>(currentTokenVal);
 	if (attr == "inline") return Attributes::AlwaysInline;
 	else if (attr == "extern") return Attributes::NoMangle;
 	else throw std::runtime_error(fmt::format("unknown attribute {}", attr));

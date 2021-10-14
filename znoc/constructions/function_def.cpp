@@ -85,7 +85,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 	get_next_token(f);
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "function name after 'func'");
 
-	auto name = *std::get_if<std::string>(&currentTokenVal);
+	auto name = std::get<std::string>(currentTokenVal);
 	get_next_token(f);
 
 	// GET ARGS
@@ -97,7 +97,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 		if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "argument name");
 
 		// GET ARG NAME
-		std::string name = *std::get_if<std::string>(&currentTokenVal);
+		std::string name = std::get<std::string>(currentTokenVal);
 
 		// GET TYPE NAME
 		get_next_token(f);

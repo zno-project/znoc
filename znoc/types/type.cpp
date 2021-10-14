@@ -88,7 +88,7 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) {
 	get_next_token(f);
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "class/struct name after `class`/`struct`");
-	std::string name = *std::get_if<std::string>(&currentTokenVal);
+	std::string name = std::get<std::string>(currentTokenVal);
 	get_next_token(f);
 
 	std::map<std::string, size_t> template_type_names;
@@ -97,7 +97,7 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 	if (currentToken == '<') {
 		get_next_token(f);
 		if (currentToken != '>') while (1) {
-			std::string template_type_name = *std::get_if<std::string>(&currentTokenVal);
+			std::string template_type_name = std::get<std::string>(currentTokenVal);
 			template_type_names[template_type_name] = i;
 			i++;
 			get_next_token(f);
@@ -121,7 +121,7 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 			//globalFuncDeclarations.push_back(std::pair<std::unique_ptr<AST::Function>, bool>(std::move(f), false));
 		} else {
 			if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "identifier for class/struct field");
-			std::string fieldName = *std::get_if<std::string>(&currentTokenVal);
+			std::string fieldName = std::get<std::string>(currentTokenVal);
 			get_next_token(f);
 			if (currentToken != ':') throw UNEXPECTED_CHAR(currentToken, ": after class/struct field name");
 			get_next_token(f);
@@ -129,7 +129,7 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 			AST::field_type_t fieldType;
 
 			try {
-				std::string t_name = *std::get_if<std::string>(&currentTokenVal);
+				std::string t_name = std::get<std::string>(currentTokenVal);
 				auto template_type_idx = template_type_names.at(t_name);
 				fieldType = AST::GenericInstance {
 					.generic_type_index = template_type_idx
