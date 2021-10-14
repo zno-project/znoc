@@ -79,7 +79,7 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, siz
 
 AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t template_instance_id) {
 	auto f = AST::FieldInfo {
-		.type = std::get<AST::TypeInstance>(fields_by_index.at(idx)),
+		.type = std::holds_alternative<AST::TypeInstance>(fields_by_index.at(idx)) ? std::get<AST::TypeInstance>(fields_by_index.at(idx)) : generic_types.at(template_instance_id).at(std::get<AST::GenericInstance>(fields_by_index.at(idx)).generic_type_index),
 		.index = idx
 	};
 	return f;
