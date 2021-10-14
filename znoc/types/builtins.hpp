@@ -64,6 +64,10 @@ namespace AST {
 			auto t = generic_types.at(template_instance).at(0).codegen();
 			return t->getPointerTo();
 		}
+
+		AST::TypeInstance get_pointed_to(size_t template_instance) {
+			return generic_types.at(template_instance).at(0);
+		}
 	};
 
 	AST::TypeInstance get_fundamental_type(std::string name);

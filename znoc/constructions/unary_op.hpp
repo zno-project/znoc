@@ -19,7 +19,7 @@ namespace AST {
 		public:
 		char op;
 		std::unique_ptr<Expression> operand;
-		UnaryExpression(char op, std::unique_ptr<Expression> operand): Expression(op == '&' ? AST::get_fundamental_type("ptr") : (op == '*' ? AST::get_fundamental_type("i32") : operand->getType())), op(op), operand(std::move(operand)) {}
+		UnaryExpression(char op, std::unique_ptr<Expression> operand): Expression(op == '&' ? operand->getType().get_pointer_to() : (op == '*' ? operand->getType().get_pointed_to() : operand->getType())), op(op), operand(std::move(operand)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
 	};
 }

@@ -201,6 +201,14 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 	return t;
 }
 
+#include "builtins.hpp"
+
+AST::TypeInstance AST::TypeInstance::get_pointed_to() {
+	auto p = std::dynamic_pointer_cast<AST::fundamental_ptr>(base_type);
+	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
+	return p->get_pointed_to(template_instance_id);
+}
+
 /*#include <iostream>
 
 std::pair<std::unique_ptr<AST::Expression>, AST::type_usage_t> AST::Type::get_field(std::string field_name, int template_instance) {

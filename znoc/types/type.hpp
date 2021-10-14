@@ -107,6 +107,7 @@ namespace AST {
 		}
 
 		AST::TypeInstance get_pointer_to();
+		AST::TypeInstance get_pointed_to();
 
 		llvm::Type* codegen() {
 			return base_type->codegen(template_instance_id);
