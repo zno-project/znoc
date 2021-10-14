@@ -12,7 +12,7 @@ namespace AST {
 	class fundamental_int: public TypeBase {
 		public:
 		fundamental_int() : TypeBase(fmt::format("i{}", N)) {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::IntegerType::get(*TheContext, N);
 		}
 	};
@@ -20,7 +20,7 @@ namespace AST {
 	class fundamental_half: public TypeBase {
 		public:
 		fundamental_half() : TypeBase("half") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getHalfTy(*TheContext);
 		}
 	};
@@ -28,7 +28,7 @@ namespace AST {
 	class fundamental_float: public TypeBase {
 		public:
 		fundamental_float() : TypeBase("float") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getFloatTy(*TheContext);
 		}
 	};
@@ -36,7 +36,7 @@ namespace AST {
 	class fundamental_double: public TypeBase {
 		public:
 		fundamental_double() : TypeBase("double") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getDoubleTy(*TheContext);
 		}
 	};
@@ -44,7 +44,7 @@ namespace AST {
 	class fundamental_fp128: public TypeBase {
 		public:
 		fundamental_fp128() : TypeBase("fp128") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getFP128Ty(*TheContext);
 		}
 	};
@@ -52,7 +52,7 @@ namespace AST {
 	class fundamental_void: public TypeBase {
 		public:
 		fundamental_void() : TypeBase("void") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getVoidTy(*TheContext);
 		}
 	};
@@ -60,7 +60,7 @@ namespace AST {
 	class fundamental_ptr: public TypeBase {
 		public:
 		fundamental_ptr() : TypeBase("ptr") {}
-		virtual llvm::Type* codegen(__attribute__((unused)) int template_instance) {
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			return llvm::Type::getInt32PtrTy(*TheContext);
 		}
 	};
