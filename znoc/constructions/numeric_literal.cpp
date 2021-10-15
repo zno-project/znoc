@@ -2,6 +2,7 @@
 #include "../parsing.hpp"
 #include "../types/builtins.hpp"
 #include "construction_parse.hpp"
+#include "../macros.hpp"
 
 #include <llvm/IR/Constant.h>
 #include <llvm/ADT/APFloat.h>
@@ -23,8 +24,21 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 // NUMERIC LITERAL
 // numeric_literal = NUMBER+;
 std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
+	std::cout << "parse numlit" << std::endl;
 	double val = std::get<double>(currentTokenVal);
-	auto result = std::make_unique<AST::NumericLiteral>(val);
 	get_next_token(f); // Move onto token after number
-	return result;
+
+	if (currentToken == tok_identifier) {
+		auto post_num_modifier = std::get<std::string>(currentTokenVal);
+		get_next_token(f); // Trim modifier
+
+		auto modifier_str = post_num_modifier.c_str();
+		auto num_type_char = *modifier_str++;
+		if (num_type_char != 'u' && num_type_char != 'f') throw UNEXPECTED_CHAR(num_type_char, "`u` or `f` qualifier after number");
+
+		auto len = atoi(modifier_str);
+		return num_type_char == 'u' ? AST::NumericLiteral::NewInt(val, len) : AST::NumericLiteral::NewFloat(val, len);
+	} else {
+		return std::make_unique<AST::NumericLiteral>(val);
+	}
 }
