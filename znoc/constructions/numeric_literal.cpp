@@ -8,17 +8,16 @@
 #include <llvm/ADT/APFloat.h>
 #include <cfloat>
 #include <iostream>
+#include <memory>
 
 llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//return llvm::ConstantInt::get(*TheContext, llvm::APInt(32, value)); //*/ return ConstantInt::get(IntegerType::get(*TheContext, 128), APInt(128, value, false));
 	//return builder->CreateFPToUI(v, IntegerType::get(*TheContext, 32));
 	if (is_int_val) {
-		if (value.i > UINT32_MAX) return llvm::ConstantInt::get(*TheContext, llvm::APInt(64, value.i));
-		else return llvm::ConstantInt::get(*TheContext, llvm::APInt(32, value.i));
+		return llvm::ConstantInt::get(expressionType.codegen(), value.i);
 	}
 	auto v = llvm::ConstantFP::get(*TheContext, llvm::APFloat(value.f));
-	if (value.f > FLT_MAX) return v;
-	else return builder->CreateFPCast(v, AST::get_fundamental_type("float").codegen());
+	return builder->CreateFPCast(v, expressionType.codegen());
 }
 
 // NUMERIC LITERAL
