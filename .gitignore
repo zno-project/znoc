@@ -11,3 +11,4 @@ znoc/znoc
 *.ll
 *.o
 myCode
+*.vsix
