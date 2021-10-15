@@ -13,6 +13,7 @@ extern llvm::BasicBlock *condBB; // Condition block of current control flow code
 
 namespace AST {
 	class Expression {
+		protected:
 		SourceLocation Loc;
 		AST::TypeInstance expressionType;
 
