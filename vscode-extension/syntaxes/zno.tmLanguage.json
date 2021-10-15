@@ -44,6 +44,14 @@
 				"match": "\\b(\\d+)\\b"
 			},
 			{
+				"name": "constant.numeric",
+				"match": "\\b(\\d+u(1|8|16|32|64|128))\\b"
+			},
+			{
+				"name": "constant.numeric",
+				"match": "\\b(\\d+f(16|32|64|128))\\b"
+			},
+			{
 				"name": "variable.name",
 				"match": "\\b([A-Za-z_]\\w*)\\b"
 			}]
