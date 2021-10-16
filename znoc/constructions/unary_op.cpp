@@ -30,6 +30,13 @@ llvm::Value* AST::UnaryExpression::codegen(llvm::IRBuilder<> *builder, std::stri
 		}
 		case '~': return builder->CreateNot(OPv, name);
 		case '*': return builder->CreateLoad(OPv);
+		case '-': {
+			if (OPv->getType()->isIntegerTy()) {
+				return builder->CreateNeg(OPv);
+			} else {
+				return builder->CreateFNeg(OPv);
+			}
+		}
 		case '&': {
 			auto v = dynamic_cast<AST::MemoryRef*>(operand.get());
 			if (!v) throw std::runtime_error("Cannot get pointer to non variable");
