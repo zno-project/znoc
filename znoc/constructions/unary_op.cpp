@@ -24,10 +24,7 @@ llvm::Value* AST::UnaryExpression::codegen(llvm::IRBuilder<> *builder, std::stri
 	std::cout << "unary op on " << type_str_src << std::endl;
 
 	switch (op) {
-		case '!': {
-			llvm::Value *OPc = OPv;
-			return builder->CreateNot(OPc, name);
-		}
+		case '!':
 		case '~': return builder->CreateNot(OPv, name);
 		case '*': return builder->CreateLoad(OPv);
 		case '-': {
