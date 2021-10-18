@@ -134,37 +134,40 @@ int parse_file(std::filesystem::path path,
 			//case ';': get_next_token(); break;
 			case tok_uses: {
 				get_next_token(f);
-				if (currentToken != '\'') throw UNEXPECTED_CHAR(currentToken, "\' for path to included file");
+				
+				EXPECT('\'', "\' for path to included file");
+				//if (currentToken != '\'') throw UNEXPECTED_CHAR(currentToken, "\' for path to included file");
 				std::string filePath;
-
-				while (1) {
+				UNTIL('\'', {
+					if (currentToken == tok_identifier) filePath += std::get<std::string>(currentTokenVal);
+					else filePath += currentToken;
+					get_next_token(f);
+				});
+				/*while (1) {
 					get_next_token(f);
 					if (currentToken == '\'') break;
 					else if (currentToken == tok_identifier) filePath += std::get<std::string>(currentTokenVal);
 					else filePath += currentToken;
 				}
+				get_next_token(f);*/
 
 				auto newP = path;
 				newP.replace_filename(filePath.c_str());
 
 				if (has_searched_path(newP)) {
 					std::cout << "Already compiling " << newP.string() << std::endl;
-					get_next_token(f);
 					break;
 				}
 
-				std::cout << "Parsing include " << newP.string() << std::endl;
-
+				std::cout << "Parsing include " << newP.string() << " as " << newP.stem() << std::endl;
 				auto new_namespace = std::make_unique<AST::Namespace>(newP.stem());
 
+				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);
-
+				std::cout << "Parsed include " << newP.string() << " as " << newP.stem() << std::endl;
 				*current_namespace << std::move(new_namespace);
+				currentToken = old_current_token;
 
-				std::cout << currentToken << std::endl;
-				std::cout << "end of include parsing" << std::endl;
-				get_next_token(f);
-				std::cout << currentToken << std::endl;
 				Parser::clear_attributes();
 				break;
 			}

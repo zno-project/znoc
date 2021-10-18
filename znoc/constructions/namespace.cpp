@@ -50,11 +50,6 @@ Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
 		else break;
 	}
 
-	std::cout << "=== PARSED NAMESPACE ===" << std::endl;
-	std::cout << ".parsed_namespace = " << n->get_name() << std::endl;
-	std::cout << ".next_identifier = " << identifier << std::endl;
-	std::cout << ".next_token = " << currentToken << std::endl;
-
 	return Parser::NamespaceParseReturn {
 		.parsed_namespace = n,
 		.next_identifier = std::move(identifier),

@@ -93,22 +93,30 @@ llvm::Value* AST::VariableRef::codegen(llvm::IRBuilder<> *builder, std::string n
 // VARIABLE DEFINITION
 // variable_def = 'let' identifier (':' type)? ('=' binary_expr)?;
 std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
-	get_next_token(f); // Trim the let
-	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "identifier after 'let'");
-	std::string name = std::get<std::string>(currentTokenVal);
-	get_next_token(f); // Trim the identifier
+	EXPECT(tok_let, "for variable definition");
+	//get_next_token(f); // Trim the let
+	//if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "identifier after 'let'");
+	std::string name = EXPECT_IDENTIFIER("variable name");//std::get<std::string>(currentTokenVal);
+	//get_next_token(f); // Trim the identifier
 
 	std::optional<AST::TypeInstance> type;
 
-	if (currentToken == ':') { //throw UNEXPECTED_CHAR(currentToken, "expected ':' after variable name");
+	OPTIONAL(':', {
+		type = parse_type(f);
+		if (currentToken != '=') return std::make_unique<AST::VariableDef>(name, std::move(*type), nullptr);
+	});
+
+	EXPECT('=', " or type after variable name");
+
+	/*if (currentToken == ':') { //throw UNEXPECTED_CHAR(currentToken, "expected ':' after variable name");
 		get_next_token(f); // Trim the :
 		type = parse_type(f);
 
 		if (currentToken != '=') return std::make_unique<AST::VariableDef>(name, std::move(*type), nullptr);
-	}
+	}*/
 
-	if (currentToken != '=') throw UNEXPECTED_CHAR(currentToken, "expected `=` or type after variable name");
-	get_next_token(f); // Trim the =
+	//if (currentToken != '=') throw UNEXPECTED_CHAR(currentToken, "expected `=` or type after variable name");
+	//get_next_token(f); // Trim the =
 
 	std::unique_ptr<AST::Expression> val = parse_binary_expression(f);
 	if (!type) type = val->getType();

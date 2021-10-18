@@ -30,18 +30,19 @@
 std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 	std::vector<std::string> fields;
 
-	std::cout << "==== Parsing identifier ====" << std::endl;
-
 	auto parsed_namespace = Parser::parse_namespace(f);
 
 	if (parsed_namespace.next_token == '(') { // Function call
-		get_next_token(f); // Trim (
 		auto func_name = parsed_namespace.next_identifier;
 		std::cout << "call to func " << parsed_namespace.parsed_namespace->get_name() << ":" << func_name << "(...)" << std::endl;
 
 		std::vector<std::unique_ptr<AST::Expression>> args;
-	
-		if (currentToken != ')') {
+
+		LIST('(', ',', ')', {
+			args.push_back(parse_binary_expression(f));
+		}, "function args");
+
+		/*if (currentToken != ')') {
 			while (1) {
 				args.push_back(parse_binary_expression(f));
 
@@ -51,14 +52,20 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 			}
 		}
 		
-		get_next_token(f); // Trim )
+		get_next_token(f); // Trim )*/
 		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
 	} else {
 		std::cout << "Variable reference - ignoring namespaces" << std::endl;
 		std::cout << "Variable reference - current tok is " << currentToken << std::endl;
 		std::shared_ptr<AST::MemoryLoc> variable = AST::get_var(parsed_namespace.next_identifier);
 
-		if (parsed_namespace.next_token == '.') while (1) {
+		UNTIL_NOT('.', {
+			auto field_name = EXPECT_IDENTIFIER("field name");
+			auto field_info = variable->underlying_type.get_field_info_by_name(field_name);
+			variable = std::make_unique<AST::GEP>(variable, field_info.index);
+		});
+
+		/*if (parsed_namespace.next_token == '.') while (1) {
 			get_next_token(f); // Trim `.`
 			auto field_name = std::get<std::string>(currentTokenVal);
 			get_next_token(f); // Trim field name
@@ -67,7 +74,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 			variable = std::make_unique<AST::GEP>(variable, field_info.index);
 
 			if (currentToken != '.') break;
-		}
+		}*/
 
 		return std::make_unique<AST::MemoryRef>(variable);
 	}

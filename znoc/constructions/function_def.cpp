@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Function.h>
@@ -82,14 +83,26 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
 
 	// GET NAME
-	get_next_token(f);
-	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "function name after 'func'");
+	//get_next_token(f);
+	//if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "function name after 'func'");
+	EXPECT(tok_func, "to start function definition");
+	auto name = EXPECT_IDENTIFIER("function name after 'func'");
+	//auto name = std::get<std::string>(currentTokenVal);
+	//get_next_token(f);
 
-	auto name = std::get<std::string>(currentTokenVal);
-	get_next_token(f);
+	typedef std::pair<std::string, AST::TypeInstance> arg_t;
+	std::vector<arg_t> argsP;
+
+	LIST('(', ',', ')', {
+		std::string name = EXPECT_IDENTIFIER("argument name");
+		EXPECT(':', "after argument name");
+		AST::TypeInstance type = parse_type(f);
+		auto arg = arg_t(name, std::move(type));
+		argsP.push_back(std::move(arg));
+	}, "argument list");
 
 	// GET ARGS
-	if (currentToken != '(') throw UNEXPECTED_CHAR(currentToken, "(");
+	/*if (currentToken != '(') throw UNEXPECTED_CHAR(currentToken, "(");
 	get_next_token(f);
 
 	std::vector<std::pair<std::string, AST::TypeInstance>> argsP;
@@ -112,7 +125,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 		else if (currentToken != ',') throw UNEXPECTED_CHAR(currentToken, ", or ) after argument");
 		get_next_token(f);
 	}
-	get_next_token(f);
+	get_next_token(f);*/
 
 	std::vector<std::shared_ptr<AST::Variable>> args;
 	for (auto &a : argsP) {
@@ -121,7 +134,15 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 
 	// CHECK FOR RETURN TYPE
 	AST::TypeInstance returnType;
-	if (currentToken == '-') {
+
+	IF_TOK_ELSE('-', {
+		EXPECT('>', "in func return type");
+		returnType = parse_type(f);
+	}, {
+		returnType = AST::get_fundamental_type("void");
+	});
+
+	/*if (currentToken == '-') {
 		get_next_token(f);
 		
 		if (currentToken != '>') throw UNEXPECTED_CHAR(currentToken, "->");
@@ -129,7 +150,20 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 		returnType = parse_type(f);
 	} else {
 		returnType = AST::get_fundamental_type("void");
-	}
+	}*/
+
+	std::unique_ptr<AST::CodeBlock> body = nullptr;
+
+	IF_TOK_ELSE(';', {
+		// Just trim it
+	}, {
+		body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
+	});
+
+	stack_allocations.pop_front(); // End scope
+
+	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body));
+	/*return r;
 
 	if (currentToken != '{') {
 		get_next_token(f);
@@ -143,5 +177,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 	stack_allocations.pop_front(); // End scope
 
 	auto r =  std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body));
-	return r;
+	return r;*/
 }

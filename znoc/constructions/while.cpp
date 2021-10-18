@@ -47,9 +47,8 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((u
 // WHILE LOOP
 // while_loop = 'while' binary_expr codeblock;
 std::unique_ptr<AST::Expression> Parser::parse_while(FILE* f) {
-	get_next_token(f); // Trim while
+	EXPECT(tok_while, "to start while loop");
 	auto condition = parse_binary_expression(f);
-	if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start while body");
 	
 	std::unique_ptr<AST::CodeBlock> body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 
