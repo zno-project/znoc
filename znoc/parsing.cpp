@@ -68,6 +68,7 @@ int get_token(FILE *f) {
 		else if (identifier == "while") return tok_while;
 		else if (identifier == "uses") return tok_uses;
 		else if (identifier == "class") return tok_class;
+		else if (identifier == "as") return tok_as;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
@@ -154,17 +155,23 @@ int parse_file(std::filesystem::path path,
 				auto newP = path;
 				newP.replace_filename(filePath.c_str());
 
+				std::string namespace_name = newP.stem();
+
+				OPTIONAL(tok_as, {
+					namespace_name = EXPECT_IDENTIFIER("after `as` statement");
+				});
+
 				if (has_searched_path(newP)) {
 					std::cout << "Already compiling " << newP.string() << std::endl;
 					break;
 				}
 
-				std::cout << "Parsing include " << newP.string() << " as " << newP.stem() << std::endl;
-				auto new_namespace = std::make_unique<AST::Namespace>(newP.stem());
+				std::cout << "Parsing include " << newP.string() << " as " << namespace_name << std::endl;
+				auto new_namespace = std::make_unique<AST::Namespace>(namespace_name);
 
 				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);
-				std::cout << "Parsed include " << newP.string() << " as " << newP.stem() << std::endl;
+				std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
 				*current_namespace << std::move(new_namespace);
 				currentToken = old_current_token;
 
