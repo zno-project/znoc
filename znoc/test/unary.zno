@@ -1,0 +1,12 @@
+uses 'stdio.zno'
+
+func main() {
+	let a = 1;
+	stdio::printI(a);
+	stdio::printI(!a);
+	let b = 2;
+	stdio::printI(b);
+	stdio::printI(!b);
+	stdio::printI(~b);
+	return;
+}

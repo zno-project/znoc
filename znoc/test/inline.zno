@@ -1,0 +1,11 @@
+uses 'stdio.zno'
+
+#[inline] func hello() {
+	stdio::printI(8);
+	return;
+}
+
+func main() {
+	hello();
+	return;
+}

@@ -1,0 +1,23 @@
+uses 'stdio.zno'
+
+struct Thingy<A, B> {
+	a: A,
+	b: B
+}
+
+func printAStructThing(s: Thingy<_fundamentals::i32, _fundamentals::i32>) -> _fundamentals::i32 {
+	stdio::printI(s.a);
+	return s.b;
+}
+
+func main() {
+	let s: Thingy<_fundamentals::i32, _fundamentals::i32>;
+	let p: Thingy<_fundamentals::i64, _fundamentals::i64>;
+	s.a = 32;
+	s.b = 65;
+	p.b = 72;
+	stdio::printI(s.a);
+	let x = s.b;
+	stdio::printI(x);
+	return;
+}

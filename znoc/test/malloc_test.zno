@@ -1,0 +1,18 @@
+uses 'stdio.zno'
+
+func main() {
+	let x_ptr = stdio::allocate();
+	stdio::printI(*x_ptr);
+	stdio::printI(*x_ptr);
+	stdio::deallocate(x_ptr);
+	let y = 65;
+	let y_ptr = &y;
+	let y_ptr_ptr = &y_ptr;
+	stdio::printI(*y_ptr);
+	stdio::printI(**y_ptr_ptr);
+	*y_ptr = 5;
+	stdio::printI(*y_ptr);
+	stdio::printI(**y_ptr_ptr);
+	let v_ptr: _fundamentals::ptr<_fundamentals::void>;
+	return;
+}

@@ -24,12 +24,21 @@ DEPENDS_CONSTRUCT = $(patsubst constructions/%.cpp, build/constructions/%.d, $(S
 DEPENDS_TYPES = $(patsubst types/%.cpp, build/types/%.d, $(SRCS_TYPES))
 DEPENDS_MEMORY = $(patsubst memory/%.cpp, buils/memory/%.d, $(SRCS_MEMORY))
 
-.PHONY: all clean
+TESTS = $(filter-out test/stdio.zno, $(wildcard test/*.zno))
+TESTS_LOG = test/log.log
+
+.PHONY: all clean test $(TESTS)
 
 all: znoc
 
-sources:
-	@echo $(SRCS) $(SRCS_CONSTRUCT) $(SRCS_TYPES)
+test: $(TESTS)
+
+$(TESTS): znoc
+	./znoc $@
+	clang trampoline.c output.o -o build/test
+	echo "" >> $(TESTS_LOG)
+	echo "====== LOG FOR:" $@ "======" >> $(TESTS_LOG)
+	-./build/test >> $(TESTS_LOG)
 
 clean:
 	rm -rf build

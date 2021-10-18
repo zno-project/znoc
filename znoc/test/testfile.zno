@@ -1,0 +1,14 @@
+uses 'stdio.zno' as io
+
+func main() -> _fundamentals::i32 {
+	let t = 76;
+	let j = 8589934592;
+	io::printI(65);
+	io::printI(t);
+	io::printI(j);
+	t = 7;
+	io::printI(t);
+	let f = 6.46;
+	io::printI(f);
+	return t;
+}

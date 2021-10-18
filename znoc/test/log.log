@@ -1,0 +1,538 @@
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1127015996
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/testInclude.zno ======
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+====== LOG FOR: test/testfile.zno ======
+65
+76
+0
+7
+1382569256
+
+====== LOG FOR: test/unary.zno ======
+1
+-2
+2
+-3
+-3
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1179964988
+32
+7
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1341220412
+32
+7
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1163241020
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/testInclude.zno ======
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+====== LOG FOR: test/testfile.zno ======
+65
+76
+0
+7
+1382569256
+
+====== LOG FOR: test/unary.zno ======
+1
+-2
+2
+-3
+-3
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1337693756
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/testInclude.zno ======
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+====== LOG FOR: test/testfile.zno ======
+65
+76
+0
+7
+1382569256
+
+====== LOG FOR: test/unary.zno ======
+1
+-2
+2
+-3
+-3
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1167738428
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1270502972
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1332164156
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1196537404
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/testInclude.zno ======
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+====== LOG FOR: test/testfile.zno ======
+65
+76
+0
+7
+1382569256
+
+====== LOG FOR: test/unary.zno ======
+1
+-2
+2
+-3
+-3
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1158805052
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/broken_ptr.zno ======
+32
+-1120257596
+32
+7
+
+====== LOG FOR: test/cbret.zno ======
+5
+7
+1
+
+====== LOG FOR: test/continue.zno ======
+9
+8
+7
+6
+4
+3
+2
+1
+0
+
+====== LOG FOR: test/ifret.zno ======
+6
+8
+
+====== LOG FOR: test/inline.zno ======
+8
+
+====== LOG FOR: test/malloc_test.zno ======
+0
+0
+65
+65
+5
+5
+
+====== LOG FOR: test/struct.zno ======
+27
+65
+
+====== LOG FOR: test/templates.zno ======
+32
+65
+
+====== LOG FOR: test/testInclude.zno ======
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+====== LOG FOR: test/testfile.zno ======
+65
+76
+0
+7
+1382569256
+
+====== LOG FOR: test/unary.zno ======
+1
+-2
+2
+-3
+-3
