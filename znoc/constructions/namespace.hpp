@@ -25,8 +25,12 @@ namespace AST {
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
 		AST::Namespace* get_namespace_by_name(std::string name);
 
+		void add_type_with_name(std::shared_ptr<AST::TypeBase> t, std::string name) {
+			named_types.insert({name, t});
+		}
+
 		Namespace* operator <<(std::shared_ptr<AST::TypeBase> t) {
-			named_types.insert({t->get_name(), t});
+			add_type_with_name(t, t->get_name());
 			return this;
 		}
 
