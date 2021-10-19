@@ -208,7 +208,7 @@ int parse_file(std::filesystem::path path,
 				break;
 			}
 			default: {
-				throw std::runtime_error("Unimplemented");
+				throw std::runtime_error(fmt::format("Unimplemented {}", currentToken));
 			}
 		}
 		Parser::clear_attributes();
