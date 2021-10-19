@@ -5,6 +5,7 @@
 #include "types/type.hpp"
 #include "attributes.hpp"
 #include "types/type.hpp"
+#include "constructions/typedef.hpp"
 #include "macros.hpp"
 #include "location.hpp"
 #include <fmt/format.h>
@@ -205,6 +206,11 @@ int parse_file(std::filesystem::path path,
 				}*/
 			case tok_func: {
 				*current_namespace << Parser::parse_function(f);
+				Parser::clear_attributes();
+				break;
+			}
+			case tok_typedef: {
+				Parser::parse_typedef(f, *current_namespace);
 				Parser::clear_attributes();
 				break;
 			}
