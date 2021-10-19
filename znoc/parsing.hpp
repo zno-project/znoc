@@ -46,6 +46,7 @@ enum Token {
 
 	tok_class = -20,
 	tok_as = -21,
+	tok_typedef = -22
 };
 
 #include "constructions/namespace.hpp"

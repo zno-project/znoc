@@ -69,6 +69,7 @@ int get_token(FILE *f) {
 		else if (identifier == "uses") return tok_uses;
 		else if (identifier == "class") return tok_class;
 		else if (identifier == "as") return tok_as;
+		else if (identifier == "typedef") return tok_typedef;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
