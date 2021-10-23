@@ -1,0 +1,3 @@
+[submodule "znoc/test/unit/gtest"]
+	path = znoc/test/unit/gtest
+	url = git@github.com:google/googletest.git
