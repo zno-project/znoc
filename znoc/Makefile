@@ -9,58 +9,48 @@ LDF = -g -lfmt `llvm-config --ldflags --libs core native`
 
 CXX?=clang++
 
-SRCS = $(wildcard *.cpp)
-SRCS_CONSTRUCT = $(wildcard constructions/*.cpp)
-SRCS_TYPES = $(wildcard types/*.cpp)
-SRCS_MEMORY = $(wildcard memory/*.cpp)
+SRCS = $(wildcard src/*.cpp)
+SRCS_CONSTRUCT = $(wildcard src/constructions/*.cpp)
+SRCS_TYPES = $(wildcard src/types/*.cpp)
+SRCS_MEMORY = $(wildcard src/memory/*.cpp)
 
-OBJS = $(patsubst %.cpp, build/%.o, $(SRCS))
-OBJS_CONSTRUCT = $(patsubst constructions/%.cpp, build/constructions/%.o, $(SRCS_CONSTRUCT))
-OBJS_TYPES = $(patsubst types/%.cpp, build/types/%.o, $(SRCS_TYPES))
-OBJS_MEMORY = $(patsubst memory/%.cpp, build/memory/%.o, $(SRCS_MEMORY))
+OBJS = $(patsubst src/%.cpp, build/%.o, $(SRCS))
+OBJS_CONSTRUCT = $(patsubst src/constructions/%.cpp, build/constructions/%.o, $(SRCS_CONSTRUCT))
+OBJS_TYPES = $(patsubst src/types/%.cpp, build/types/%.o, $(SRCS_TYPES))
+OBJS_MEMORY = $(patsubst src/memory/%.cpp, build/memory/%.o, $(SRCS_MEMORY))
 
-DEPENDS = $(patsubst %.cpp, build/%.d, $(SRCS))
-DEPENDS_CONSTRUCT = $(patsubst constructions/%.cpp, build/constructions/%.d, $(SRCS_CONSTRUCT))
-DEPENDS_TYPES = $(patsubst types/%.cpp, build/types/%.d, $(SRCS_TYPES))
-DEPENDS_MEMORY = $(patsubst memory/%.cpp, buils/memory/%.d, $(SRCS_MEMORY))
+DEPENDS = $(patsubst src/%.cpp, build/%.d, $(SRCS))
+DEPENDS_CONSTRUCT = $(patsubst src/constructions/%.cpp, build/constructions/%.d, $(SRCS_CONSTRUCT))
+DEPENDS_TYPES = $(patsubst src/types/%.cpp, build/types/%.d, $(SRCS_TYPES))
+DEPENDS_MEMORY = $(patsubst src/memory/%.cpp, buils/memory/%.d, $(SRCS_MEMORY))
 
 TESTS = $(filter-out test/stdio.zno, $(wildcard test/*.zno))
 TESTS_LOG = test/log.log
 
-.PHONY: all clean test $(TESTS)
+.PHONY: all clean
 
-all: znoc
-
-test: $(TESTS)
-
-$(TESTS): znoc
-	./znoc $@
-	clang trampoline.c output.o -o build/test
-	echo "" >> $(TESTS_LOG)
-	echo "====== LOG FOR:" $@ "======" >> $(TESTS_LOG)
-	-./build/test >> $(TESTS_LOG)
+all: build/znoc
 
 clean:
 	rm -rf build
-	rm znoc
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
-build/%.o: %.cpp
+build/%.o: src/%.cpp
 	mkdir -p build/
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/constructions/%.o: constructions/%.cpp
+build/constructions/%.o: src/constructions/%.cpp
 	mkdir -p build/constructions
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/types/%.o: types/%.cpp
+build/types/%.o: src/types/%.cpp
 	mkdir -p build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/memory/%.o: memory/%.cpp
+build/memory/%.o: src/memory/%.cpp
 	mkdir -p build/memory
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
-	$(CXX) -o znoc $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) $(LDFLAGS) $(LDF)
+build/znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
+	$(CXX) -o build/znoc $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) $(LDFLAGS) $(LDF)
