@@ -7,16 +7,15 @@
 #include "codeblock.hpp"
 #include "../casting.hpp"
 #include "../parsing.hpp"
-#include "../main.hpp"
 #include "../macros.hpp"
 #include "binary_op.hpp"
 #include <fmt/format.h>
 #include <llvm/IR/BasicBlock.h>
 #include "../types/builtins.hpp"
 #include "construction_parse.hpp"
+#include "../llvm_module.hpp"
 
 llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
-	//emitLocation(builder, this);
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	llvm::BasicBlock *DefaultBB = llvm::BasicBlock::Create(*TheContext, "case_default");
 	llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(*TheContext, "post_switch");
@@ -57,14 +56,12 @@ llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((
 // switch = 'switch' binary_expr '{' switch_case* | 'default' codeblock '}';
 std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	EXPECT(tok_switch, "in switch statement");
-	//get_next_token(f); // Trim switch
+
 	auto condition = parse_binary_expression(f);
-	//if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start switch body");
 	
 	auto body = std::vector<std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>>();
 	std::unique_ptr<AST::CodeBlock> default_body;
 
-	//get_next_token(f); // Trim {
 	EXPECT('{', "to start switch body");
 	UNTIL('}', {
 		IF_TOK_ELSE(tok_default, {
@@ -73,17 +70,6 @@ std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 			body.push_back(parse_switch_case(f));
 		});
 	});
-
-	/*if (currentToken != '}') while (1) {
-		if (currentToken == tok_default) {
-			get_next_token(f);
-			if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start switch default code block");
-			default_body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
-		} else body.push_back(parse_switch_case(f));
-
-		if (currentToken == '}') break;
-	}
-	get_next_token(f); // Trim }*/
 
 	return std::make_unique<AST::SwitchDef>(std::move(condition), std::move(body), std::move(default_body));
 }
@@ -94,28 +80,14 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	AST::SwitchDef::switch_case_metadata_t meta;
 
 	EXPECT(tok_case, "inside switch statement");
-	//if (currentToken != tok_case) throw UNEXPECTED_CHAR(currentToken, "'case' inside switch statement");
-	//get_next_token(f);
-	/*UNTIL_NOT_AT_LEAST_ONCE(',', {
-		int val = EXPECT_DOUBLE("for case value");
-		meta.num.push_back(llvm::ConstantInt::get(llvm::IntegerType::get(*TheContext, 32), val));
-	});*/
-	/*LIST(tok_case, ',', '{', {
-		int val = EXPECT_DOUBLE("for case value");
-		meta.num.push_back(llvm::ConstantInt::get(llvm::IntegerType::get(*TheContext, 32), val));
-	}, "cases list");*/
 
 	while (1) {
-		//if (currentToken != tok_numeric_literal) throw UNEXPECTED_CHAR(currentToken, "numeric literal for case value");
 		int val = EXPECT_DOUBLE("numeric literal for case value");
 		meta.num.push_back(llvm::ConstantInt::get(llvm::IntegerType::get(*TheContext, 32), val));
 		if (currentToken == '{') break;
 		EXPECT(',', "or { after case");
-		//else if (currentToken != ',') throw UNEXPECTED_CHAR(currentToken, ", or { after case");
-		//get_next_token(f); // Trim ,
 	}
 	
-	//if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start case code block");
 	std::unique_ptr<AST::CodeBlock> caseBody = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 
 	return std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>(meta, std::move(caseBody));

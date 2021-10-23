@@ -18,7 +18,6 @@
 
 #include "../attributes.hpp"
 #include "../types/type.hpp"
-#include "../main.hpp"
 #include "../types/casting.hpp"
 #include "reference.hpp"
 #include "../macros.hpp"
@@ -27,12 +26,7 @@
 #include "../mangling.hpp"
 #include "../types/builtins.hpp"
 
-//std::map<std::string, AST::Function*> NamedFunctions; // Registered functions
-
 llvm::Value* AST::FunctionCall::codegen(llvm::IRBuilder<> *builder, std::string name) {
-	//emitLocation(builder, this);
-	//auto function = AST::get_function_by_name(callee);
-
 	llvm::Function *F = function->generated;
 
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
@@ -45,11 +39,3 @@ llvm::Value* AST::FunctionCall::codegen(llvm::IRBuilder<> *builder, std::string 
 	auto funcCall = builder->CreateCall(F, llvm::ArrayRef<llvm::Value*>(fargs), name);
 	return funcCall;
 }
-
-/*std::string AST::Function::mangled_name() {
-	if (attributes[(unsigned long)Attributes::NoMangle]) return name;
-	/*if (name == "main") return name;
-	/*auto p = manglePrefixes;
-	p.push_back(std::pair<ManglePart, std::string>(ManglePart::Function, name));
-	return full_mangle_name(p);
-}*/

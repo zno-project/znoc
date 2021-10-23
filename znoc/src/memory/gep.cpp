@@ -2,7 +2,7 @@
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Constant.h>
-#include "../main.hpp"
+#include "../llvm_module.hpp"
 
 llvm::Value* AST::GEP::codegen(llvm::IRBuilder<> *builder) {
 	auto zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0));

@@ -38,9 +38,6 @@ Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
 	while (1) {
 		identifier = std::get<std::string>(currentTokenVal);
 		get_next_token(f);
-		std::cout << currentToken << std::endl;
-		std::cout << identifier << std::endl;
-		std::cout << "-----" << std::endl;
 		if (currentToken == ':') {
 			get_next_token(f);
 			if (currentToken != ':') throw UNEXPECTED_CHAR(currentToken, "`::` in namespace accessor");

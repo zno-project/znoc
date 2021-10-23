@@ -4,7 +4,7 @@
 #include "type.hpp"
 
 #include <llvm/IR/Type.h>
-#include "../main.hpp"
+#include "../llvm_module.hpp"
 #include <fmt/format.h>
 
 namespace AST {

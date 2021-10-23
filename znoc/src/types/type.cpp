@@ -3,6 +3,7 @@
 #include "../parsing.hpp"
 #include "../macros.hpp"
 #include "../main.hpp"
+#include "../llvm_module.hpp"
 #include "../constructions/namespace.hpp"
 #include <map>
 #include <string>
@@ -48,20 +49,6 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	}, "template list");
 	if (template_types.size() > 0) ret_type.template_instance_id = type_base->add_generic_instance(template_types);
 
-	/*if (currentToken == '<') {
-		std::vector<AST::TypeInstance> template_types;
-		get_next_token(f);
-		if (currentToken != '>') while (1) {
-			template_types.push_back(Parser::parse_type(f));
-			if (currentToken != ',') break;
-			get_next_token(f); 
-		}
-		if (currentToken != '>') throw UNEXPECTED_CHAR(currentToken, "`>` to end template type list");
-		get_next_token(f);
-		//t.type->templatedTypes.push_back(template_types);
-		ret_type.template_instance_id = type_base->add_generic_instance(template_types);
-	}*/
-
 	return ret_type;
 }
 
@@ -93,9 +80,9 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 
 std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) {
 	EXPECT(tok_struct, "to begin struct definition");
-	//if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "class/struct name after `class`/`struct`");
+
 	std::string name = EXPECT_IDENTIFIER("for name of struct");//std::get<std::string>(currentTokenVal);
-	//get_next_token(f);
+
 
 	std::map<std::string, size_t> template_type_names;
 	size_t i = 0;
@@ -113,10 +100,6 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 		if (currentToken != '>') throw UNEXPECTED_CHAR(currentToken, "`>` to end template type list");
 		get_next_token(f);
 	}
-
-	//if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ after class/struct name");
-	//get_next_token(f);
-	//EXPECT('{', "to begin struct definition");
 
 	std::vector<std::pair<std::string, AST::field_type_t>> fields;
 	std::map<std::string, std::shared_ptr<AST::Function>> functions;
@@ -144,40 +127,6 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 			functions[func->get_name()] = func;
 		});
 	}, "struct fields and functions");
-
-	/*if (currentToken != '}') while (1) {
-		if (currentToken == tok_func) {
-			auto func = Parser::parse_function(f);
-			functions[func->get_name()] = func;
-			//globalFuncDeclarations.push_back(std::pair<std::unique_ptr<AST::Function>, bool>(std::move(f), false));
-		} else {
-			if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "identifier for class/struct field");
-			std::string fieldName = std::get<std::string>(currentTokenVal);
-			get_next_token(f);
-			if (currentToken != ':') throw UNEXPECTED_CHAR(currentToken, ": after class/struct field name");
-			get_next_token(f);
-
-			AST::field_type_t fieldType;
-
-			try {
-				std::string t_name = std::get<std::string>(currentTokenVal);
-				auto template_type_idx = template_type_names.at(t_name);
-				fieldType = AST::GenericInstance {
-					.generic_type_index = template_type_idx
-				};
-				get_next_token(f);
-			} catch (std::out_of_range) {
-				fieldType = parse_type(f);
-			}
-
-			fields.push_back(std::pair<std::string, AST::field_type_t>(fieldName, std::move(fieldType)));
-		}
-
-		if (currentToken == '}') break;
-		else if (currentToken != ',') throw UNEXPECTED_CHAR(currentToken, ", or } after class field/function");
-		get_next_token(f); // Trim ,
-	}
-	get_next_token(f); // Trim }*/
 
 	std::vector<AST::field_type_t> fields_by_index;
 	std::map<std::string, size_t> fields_by_name;
@@ -239,51 +188,3 @@ AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
 	return p->get_pointed_to(template_instance_id);
 }
-
-/*#include <iostream>
-
-std::pair<std::unique_ptr<AST::Expression>, AST::type_usage_t> AST::Type::get_field(std::string field_name, int template_instance) {
-	auto idx = fieldIndices.at(field_name);
-	auto field_type = fieldTypes[idx];
-	AST::type_usage_t ret;
-
-	if (std::holds_alternative<AST::templated_field_type_t>(field_type)) { // If it's a templated field
-		auto idx = std::get<AST::templated_field_type_t>(field_type).typeIndex; // Get the index in the template instance list
-		ret = templatedTypes[template_instance][idx]; // And get the type for the current template instance
-	} else {
-		ret = std::get<AST::type_usage_t>(field_type); // If not templates, just get the raw type
-	}
-
-	return std::pair(std::make_unique<AST::GEP>(idx, ret),  ret);
-}*/
-
-// Returns a list of indices into nested structs, from field names and template instance
-/*std::vector<int> AST::Type::get_field_idxs(std::vector<std::string> fieldNames, int template_instance) {
-	std::vector<int> fieldIdx;
-	auto currentT = this;
-	for (auto &field : fieldNames) { // For each field in the list of fields
-		auto idx = currentT->fieldIndices.at(field); // Get the index by field name
-		fieldIdx.push_back(idx); // Append to return val
-
-		auto newT = currentT->fieldTypes[idx]; // Get the type for that field
-		if (std::holds_alternative<AST::templated_field_type_t>(newT)) { // If it's a templated field
-			auto idx = std::get<AST::templated_field_type_t>(newT).typeIndex; // Get the index in the template instance list
-			currentT = templatedTypes[template_instance][idx].type.get(); // And get the type for the current template instance
-		} else {
-			currentT = std::get<AST::type_usage_t>(newT).type.get(); // If not templates, just get the raw type
-		}
-	}
-	return fieldIdx;
-}*/
-
-/*const std::string& AST::Type::get_part_mangle_name(int template_instance) {
-	std::string templateTypes;
-	std::vector<std::pair<ManglePart, std::string>> v = {std::pair(ManglePart::Type, name)};
-	if (template_instance > -1) {
-		for (auto templateType : templatedTypes.at(template_instance)) {
-			templateTypes += templateType.type->get_part_mangle_name(templateType.template_instance);
-		}
-		v.push_back(std::pair(ManglePart::Typeargs, templateTypes));
-	}
-	return _mangle_name(v);
-}*/

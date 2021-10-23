@@ -7,7 +7,7 @@
 #include <llvm/ADT/APFloat.h>
 #include <string>
 #include <iostream>
-#include "../main.hpp"
+#include "../llvm_module.hpp"
 #include "../casting.hpp"
 #include "../macros.hpp"
 #include "binary_op.hpp"
@@ -29,7 +29,6 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((u
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(condBB);
 	builder->SetInsertPoint(condBB);
 	auto conditionCond = condition->codegen(builder, "__while_condition");
-	//auto condition = builder->CreateFCmpONE(conditionCond, llvm::ConstantFP::get(*TheContext, llvm::APFloat(0.0f)), "__while_condition_casted");
 	builder->CreateCondBr(conditionCond, WhileLoopBodyBB, mergeBB);
 
 	builder->SetInsertPoint(WhileLoopBodyBB);

@@ -1,6 +1,6 @@
 #include "if.hpp"
 
-#include "../main.hpp"
+#include "../llvm_module.hpp"
 #include "../casting.hpp"
 #include "../macros.hpp"
 #include "../parsing.hpp"
@@ -62,10 +62,9 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 // if = 'if' binary_expr codeblock ('else' (codeblock | if))?;
 std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
 	EXPECT(tok_if, "to start if statement");
-	//get_next_token(f); // Trim if
+
 	auto condition = parse_binary_expression(f);
 
-	//if (currentToken != '{') throw UNEXPECTED_CHAR(currentToken, "{ to start if code block");
 	std::unique_ptr<AST::Expression> if_body = parse_code_block(f);
 
 	IF_TOK_ELSE(tok_else, {
@@ -79,17 +78,4 @@ std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
 	}, {
 		return std::make_unique<AST::IfDef>(std::move(condition), std::move(if_body), nullptr);
 	});
-	/*if (currentToken == tok_else) {
-		get_next_token(f);
-		std::unique_ptr<AST::Expression> elseBody;
-		if (currentToken == tok_if) elseBody = parse_if_def(f);
-		else if (currentToken == '{') {
-			elseBody = parse_code_block(f);
-		} else {
-			throw UNEXPECTED_CHAR(currentToken, "{ to start if code block");
-		}
-		return std::make_unique<AST::IfDef>(std::move(condition), std::move(ifBody), std::move(elseBody));
-	}
-
-	return std::make_unique<AST::IfDef>(std::move(condition), std::move(ifBody), nullptr);*/
 }

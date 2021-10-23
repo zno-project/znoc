@@ -3,7 +3,6 @@
 
 #include "expression.hpp"
 #include "../types/builtins.hpp"
-#include "../main.hpp"
 #include <llvm/IR/Constant.h>
 #include <llvm/ADT/APFloat.h>
 #include <cfloat>

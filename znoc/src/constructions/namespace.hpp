@@ -7,7 +7,6 @@
 #include "function_def.hpp"
 #include <stdio.h>
 #include <iostream>
-//#include "../main.hpp"
 
 namespace AST {
 	class Namespace {
