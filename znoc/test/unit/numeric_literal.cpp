@@ -105,7 +105,7 @@ TEST(NumericLiteral, TestLengthOfIntModifiers) {
 
 TEST(NumericLiteral, TestLengthOfIntAutoLen) {
 	{
-		auto test_d = std::to_string((uint64_t)UINT32_MAX);
+		auto test_d = std::to_string((uint64_t)INT32_MAX);
 		auto c = new CompilerMain(test_d.c_str());
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -117,7 +117,7 @@ TEST(NumericLiteral, TestLengthOfIntAutoLen) {
 	}
 
 	{
-		auto test_d = std::to_string((uint64_t)UINT32_MAX + 10);
+		auto test_d = std::to_string((uint64_t)INT32_MAX + 10);
 		auto c = new CompilerMain(test_d.c_str());
 		auto r = Parser::parse_numeric_literal(c->f);
 

@@ -24,29 +24,30 @@ enum Token {
 
 	// primary
 	tok_identifier = -5,
-	tok_numeric_literal = -6,
+	tok_integer_numeric_literal = -6,
+	tok_decimal_numeric_literal = -7,
 
 	// typedef
-	tok_struct = -7,
+	tok_struct = -8,
 
 	// control flow
-	tok_if = -8,
-	tok_else = -9,
-	tok_for = -10,
-	tok_throw = -11,
-	tok_switch = -12,
-	tok_case = -13,
-	tok_break = -14,
-	tok_continue = -15,
-	tok_fallthrough = -16,
-	tok_default = -17,
-	tok_while = -18,
+	tok_if = -9,
+	tok_else = -10,
+	tok_for = -11,
+	tok_throw = -12,
+	tok_switch = -13,
+	tok_case = -14,
+	tok_break = -15,
+	tok_continue = -16,
+	tok_fallthrough = -17,
+	tok_default = -18,
+	tok_while = -19,
 
-	tok_uses = -19,
+	tok_uses = -20,
 
-	tok_class = -20,
-	tok_as = -21,
-	tok_typedef = -22
+	tok_class = -21,
+	tok_as = -22,
+	tok_typedef = -23
 };
 
 #include "constructions/namespace.hpp"
@@ -67,11 +68,12 @@ int parse_file(std::filesystem::path p,
 	ret;	\
 })
 
-#define EXPECT_DOUBLE(err) ({ \
-	if (currentToken != tok_numeric_literal) throw UNEXPECTED_CHAR(currentToken, err);	\
+#define EXPECT_NUMBERIC_LITERAL(err) ({ \
+	if (currentToken != tok_decimal_numeric_literal && currentToken != tok_integer_numeric_literal) throw UNEXPECTED_CHAR(currentToken, err);	\
+	auto contains_dp = currentToken == tok_decimal_numeric_literal;	\
 	auto ret = std::get<double>(currentTokenVal);	\
 	get_next_token(f);	\
-	ret;	\
+	std::make_tuple(ret, contains_dp);	\
 })
 
 #define UNTIL(end, body) {	\
