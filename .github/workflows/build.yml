@@ -2,7 +2,7 @@ name: Build and test
 on: [push, pull_request]
 
 jobs:
-  Build:
+  Build-macos:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
@@ -21,5 +21,23 @@ jobs:
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
-          name: znoc
+          name: znoc-macos
+          path: znoc/build/znoc
+
+  Build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt install libfmt-dev llvm
+      - name: Build executable
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ make
+      - name: Upload built executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-linux
           path: znoc/build/znoc
