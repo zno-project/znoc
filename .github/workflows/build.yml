@@ -2,7 +2,7 @@ name: Build and test
 on: [push, pull_request]
 
 jobs:
-  Build macos:
+  Build_macos:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
@@ -24,7 +24,7 @@ jobs:
           name: znoc-macos
           path: znoc/build/znoc
 
-  Build Ubuntu:
+  Build_Ubuntu:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -42,7 +42,7 @@ jobs:
           name: znoc-linux
           path: znoc/build/znoc
   
-  Build Windows:
+  Build_Windows:
     runs-on: windows-latest
     defaults:
       run:
