@@ -1,0 +1,21 @@
+name: Build and test
+on: [push, pull_request]
+
+jobs:
+  Build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make
+      - name: Build executable
+        run: |
+          cd znoc
+          make
+      - name: Upload built executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc
+          path: znoc/build/znoc
