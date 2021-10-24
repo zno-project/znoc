@@ -176,7 +176,7 @@ AST::OpType Parser::parse_binary_op(FILE* f) {
 // binary_expr = unary_expr (binary_op binary_expr)?;
 std::unique_ptr<AST::Expression> Parser::parse_binary_expression(FILE* f) {
 	auto LHS = parse_unary_expression(f);
-	std::cout << "bin expr - current tok is " << currentToken << std::endl;
+	//std::cout << "bin expr - current tok is " << currentToken << std::endl;
 	AST::OpType op = parse_binary_op(f);
 	if (op < 0) return LHS; // If no `op + RHS` return the LHS on its own
 

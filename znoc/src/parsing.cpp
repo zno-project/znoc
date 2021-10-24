@@ -101,7 +101,7 @@ int get_token(FILE *f) {
 int get_next_token(FILE *f) {
 	//std::cout << "getnexttoken" << std::endl;
 	currentToken = get_token(f);
-	std::cout << "Tok: " << (char)currentToken << "(" << currentToken << ")" << std::endl;
+	//std::cout << "Tok: " << (char)currentToken << "(" << currentToken << ")" << std::endl;
 	return currentToken;
 }
 
@@ -124,7 +124,7 @@ int parse_file(std::filesystem::path path,
 
 	get_next_token(f);
 	while (1) {
-		std::cout << "current token is " << currentToken << std::endl;
+		//std::cout << "current token is " << currentToken << std::endl;
 		switch (currentToken) {
 			case '#': {
 				Parser::parse_attributes(f);

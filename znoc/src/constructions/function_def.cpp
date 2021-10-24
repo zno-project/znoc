@@ -72,7 +72,7 @@ void AST::Function::codegen_prototype() {
 	generated = (llvm::Function*)(f.getCallee());
 	generated->setCallingConv(llvm::CallingConv::C);
 
-	std::cout << attributes << std::endl;
+	//std::cout << attributes << std::endl;
 
 	if (attributes[(unsigned long)Attributes::AlwaysInline]) generated->addFnAttr(llvm::Attribute::AlwaysInline);
 }

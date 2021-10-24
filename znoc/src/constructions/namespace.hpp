@@ -39,7 +39,7 @@ namespace AST {
 		}
 
 		Namespace* operator <<(std::unique_ptr<AST::Namespace> n) {
-			std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
+			//std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
 			namespaces.insert({n->get_name(), std::move(n)});
 			return this;
 		}

@@ -28,7 +28,7 @@ std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 	get_next_token(f); // Move onto token after number*/
 
 	IF_TOK_ELSE_IDENTIFIER(post_num_modifier, {
-		std::cout << "post num modifier: " << post_num_modifier << std::endl;
+		//std::cout << "post num modifier: " << post_num_modifier << std::endl;
 		auto modifier_str = post_num_modifier.c_str();
 		auto num_type_char = *(modifier_str++);
 		
