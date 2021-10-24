@@ -9,11 +9,12 @@ jobs:
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
+          export PATH="/usr/local/opt/llvm/bin:$PATH"
       - name: Build executable
         run: |
           cd znoc
-          make
+          CC=clang CXX=clang++ make
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
