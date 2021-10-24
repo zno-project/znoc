@@ -1,9 +1,9 @@
 CFLAGS ?=
 LDFLAGS ?=
 ifeq ($(shell uname),Darwin)
-CF = -MMD -MP --std=c++20 `llvm-config --cppflags | sed 's/-I/-isystem /g'` -g
+CF = -MMD -MP --std=gnu++17 `llvm-config --cppflags | sed 's/-I/-isystem /g'` -g
 else
-CF = -MMD -MP --std=c++20 `llvm-config --cppflags`
+CF = -MMD -MP --std=gnu++17 `llvm-config --cppflags`
 endif
 LDF = -g -lfmt `llvm-config --ldflags --libs core native`
 
