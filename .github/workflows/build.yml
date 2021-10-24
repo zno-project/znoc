@@ -13,8 +13,10 @@ jobs:
           export PATH="/usr/local/opt/llvm/bin:$PATH"
           which clang++
           which llvm-config
+          llvm-config --cppflags
       - name: Build executable
         run: |
+          llvm-config --cppflags
           cd znoc
           CC=clang CXX=clang++ make
       - name: Upload built executable
