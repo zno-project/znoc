@@ -157,7 +157,7 @@ int parse_file(std::filesystem::path path,
 				auto newP = path;
 				newP.replace_filename(filePath.c_str());
 
-				std::string namespace_name = newP.stem();
+				std::string namespace_name = newP.stem().string();
 
 				OPTIONAL(tok_as, {
 					namespace_name = EXPECT_IDENTIFIER("after `as` statement");
