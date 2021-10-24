@@ -14,6 +14,7 @@
 
 namespace AST {
 	class ReturnExpression: public Expression {
+		private:
 		std::unique_ptr<Expression> value;
 		
 		public:

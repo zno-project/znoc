@@ -7,6 +7,7 @@
 
 namespace AST {
 	class IfDef: public AST::Expression {
+		private:
 		std::unique_ptr<AST::Expression> condition, thenClause, elseClause;
 
 		public:

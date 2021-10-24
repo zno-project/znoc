@@ -13,6 +13,7 @@
 
 namespace AST {
 	class BreakExpression: public AST::Expression {
+		private:
 		std::unique_ptr<AST::Expression> value;
 		
 		public:

@@ -10,6 +10,7 @@
 
 namespace AST {
 	class WhileDef: public Expression {
+		private:
 		std::unique_ptr<AST::Expression> condition;
 		std::unique_ptr<AST::CodeBlock> body;
 

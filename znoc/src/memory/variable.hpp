@@ -11,6 +11,7 @@
 
 namespace AST {
 	class Variable: public AST::MemoryLoc {
+		private:
 		std::string name;
 
 		public:
@@ -27,6 +28,7 @@ namespace AST {
 
 namespace AST {
 	class VariableDef: public Expression {
+		private:
 		std::shared_ptr<AST::Variable> var_ref;
 		std::unique_ptr<Expression> value;
 

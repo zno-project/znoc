@@ -40,6 +40,7 @@ namespace AST {
 	} OpType;
 
 	class BinaryExpression: public AST::Expression {
+		private:
 		OpType op;
 		std::unique_ptr<AST::Expression> LHS, RHS;
 

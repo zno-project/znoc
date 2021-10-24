@@ -6,6 +6,7 @@
 
 namespace AST {
 	class MemoryRef: public Expression {
+		private:
 		std::shared_ptr<MemoryLoc> to_access;
 		public:
 		MemoryRef(std::shared_ptr<MemoryLoc> to_access): to_access(to_access), Expression(to_access->underlying_type) {}

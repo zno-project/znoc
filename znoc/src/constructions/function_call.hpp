@@ -20,6 +20,7 @@
 
 namespace AST {
 	class FunctionCall: public AST::Expression {
+		private:
 		std::shared_ptr<AST::Function> function;
 		std::vector<std::unique_ptr<AST::Expression>> args;
 

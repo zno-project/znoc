@@ -5,6 +5,7 @@
 
 namespace AST {
 	class GEP: public AST::MemoryLoc {
+		private:
 		int idx;
 		std::shared_ptr<MemoryLoc> to_index;
 		

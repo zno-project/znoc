@@ -12,6 +12,7 @@ llvm::AllocaInst* create_entry_block_alloca(llvm::Function *in_func, std::string
 
 namespace AST {
 	class Function {
+		private:
 		std::string name;
 		std::vector<std::shared_ptr<AST::Variable>> args;
 		AST::TypeInstance returnType;

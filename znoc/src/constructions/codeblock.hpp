@@ -11,6 +11,7 @@
 
 namespace AST {
 	class CodeBlock: public AST::Expression {
+		private:
 		std::vector<std::unique_ptr<AST::Expression>> body;
 
 		public:

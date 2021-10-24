@@ -10,6 +10,7 @@
 
 namespace AST {
 	class Namespace {
+		private:
 		std::map<std::string, std::shared_ptr<AST::TypeBase>> named_types;
 		std::map<std::string, std::shared_ptr<AST::Function>> named_functions;
 		std::map<std::string, std::unique_ptr<AST::Namespace>> namespaces;

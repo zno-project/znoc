@@ -9,6 +9,7 @@
 
 namespace AST {
 	class NumericLiteral: public AST::Expression {
+		private:
 		union {
 			uint64_t i;
 			double f;
