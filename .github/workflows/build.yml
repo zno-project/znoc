@@ -13,7 +13,9 @@ jobs:
       - name: Build executable
         run: |
           export PATH="/usr/local/opt/llvm/bin:$PATH"
-          llvm-config --cppflags
+          export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
+          export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
+          export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
           cd znoc
           CC=clang CXX=clang++ make
       - name: Upload built executable
