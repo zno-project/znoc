@@ -2,7 +2,7 @@ name: Build and test
 on: [push, pull_request]
 
 jobs:
-  Build-macos:
+  Build macos:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
@@ -24,7 +24,7 @@ jobs:
           name: znoc-macos
           path: znoc/build/znoc
 
-  Build-ubuntu:
+  Build Ubuntu:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -41,3 +41,27 @@ jobs:
         with:
           name: znoc-linux
           path: znoc/build/znoc
+  
+  Build Windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-toolchain mingw-w64-x86_64-llvm mingw-w64-x86_64-fmt
+      - name: Build executable
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ mingw32-make
+      - name: Upload built executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-windows
+          path: znoc/build/znoc.exe
