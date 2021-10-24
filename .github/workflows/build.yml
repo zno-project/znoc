@@ -10,12 +10,15 @@ jobs:
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
+          which clang++
+          which llvm-config
           export PATH="/usr/local/opt/llvm/bin:$PATH"
           which clang++
           which llvm-config
           llvm-config --cppflags
       - name: Build executable
         run: |
+          export PATH="/usr/local/opt/llvm/bin:$PATH"
           llvm-config --cppflags
           cd znoc
           CC=clang CXX=clang++ make
