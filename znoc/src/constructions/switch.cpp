@@ -82,7 +82,7 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	EXPECT(tok_case, "inside switch statement");
 
 	while (1) {
-		int val = EXPECT_DOUBLE("numeric literal for case value");
+		int val = EXPECT_NUMBERIC_LITERAL("numeric literal for case value", bool throwaway);
 		meta.num.push_back(llvm::ConstantInt::get(llvm::IntegerType::get(*TheContext, 32), val));
 		if (currentToken == '{') break;
 		EXPECT(',', "or { after case");

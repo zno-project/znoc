@@ -24,7 +24,8 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 // numeric_literal = NUMBER+;
 std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 	//std::cout << "parse numlit" << std::endl;
-	double val = EXPECT_DOUBLE("to start numeric literal");/*std::get<double>(currentTokenVal);
+	bool contains_dp;
+	double val = EXPECT_NUMBERIC_LITERAL("to start numeric literal", contains_dp);/*std::get<double>(currentTokenVal);
 	get_next_token(f); // Move onto token after number*/
 
 	IF_TOK_ELSE_IDENTIFIER(post_num_modifier, {
@@ -32,11 +33,15 @@ std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 		auto modifier_str = post_num_modifier.c_str();
 		auto num_type_char = *(modifier_str++);
 		
-		if (num_type_char != 'u' && num_type_char != 'f') throw UNEXPECTED_CHAR(num_type_char, "`u` or `f` qualifier after number");
+		if (num_type_char != 'u' && num_type_char != 'i' && num_type_char != 'f' ) {
+			throw UNEXPECTED_CHAR(num_type_char, "`u` or `i` or `f` qualifier after number");
+		}
 		auto len = atoi(modifier_str);
-		return num_type_char == 'u' ? AST::NumericLiteral::NewInt(val, len) : AST::NumericLiteral::NewFloat(val, len);
+		return num_type_char == 'u' ? AST::NumericLiteral::NewUInt(val, len) : 
+		       num_type_char == 'i' ? AST::NumericLiteral::NewInt(val, len) :
+			                          AST::NumericLiteral::NewFloat(val, len);
 	}, {
-		return std::make_unique<AST::NumericLiteral>(val);
+		return std::make_unique<AST::NumericLiteral>(val, contains_dp);
 	});
 
 	/*if (currentToken == tok_identifier) {

@@ -59,7 +59,8 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 		case tok_identifier: {
 			return parse_identifier_expression(f);
 		}
-		case tok_numeric_literal: {
+		case tok_decimal_numeric_literal:
+		case tok_integer_numeric_literal: {
 			return parse_numeric_literal(f);
 		}
 		case tok_let: {

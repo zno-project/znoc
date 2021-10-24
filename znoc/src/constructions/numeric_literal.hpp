@@ -16,13 +16,6 @@ namespace AST {
 		} value;
 		bool is_int_val;
 
-		static bool is_int(double v) {
-			uint64_t vi = v;
-			double vc = v - vi;
-			return vc == 0;
-		}
-
-
 		static AST::TypeInstance len_to_ftype(size_t len) {
 			switch (len) {
 				case 16:
@@ -68,10 +61,24 @@ namespace AST {
 			value.i = v;
 		}
 
-		NumericLiteral(double v): Expression(is_int(v) ? (v > UINT32_MAX ? AST::get_fundamental_type("i64") : AST::get_fundamental_type("i32")) : (v > FLT_MAX ? AST::get_fundamental_type("double") : AST::get_fundamental_type("float"))) {
-			is_int_val = is_int(v);
+		NumericLiteral(double v, bool contains_dp): Expression(
+			contains_dp ?
+				(v > FLT_MAX ?
+					AST::get_fundamental_type("double") :
+					AST::get_fundamental_type("float")
+				) :
+				(v > INT32_MAX ?
+					AST::get_fundamental_type("i64") :
+					AST::get_fundamental_type("i32")
+				)
+		) {
+			is_int_val = !contains_dp;
 			if (is_int_val) value.i = v;
 			else value.f = v;
+		}
+
+		static std::unique_ptr<NumericLiteral> NewUInt(uint64_t v, size_t len) {
+			return std::make_unique<AST::NumericLiteral>((uint64_t)v, len);
 		}
 
 		static std::unique_ptr<NumericLiteral> NewInt(uint64_t v, size_t len) {
