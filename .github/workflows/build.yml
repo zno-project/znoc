@@ -11,6 +11,8 @@ jobs:
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
           export PATH="/usr/local/opt/llvm/bin:$PATH"
+          which clang++
+          which llvm-config
       - name: Build executable
         run: |
           cd znoc
