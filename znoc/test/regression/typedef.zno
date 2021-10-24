@@ -13,8 +13,8 @@ func printAStructThing(s: Thingy<_fundamentals::i32, _fundamentals::i32>) -> _fu
 typedef Thingy as OtherThingy
 
 func main() {
-	let s: OtherThingy<_fundamentals::i32, _fundamentals::i32>;
-	let p: OtherThingy<_fundamentals::i64, _fundamentals::i64>;
+	let s: OtherThingy;
+	let p: Thingy<_fundamentals::i64, _fundamentals::i64>;
 	s.a = 32;
 	s.b = 65;
 	p.b = 72;

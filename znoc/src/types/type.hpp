@@ -92,25 +92,25 @@ namespace AST {
 
 	struct TypeInstance {
 		std::shared_ptr<AST::TypeBase> base_type;
-		size_t template_instance_id;
+		std::optional<size_t> template_instance_id;
 
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name) {
-			return base_type->get_function_by_name(name, template_instance_id);
+			return base_type->get_function_by_name(name, template_instance_id.value());
 		}
 
 		FieldInfo get_field_info_by_name(std::string name) {
-			return base_type->get_field_info_by_name(name, template_instance_id);
+			return base_type->get_field_info_by_name(name, template_instance_id.value());
 		}
 
 		FieldInfo get_field_info_by_index(size_t idx) {
-			return base_type->get_field_info_by_index(idx, template_instance_id);
+			return base_type->get_field_info_by_index(idx, template_instance_id.value());
 		}
 
 		AST::TypeInstance get_pointer_to();
 		AST::TypeInstance get_pointed_to();
 
 		llvm::Type* codegen() {
-			return base_type->codegen(template_instance_id);
+			return base_type->codegen(template_instance_id.value());
 		}
 
 		bool operator==(const TypeInstance&) const = default;
@@ -182,7 +182,7 @@ namespace AST {
 
 namespace Parser {
 	AST::TypeInstance parse_type(FILE* f);
-	std::shared_ptr<AST::TypeBase> parse_aggregate_type_definition(FILE* f);
+	AST::TypeInstance parse_aggregate_type_definition(FILE* f);
 }
 
 //extern std::map<std::string, std::shared_ptr<AST::Type>> named_types;

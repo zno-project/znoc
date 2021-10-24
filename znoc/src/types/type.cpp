@@ -15,18 +15,54 @@
 
 void AST::init_builtin_types() {
 	auto fundamentals = std::make_unique<AST::Namespace>("_fundamentals");
-	*fundamentals << std::make_shared<AST::fundamental_int<1>>();
-	*fundamentals << std::make_shared<AST::fundamental_int<8>>();
-	*fundamentals << std::make_shared<AST::fundamental_int<16>>();
-	*fundamentals << std::make_shared<AST::fundamental_int<32>>();
-	*fundamentals << std::make_shared<AST::fundamental_int<64>>();
-	*fundamentals << std::make_shared<AST::fundamental_int<128>>();
-	*fundamentals << std::make_shared<AST::fundamental_half>();
-	*fundamentals << std::make_shared<AST::fundamental_float>();
-	*fundamentals << std::make_shared<AST::fundamental_double>();
-	*fundamentals << std::make_shared<AST::fundamental_fp128>();
-	*fundamentals << std::make_shared<AST::fundamental_void>();
-	*fundamentals << std::make_shared<AST::fundamental_ptr>();
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<1>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<8>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<16>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<32>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<64>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_int<128>>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_half>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_float>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_double>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_fp128>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_void>(),
+		.template_instance_id = 0
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_ptr>(),
+		.template_instance_id = 0
+	};
 
 	*GlobalNamespace << std::move(fundamentals);
 }
@@ -38,18 +74,13 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	std::string type_name = parsed_namespace_data.next_identifier;
 	auto type_base = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
 
-	auto ret_type = AST::TypeInstance {
-		.base_type = type_base,
-		.template_instance_id = 0
-	};
-
 	std::vector<AST::TypeInstance> template_types;
 	OPTIONAL_LIST('<', ',', '>', {
 		template_types.push_back(Parser::parse_type(f));
 	}, "template list");
-	if (template_types.size() > 0) ret_type.template_instance_id = type_base->add_generic_instance(template_types);
+	if (template_types.size() > 0) type_base.template_instance_id = type_base.base_type->add_generic_instance(template_types);
 
-	return ret_type;
+	return type_base;
 }
 
 std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {
@@ -78,7 +109,7 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 	return f;
 }
 
-std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) {
+AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	EXPECT(tok_struct, "to begin struct definition");
 
 	std::string name = EXPECT_IDENTIFIER("for name of struct");//std::get<std::string>(currentTokenVal);
@@ -137,7 +168,11 @@ std::shared_ptr<AST::TypeBase> Parser::parse_aggregate_type_definition(FILE* f) 
 	}
 
 	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(functions));
-	return s;
+
+	return AST::TypeInstance {
+		.base_type = s,
+		.template_instance_id = (i == 0 ? std::optional<size_t>(0) : std::optional<size_t>())
+	};
 }
 
 llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
@@ -186,5 +221,5 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	auto p = std::dynamic_pointer_cast<AST::fundamental_ptr>(base_type);
 	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
-	return p->get_pointed_to(template_instance_id);
+	return p->get_pointed_to(template_instance_id.value());
 }
