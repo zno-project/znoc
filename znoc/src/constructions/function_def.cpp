@@ -79,7 +79,7 @@ void AST::Function::codegen_prototype() {
 
 // FUNCTION
 // function = function_prototype (codeblock | ';');
-std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
+std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST::TypeInstance> self_type) {
 	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
@@ -87,6 +87,11 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f) {
 
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;
+
+	if (self_type.has_value()) {
+		auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
+		argsP.push_back(std::move(arg));
+	}
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
