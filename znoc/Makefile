@@ -38,18 +38,30 @@ clean:
 
 build/%.o: src/%.cpp
 	mkdir -p build/
+	mkdir -p build/constructions
+	mkdir -p build/memory
+	mkdir -p build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
 build/constructions/%.o: src/constructions/%.cpp
+	mkdir -p build/
 	mkdir -p build/constructions
+	mkdir -p build/memory
+	mkdir -p build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
 build/types/%.o: src/types/%.cpp
+	mkdir -p build/
+	mkdir -p build/constructions
+	mkdir -p build/memory
 	mkdir -p build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
 build/memory/%.o: src/memory/%.cpp
+	mkdir -p build/
+	mkdir -p build/constructions
 	mkdir -p build/memory
+	mkdir -p build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
 build/znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
