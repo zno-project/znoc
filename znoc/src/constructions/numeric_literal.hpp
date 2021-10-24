@@ -63,10 +63,7 @@ namespace AST {
 
 		NumericLiteral(double v, bool contains_dp): Expression(
 			contains_dp ?
-				(v > FLT_MAX ?
-					AST::get_fundamental_type("double") :
-					AST::get_fundamental_type("float")
-				) :
+				AST::get_fundamental_type("double") :
 				(v > INT32_MAX ?
 					AST::get_fundamental_type("i64") :
 					AST::get_fundamental_type("i32")
