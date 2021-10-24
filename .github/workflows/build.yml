@@ -32,6 +32,7 @@ jobs:
         with:
           name: znoc-macos-obj
           path: znoc/build/**/*.o
+          retention-days: 1
 
   Build_Ubuntu:
     runs-on: ubuntu-latest
@@ -55,6 +56,7 @@ jobs:
         with:
           name: znoc-linux-obj
           path: znoc/build/**/*.o
+          retention-days: 1
   
   Build_Windows:
     runs-on: windows-latest
@@ -84,6 +86,7 @@ jobs:
         with:
           name: znoc-windows-obj
           path: znoc/build/**/*.o
+          retention-days: 1
 
 
   Test_macos:
@@ -125,6 +128,7 @@ jobs:
         with:
           name: znoc-macos-tests
           path: znoc/test/unit/build/out.xml
+          retention-days: 1
 
   Publish_tests:
     runs-on: ubuntu-latest
