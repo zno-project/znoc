@@ -88,7 +88,11 @@ int get_token(FILE *f) {
 		} while (isdigit(lastChar) || (!foundDecimal && lastChar == '.'));
 
 		currentTokenVal = strtod(number.c_str(), nullptr);
-		return tok_numeric_literal;
+		if (foundDecimal) {
+			return tok_decimal_numeric_literal;
+		} else {
+			return tok_integer_numeric_literal;
+		}
 	}
 
 	if (lastChar == EOF) return tok_eof;
