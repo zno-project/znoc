@@ -1,5 +1,6 @@
 #include "casting.hpp"
 #include <fmt/format.h>
+#include <llvm/Support/raw_ostream.h>
 
 std::unique_ptr<AST::Cast> AST::make_cast(std::unique_ptr<AST::Expression> from, AST::TypeInstance to) {
 	return std::make_unique<AST::Cast>(std::move(from), std::move(to));
