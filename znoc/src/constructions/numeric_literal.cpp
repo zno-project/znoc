@@ -9,6 +9,7 @@
 #include <cfloat>
 #include <iostream>
 #include <memory>
+#include <tuple>
 
 llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//return llvm::ConstantInt::get(*TheContext, llvm::APInt(32, value)); //*/ return ConstantInt::get(IntegerType::get(*TheContext, 128), APInt(128, value, false));
@@ -24,8 +25,7 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 // numeric_literal = NUMBER+;
 std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 	//std::cout << "parse numlit" << std::endl;
-	bool contains_dp;
-	double val = EXPECT_NUMBERIC_LITERAL("to start numeric literal", contains_dp);/*std::get<double>(currentTokenVal);
+	auto [ val, contains_dp ] = EXPECT_NUMBERIC_LITERAL("to start numeric literal");/*std::get<double>(currentTokenVal);
 	get_next_token(f); // Move onto token after number*/
 
 	IF_TOK_ELSE_IDENTIFIER(post_num_modifier, {
