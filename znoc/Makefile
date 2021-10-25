@@ -38,11 +38,11 @@ clean:
 
 build:
 	mkdir -p build/
-build/constructions: build
+build/constructions:
 	mkdir -p build/constructions/
-build/memory: build
+build/memory:
 	mkdir -p build/memory
-build/types: build
+build/types:
 	mkdir -p build/types
 
 build/%.o: src/%.cpp | build
