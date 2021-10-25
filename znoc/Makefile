@@ -22,7 +22,7 @@ OBJS_MEMORY = $(patsubst src/memory/%.cpp, build/memory/%.o, $(SRCS_MEMORY))
 DEPENDS = $(patsubst src/%.cpp, build/%.d, $(SRCS))
 DEPENDS_CONSTRUCT = $(patsubst src/constructions/%.cpp, build/constructions/%.d, $(SRCS_CONSTRUCT))
 DEPENDS_TYPES = $(patsubst src/types/%.cpp, build/types/%.d, $(SRCS_TYPES))
-DEPENDS_MEMORY = $(patsubst src/memory/%.cpp, buils/memory/%.d, $(SRCS_MEMORY))
+DEPENDS_MEMORY = $(patsubst src/memory/%.cpp, build/memory/%.d, $(SRCS_MEMORY))
 
 TESTS = $(filter-out test/stdio.zno, $(wildcard test/*.zno))
 TESTS_LOG = test/log.log
