@@ -183,6 +183,8 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 		});
 	}, "struct fields and functions");
 
+	if (!all_fields_defined) ret = finalise_aggregate_type(name, std::move(fields), i != 0);
+
 	return ret;
 }
 
