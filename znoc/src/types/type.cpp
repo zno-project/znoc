@@ -17,51 +17,51 @@ void AST::init_builtin_types() {
 	auto fundamentals = std::make_unique<AST::Namespace>("_fundamentals");
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<1>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<8>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<16>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<32>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<64>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<128>>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_half>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_float>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_double>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_fp128>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_void>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_ptr>(),
-		.template_instance_id = 0
+		.template_instance_id = std::optional<size_t>()
 	};
 
 	*GlobalNamespace << std::move(fundamentals);
@@ -78,7 +78,17 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	OPTIONAL_LIST('<', ',', '>', {
 		template_types.push_back(Parser::parse_type(f));
 	}, "template list");
-	if (template_types.size() > 0) type_base.template_instance_id = type_base.base_type->add_generic_instance(template_types);
+
+	auto expected_num_template_args = type_base.base_type->get_generic_type_interfaces().size();
+	auto found_num_template_args = template_types.size();
+
+	if (type_base.is_templateable() && found_num_template_args != 0) { // Allow not 'generic' version of type eg. in typedefs
+		if (expected_num_template_args != found_num_template_args) throw std::runtime_error(fmt::format("Expected {} typeargs for type {}. Found {}.", expected_num_template_args, type_name, found_num_template_args));
+		type_base.template_instance_id = type_base.base_type->add_generic_instance(template_types);
+	} else {
+		// Cannot template untemplatable type
+		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
+	}
 
 	return type_base;
 }
@@ -122,7 +132,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 
 	return AST::TypeInstance {
 		.base_type = s,
-		.template_instance_id = (template_type_interfaces.size() != 0 ? std::optional<size_t>() : 0)
+		.template_instance_id = std::optional<size_t>()
 	};
 }
 
@@ -234,7 +244,7 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	auto p = std::dynamic_pointer_cast<AST::fundamental_ptr>(base_type);
 	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
-	return p->get_pointed_to(template_instance_id.value());
+	return p->get_pointed_to(get_template_id());
 }
 
 void AST::TypeBase::add_func(std::shared_ptr<AST::Function> f) {

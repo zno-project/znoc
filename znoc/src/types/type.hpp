@@ -7,6 +7,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <variant>
 #include <optional>
+#include <fmt/format.h>
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -78,7 +79,7 @@ namespace AST {
 		std::map<std::string, std::shared_ptr<AST::Function>> functions;
 
 		public:
-		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated() {}
+		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated(), generic_type_interfaces() {}
 		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
 		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generic_type_interfaces(std::move(generic_type_interfaces)), generated() {}
 
@@ -91,6 +92,9 @@ namespace AST {
 		FieldInfo get_field_info_by_name(std::string name, size_t template_instance_id);
 		FieldInfo get_field_info_by_index(size_t idx, size_t template_instance_id);
 		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
+		std::vector<Interface>& get_generic_type_interfaces() {
+			return generic_type_interfaces;
+		}
 
 		void add_func(std::shared_ptr<AST::Function> f);
 	};
@@ -99,23 +103,37 @@ namespace AST {
 		std::shared_ptr<AST::TypeBase> base_type;
 		std::optional<size_t> template_instance_id;
 
+		private:
+		size_t get_template_id() {
+			if (is_templateable()) {
+				if (!template_instance_id.has_value()) throw std::runtime_error(fmt::format("Type {} must be templated before use", base_type->get_name()));
+				return template_instance_id.value();
+			}
+			return 0;
+		}
+
+		public:
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name) {
-			return base_type->get_function_by_name(name, template_instance_id.value());
+			return base_type->get_function_by_name(name, get_template_id());
 		}
 
 		FieldInfo get_field_info_by_name(std::string name) {
-			return base_type->get_field_info_by_name(name, template_instance_id.value());
+			return base_type->get_field_info_by_name(name, get_template_id());
 		}
 
 		FieldInfo get_field_info_by_index(size_t idx) {
-			return base_type->get_field_info_by_index(idx, template_instance_id.value());
+			return base_type->get_field_info_by_index(idx, get_template_id());
 		}
 
 		AST::TypeInstance get_pointer_to();
 		AST::TypeInstance get_pointed_to();
 
 		llvm::Type* codegen() {
-			return base_type->codegen(template_instance_id.value());
+			return base_type->codegen(get_template_id());
+		}
+
+		bool is_templateable() {
+			return base_type->get_generic_type_interfaces().size() != 0;
 		}
 
 		bool operator==(const TypeInstance&) const = default;
