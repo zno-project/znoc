@@ -1,0 +1,18 @@
+uses 'stdio.zno'
+
+struct Thingy {
+	a: _fundamentals::i32,
+	b: _fundamentals::i32,
+
+	func printB() {
+		let t = *self;
+		stdio::printI(t.b);
+	}
+}
+
+func main() {
+	let s: Thingy;
+	s.a = 32;
+	s.b = 65;
+	s.printB();
+}
