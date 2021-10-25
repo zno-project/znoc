@@ -77,7 +77,7 @@ namespace AST {
 		public:
 		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated() {}
 		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::map<std::string, std::shared_ptr<AST::Function>> functions): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(std::move(functions)), generated() {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generated() {}
 
 		virtual llvm::Type* codegen(size_t template_instance);
 
@@ -88,6 +88,8 @@ namespace AST {
 		FieldInfo get_field_info_by_name(std::string name, size_t template_instance_id);
 		FieldInfo get_field_info_by_index(size_t idx, size_t template_instance_id);
 		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
+
+		void add_func(std::shared_ptr<AST::Function> f);
 	};
 
 	struct TypeInstance {

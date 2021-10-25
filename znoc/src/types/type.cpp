@@ -109,11 +109,27 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 	return f;
 }
 
+AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, bool is_templated) {
+	std::vector<AST::field_type_t> fields_by_index;
+	std::map<std::string, size_t> fields_by_name;
+
+	for (size_t i = 0; i < fields.size(); i++) {
+		fields_by_index.push_back(fields[i].second);
+		fields_by_name[fields[i].first] = i;
+	}
+
+	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index));
+
+	return AST::TypeInstance {
+		.base_type = s,
+		.template_instance_id = (is_templated ? std::optional<size_t>() : 0)
+	};
+}
+
 AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	EXPECT(tok_struct, "to begin struct definition");
 
 	std::string name = EXPECT_IDENTIFIER("for name of struct");//std::get<std::string>(currentTokenVal);
-
 
 	std::map<std::string, size_t> template_type_names;
 	size_t i = 0;
@@ -133,10 +149,14 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	}
 
 	std::vector<std::pair<std::string, AST::field_type_t>> fields;
-	std::map<std::string, std::shared_ptr<AST::Function>> functions;
+
+	AST::TypeInstance ret;
+	bool all_fields_defined = false;
 
 	LIST('{', ',', '}', {
 		IF_TOK_ELSE_IDENTIFIER(fieldName, {
+			if (all_fields_defined) throw std::runtime_error("Cannot declare field after member function");
+			
 			EXPECT(':', "after struct field name");
 
 			AST::field_type_t fieldType;
@@ -154,36 +174,20 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 
 			fields.push_back(std::pair<std::string, AST::field_type_t>(fieldName, std::move(fieldType)));
 		}, {
-			auto func = Parser::parse_function(f);
-			functions[func->get_name()] = func;
+			if (!all_fields_defined) {
+				// If first member function, prevent additional fields being created, plus finalise the type
+				all_fields_defined = true;
+				ret = finalise_aggregate_type(name, std::move(fields), i != 0);
+			}
+			ret.base_type->add_func(Parser::parse_function(f, ret));
 		});
 	}, "struct fields and functions");
 
-	std::vector<AST::field_type_t> fields_by_index;
-	std::map<std::string, size_t> fields_by_name;
-
-	for (size_t i = 0; i < fields.size(); i++) {
-		fields_by_index.push_back(fields[i].second);
-		fields_by_name[fields[i].first] = i;
-	}
-
-	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(functions));
-
-	return AST::TypeInstance {
-		.base_type = s,
-		.template_instance_id = (i == 0 ? std::optional<size_t>(0) : std::optional<size_t>())
-	};
+	return ret;
 }
 
 llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
 	if (!generated[template_instance]) {
-		for (auto &func : functions) {
-			func.second->codegen_prototype();
-		}
-		for (auto &func : functions) {
-			func.second->codegen();
-		}
-
 		std::vector<llvm::Type*> f;
 		for (auto &fT : fields_by_index) {
 			if (std::holds_alternative<AST::TypeInstance>(fT)) {
@@ -196,6 +200,13 @@ llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
 		auto gen = llvm::StructType::create(*TheContext, llvm::ArrayRef<llvm::Type*>(f));
 		gen->setName(fmt::format("{}_instance{}", name, template_instance));
 		generated[template_instance] = gen;
+
+		for (auto &func : functions) {
+			func.second->codegen_prototype();
+		}
+		for (auto &func : functions) {
+			func.second->codegen();
+		}
 	}
 	return generated[template_instance];
 };
@@ -222,4 +233,8 @@ AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	auto p = std::dynamic_pointer_cast<AST::fundamental_ptr>(base_type);
 	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
 	return p->get_pointed_to(template_instance_id.value());
+}
+
+void AST::TypeBase::add_func(std::shared_ptr<AST::Function> f) {
+	functions.insert({f->get_name(), f});
 }
