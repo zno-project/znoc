@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make
       - name: Build executable
         run: |
           export PATH="/usr/local/opt/llvm/bin:$PATH"
@@ -20,7 +20,7 @@ jobs:
           export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
           export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
           cd znoc
-          CC=clang CXX=clang++ make
+          CC=clang CXX=clang++ gmake
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
