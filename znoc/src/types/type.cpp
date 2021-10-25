@@ -109,7 +109,7 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 	return f;
 }
 
-AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, bool is_templated) {
+AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces) {
 	std::vector<AST::field_type_t> fields_by_index;
 	std::map<std::string, size_t> fields_by_name;
 
@@ -118,11 +118,11 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 		fields_by_name[fields[i].first] = i;
 	}
 
-	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index));
+	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces));
 
 	return AST::TypeInstance {
 		.base_type = s,
-		.template_instance_id = (is_templated ? std::optional<size_t>() : 0)
+		.template_instance_id = (template_type_interfaces.size() != 0 ? std::optional<size_t>() : 0)
 	};
 }
 
@@ -132,14 +132,14 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	std::string name = EXPECT_IDENTIFIER("for name of struct");//std::get<std::string>(currentTokenVal);
 
 	std::map<std::string, size_t> template_type_names;
-	size_t i = 0;
+	std::vector<AST::Interface> template_type_interfaces;
 
 	if (currentToken == '<') {
 		get_next_token(f);
 		if (currentToken != '>') while (1) {
 			std::string template_type_name = std::get<std::string>(currentTokenVal);
-			template_type_names[template_type_name] = i;
-			i++;
+			template_type_interfaces.push_back(AST::Interface {});
+			template_type_names[template_type_name] = template_type_interfaces.size() - 1;
 			get_next_token(f);
 			if (currentToken != ',') break;
 			get_next_token(f); 
@@ -177,13 +177,13 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 			if (!all_fields_defined) {
 				// If first member function, prevent additional fields being created, plus finalise the type
 				all_fields_defined = true;
-				ret = finalise_aggregate_type(name, std::move(fields), i != 0);
+				ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces));
 			}
 			ret.base_type->add_func(Parser::parse_function(f, ret));
 		});
 	}, "struct fields and functions");
 
-	if (!all_fields_defined) ret = finalise_aggregate_type(name, std::move(fields), i != 0);
+	if (!all_fields_defined) ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces));
 
 	return ret;
 }

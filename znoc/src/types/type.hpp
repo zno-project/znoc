@@ -65,6 +65,8 @@ namespace AST {
 		size_t index;
 	};
 
+	struct Interface {};
+
 	class TypeBase {
 		protected:
 		std::string name;
@@ -72,12 +74,13 @@ namespace AST {
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
 		std::vector<std::vector<AST::TypeInstance>> generic_types;
+		std::vector<Interface> generic_type_interfaces;
 		std::map<std::string, std::shared_ptr<AST::Function>> functions;
 
 		public:
 		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated() {}
 		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generated() {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generic_type_interfaces(std::move(generic_type_interfaces)), generated() {}
 
 		virtual llvm::Type* codegen(size_t template_instance);
 
