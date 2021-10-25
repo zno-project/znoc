@@ -36,33 +36,26 @@ clean:
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
-build/%.o: src/%.cpp
+build:
 	mkdir -p build/
-	mkdir -p build/constructions
+build/constructions: build
+	mkdir -p build/constructions/
+build/memory: build
 	mkdir -p build/memory
+build/types: build
 	mkdir -p build/types
+
+build/%.o: src/%.cpp | build
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/constructions/%.o: src/constructions/%.cpp
-	mkdir -p build/
-	mkdir -p build/constructions
-	mkdir -p build/memory
-	mkdir -p build/types
+build/constructions/%.o: src/constructions/%.cpp | build/constructions
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/types/%.o: src/types/%.cpp
-	mkdir -p build/
-	mkdir -p build/constructions
-	mkdir -p build/memory
-	mkdir -p build/types
+build/types/%.o: src/types/%.cpp | build/types
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/memory/%.o: src/memory/%.cpp
-	mkdir -p build/
-	mkdir -p build/constructions
-	mkdir -p build/memory
-	mkdir -p build/types
+build/memory/%.o: src/memory/%.cpp | build/memory
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
+build/znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) | build
 	$(CXX) -o build/znoc $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) $(LDFLAGS) $(LDF)
