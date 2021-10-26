@@ -154,12 +154,16 @@ jobs:
         with:
           name: znoc-macos-test-results
           if-no-files-found: error
-          path: macos.xml
+          path: macos
       - name: Download test results (linux)
         uses: actions/download-artifact@v2
         with:
           name: znoc-linux-test-results
           if-no-files-found: error
-          path: linux.xml
+          path: linux
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: |
+            macos/out.xml
+            linux/out.xml
