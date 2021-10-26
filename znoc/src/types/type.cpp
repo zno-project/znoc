@@ -96,13 +96,14 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 
 	if (type_base.is_templateable() && found_num_template_args != 0) { // Allow not 'generic' version of type eg. in typedefs
 		if (expected_num_template_args != found_num_template_args) throw std::runtime_error(fmt::format("Expected {} typeargs for type {}. Found {}.", expected_num_template_args, type_name, found_num_template_args));
+		if (type_base.template_instance_id.has_value()) throw std::runtime_error(fmt::format("Cannot template already templated type {}", type_name));
 		type_base.template_instance_id = type_base.base_type->add_generic_instance(template_types);
 	} else {
 		// Cannot template untemplatable type
 		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
 	}
 
-	std::optional<size_t> array_len;
+	std::optional<size_t> array_len = type_base.array_len;
 
 	OPTIONAL('[', {
 		bool is_float;
