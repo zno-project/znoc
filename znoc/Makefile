@@ -45,6 +45,7 @@ clean:
 	rm -rf build test/unit/build
 
 test: $(UNIT_TESTS)
+	./test/unit/build/znoc-test
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
