@@ -37,6 +37,8 @@ UNIT_TEST_OBJS = $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(SRCS_UNIT_TE
 REGRESSION_TESTS = $(filter-out test/regression/stdio.zno, $(wildcard test/regression/*.zno))
 REGRESSION_TESTS_LOG = test/regression/log.log
 
+GTEST_OUTPUT ?= xml:test/unit/build/out.xml
+
 .PHONY: all clean test
 
 all: build/znoc
@@ -45,7 +47,7 @@ clean:
 	rm -rf build test/unit/build
 
 test: $(UNIT_TESTS)
-	./test/unit/build/znoc-test
+	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
