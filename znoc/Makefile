@@ -91,7 +91,7 @@ $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a: $(GTEST)/googletest/src/* 
 $(GTEST_LIB)/libgtest.a: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
 
 #.SECONDARY: $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(wildcard test/unit/*.cpp))    ## prevent make from automatically removing "intermediate" object files
-test/unit/build/%.o: test/unit/%.cpp $(GTEST_LIB)/googletest/include | test/unit/build
+test/unit/build/%.o: test/unit/%.cpp $(GTEST)/googletest/include | test/unit/build
 	$(CXX) -I$(GTEST)/googletest/include -Isrc $< -o $@ $(CFLAGS) $(CF) -c
 
 test/unit/build/znoc-test: $(UNIT_TEST_OBJS) $(MAIN_OBJS_FOR_TEST) $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a | test/unit/build
