@@ -89,7 +89,6 @@ $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a: $(GTEST)/googletest/src/* 
 	$(MAKE) -C test/unit/build gtest gtest_main
 	touch $(GTEST_LIB)/libgtest.a
 $(GTEST_LIB)/libgtest.a: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
-$(GTEST_LIB)/googletest/include: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
 
 #.SECONDARY: $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(wildcard test/unit/*.cpp))    ## prevent make from automatically removing "intermediate" object files
 test/unit/build/%.o: test/unit/%.cpp $(GTEST_LIB)/googletest/include | test/unit/build
