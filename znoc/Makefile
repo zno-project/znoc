@@ -1,12 +1,13 @@
 CXX ?= clang++
+PKG_CONFIG ?= pkg-config
 LLVM_CONFIG ?= llvm-config
 
 ifeq ($(shell uname),Darwin)
-CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags | sed 's/-I/-isystem /g'` -g
+CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags | sed 's/-I/-isystem /g'` `$(PKG_CONFIG) --cflags fmt` -g
 else
-CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags`
+CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags` `$(PKG_CONFIG) --cflags fmt` -g
 endif
-LDF = -g -lfmt `$(LLVM_CONFIG) --ldflags --libs core native`
+LDF = -g `$(LLVM_CONFIG) --ldflags --libs core native` `$(PKG_CONFIG) --libs fmt`
 
 CFLAGS ?=
 LDFLAGS ?=
