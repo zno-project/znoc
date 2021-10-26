@@ -102,6 +102,17 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
 	}
 
+	std::optional<size_t> array_len;
+
+	OPTIONAL('[', {
+		bool is_float;
+		std::tie(array_len, is_float) = EXPECT_NUMBERIC_LITERAL("array length");
+		if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
+		EXPECT(']', "after array length");
+	});
+
+	type_base.array_len = array_len;
+
 	return type_base;
 }
 
