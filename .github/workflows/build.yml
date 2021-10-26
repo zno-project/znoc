@@ -110,6 +110,7 @@ jobs:
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
       - name: Run tests
         run: |
+          ls znoc/build
           cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
       - name: Upload test results
@@ -146,6 +147,7 @@ jobs:
           CC=clang CXX=clang++ make
       - name: Run tests
         run: |
+          ls znoc/build
           cd znoc
           CC=clang CXX=clang++ make test
       - name: Upload test results
