@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 jobs:
-  Build_macos:
+  build-macos:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
@@ -21,7 +21,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos
-          path: znoc/build/znoc-macos
+          path: znoc/build/znoc
       - name: Upload built objects
         uses: actions/upload-artifact@v2
         with:
@@ -29,7 +29,7 @@ jobs:
           path: znoc/build/**/*.o
           retention-days: 1
 
-  Build_Ubuntu:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -46,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: znoc-linux
-          path: znoc/build/znoc-linux
+          path: znoc/build/znoc
       - name: Upload built objects
         uses: actions/upload-artifact@v2
         with:
@@ -54,7 +54,7 @@ jobs:
           path: znoc/build/**/*.o
           retention-days: 1
   
-  Build_Windows:
+  build-windows:
     runs-on: windows-latest
     defaults:
       run:
@@ -85,9 +85,9 @@ jobs:
           retention-days: 1
 
 
-  Test_macos:
+  test-macos:
     runs-on: macos-latest
-    needs: Build_macos
+    needs: build-macos
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -113,18 +113,55 @@ jobs:
           name: znoc-macos-test-results
           path: znoc/test/unit/build/out.xml
           retention-days: 1
-
-  Publish_tests:
+  
+  test-linux:
     runs-on: ubuntu-latest
-    needs: [Test_macos]
+    needs: linux-macos
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Download built object code
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-linux-obj
+          path: znoc/build/
+          if-no-files-found: error
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libfmt-dev llvm
+      - name: Run tests
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ make test
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-linux-test-results
+          path: znoc/test/unit/build/out.xml
+          retention-days: 1
+
+  publish-tests:
+    runs-on: ubuntu-latest
+    needs: [test-macos, test-linux]
     if: always()
     steps:
-      - name: Download test results
+      - name: Download test results (macos)
         uses: actions/download-artifact@v2
         with:
           name: znoc-macos-test-results
           if-no-files-found: error
+          path: macos.xml
+      - name: Download test results (linux)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-linux-test-results
+          if-no-files-found: error
+          path: linux.xml
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          files: out.xml
+          files: *.xml
