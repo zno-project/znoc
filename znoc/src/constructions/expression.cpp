@@ -28,7 +28,6 @@ std::unique_ptr<AST::Expression> Parser::parse_parentheses_expression(FILE* f) {
 std::unique_ptr<AST::Expression> Parser::parse_non_semicolon_statement(FILE* f) {
 	switch (currentToken) {
 		case '{': {
-			get_next_token(f);
 			return parse_code_block(f);
 		}
 		case tok_while: {
