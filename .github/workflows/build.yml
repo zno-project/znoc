@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        with:
-          submodules: 'true'
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
@@ -19,28 +17,16 @@ jobs:
         run: |
           cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
-      - name: Build tests
-        run: |
-          cd znoc
-          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
-      - name: Archive executable
-        run: |
-          cd znoc/build
-          tar -cf znoc-macos.tar znoc
-      - name: Archive tests
-        run: |
-          cd znoc/test/unit/build
-          tar -cf znoc-macos-tests.tar znoc-test-numeric_literal
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos.tar
-          path: znoc/build/znoc-macos.tar
-      - name: Upload built tests
+          name: znoc-macos
+          path: znoc/build/znoc-macos
+      - name: Upload built objects
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-tests.tar
-          path: znoc/test/unit/build/znoc-macos-tests.tar
+          name: znoc-macos-obj
+          path: znoc/build/**/*.o
           retention-days: 1
 
   Build_Ubuntu:
@@ -48,8 +34,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        with:
-          submodules: 'true'
       - name: Install dependencies
         run: |
           sudo apt update
@@ -58,28 +42,16 @@ jobs:
         run: |
           cd znoc
           CC=clang CXX=clang++ make
-      - name: Build tests
-        run: |
-          cd znoc
-          CC=clang CXX=clang++ make test
-      - name: Archive executable
-        run: |
-          cd znoc/build
-          tar -cf znoc-linux.tar znoc
-      - name: Archive tests
-        run: |
-          cd znoc/test/unit/build
-          tar -cf znoc-linux-tests.tar znoc-test-numeric_literal
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-linux.tar
-          path: znoc/build/znoc-linux.tar
-      - name: Upload built tests
+          name: znoc-linux
+          path: znoc/build/znoc-linux
+      - name: Upload built objects
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-linux-tests.tar
-          path: znoc/test/unit/build/znoc-linux-tests.tar
+          name: znoc-linux-obj
+          path: znoc/build/**/*.o
           retention-days: 1
   
   Build_Windows:
@@ -117,26 +89,29 @@ jobs:
     runs-on: macos-latest
     needs: Build_macos
     steps:
-      - name: Download tests
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Download built object code
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-tests.tar
+          name: znoc-macos-obj
+          path: znoc/build/
           if-no-files-found: error
-      - name: Extract tests
-        run: |
-          tar -xf znoc-macos-tests.tar
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
-      - name: Run test executable
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+      - name: Run tests
         run: |
-          ./znoc-test-numeric_literal --gtest_output="xml:out.xml"
+          cd znoc
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos-test-results
-          path: out.xml
+          path: znoc/test/unit/build/out.xml
           retention-days: 1
 
   Publish_tests:
