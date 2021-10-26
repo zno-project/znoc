@@ -17,51 +17,63 @@ void AST::init_builtin_types() {
 	auto fundamentals = std::make_unique<AST::Namespace>("_fundamentals");
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<1>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<8>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<16>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<32>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<64>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<128>>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_half>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_float>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_double>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_fp128>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_void>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_ptr>(),
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 
 	*GlobalNamespace << std::move(fundamentals);
@@ -132,7 +144,8 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 
 	return AST::TypeInstance {
 		.base_type = s,
-		.template_instance_id = std::optional<size_t>()
+		.template_instance_id = std::optional<size_t>(),
+		.array_len = std::optional<size_t>()
 	};
 }
 
@@ -242,6 +255,7 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 #include "builtins.hpp"
 
 AST::TypeInstance AST::TypeInstance::get_pointed_to() {
+	if (is_array()) throw std::runtime_error("Can only deref a pointer - attempted to deref an array");
 	auto p = std::dynamic_pointer_cast<AST::fundamental_ptr>(base_type);
 	if (!p) throw std::runtime_error(fmt::format("Can only deref a pointer - attempted to deref {}", this->base_type->get_name()));
 	return p->get_pointed_to(get_template_id());
