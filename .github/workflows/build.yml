@@ -16,8 +16,11 @@ jobs:
       - name: Build executable
         run: |
           cd znoc
-          CC=clang CXX=clang++ gmake
-          CC=clang CXX=clang++ gmake test
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+      - name: Build tests
+        run: |
+          cd znoc
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
