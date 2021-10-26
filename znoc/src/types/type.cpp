@@ -18,62 +18,62 @@ void AST::init_builtin_types() {
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<1>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<8>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<16>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<32>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<64>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<128>>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_half>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_float>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_double>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_fp128>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_void>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_ptr>(),
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 
 	*GlobalNamespace << std::move(fundamentals);
@@ -103,16 +103,16 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
 	}
 
-	std::optional<size_t> array_len = type_base.array_len;
-
-	OPTIONAL('[', {
-		bool is_float;
-		std::tie(array_len, is_float) = EXPECT_NUMBERIC_LITERAL("array length");
-		if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
-		EXPECT(']', "after array length");
-	});
-
-	type_base.array_len = array_len;
+	while (1) {
+		IF_TOK_ELSE('[', {
+			bool is_float;
+			size_t array_len;
+			std::tie(array_len, is_float) = EXPECT_NUMBERIC_LITERAL("array length");
+			if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
+			EXPECT(']', "after array length");
+			type_base.array_lengths.push_back(array_len);
+		}, { break; });
+	}
 
 	return type_base;
 }
@@ -157,7 +157,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 	return AST::TypeInstance {
 		.base_type = s,
 		.template_instance_id = std::optional<size_t>(),
-		.array_len = std::optional<size_t>()
+		.array_lengths = std::vector<size_t>()
 	};
 }
 

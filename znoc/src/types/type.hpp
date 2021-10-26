@@ -102,7 +102,7 @@ namespace AST {
 	struct TypeInstance {
 		std::shared_ptr<AST::TypeBase> base_type;
 		std::optional<size_t> template_instance_id;
-		std::optional<size_t> array_len;
+		std::vector<size_t> array_lengths;
 
 		private:
 		size_t get_template_id() {
@@ -131,8 +131,8 @@ namespace AST {
 
 		llvm::Type* codegen() {
 			auto t = base_type->codegen(get_template_id());
-			if (is_array()) {
-				t = llvm::ArrayType::get(t, array_len.value());
+			for (auto& len : array_lengths) {
+				t = llvm::ArrayType::get(t, len);
 			}
 			return t;
 		}
@@ -142,10 +142,15 @@ namespace AST {
 		}
 
 		bool is_array() {
-			return array_len.has_value();
+			return array_lengths.size() > 0;
 		}
 
-		bool operator==(const TypeInstance&) const = default;
+		bool operator==(const TypeInstance& cmp) const {
+			if (cmp.array_lengths.size() != array_lengths.size()) return false;
+			if (cmp.base_type != base_type) return false;
+			if (cmp.template_instance_id != template_instance_id) return false;
+			return cmp.array_lengths == array_lengths;
+		};
 	};
 }
 
