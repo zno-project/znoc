@@ -23,16 +23,24 @@ jobs:
         run: |
           cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
+      - name: Archive executable
+        run: |
+          cd znoc/build
+          tar -cf znoc-macos.tar znoc
+      - name: Archive tests
+        run: |
+          cd znoc/test/unit/build
+          tar -cf znoc-macos-tests.tar znoc-test-numeric_literal
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos
-          path: znoc/build/znoc
+          name: znoc-macos.tar
+          path: znoc/build/znoc-macos.tar
       - name: Upload built tests
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-tests
-          path: znoc/test/unit/build/znoc-test-numeric_literal
+          name: znoc-macos-tests.tar
+          path: znoc/test/unit/build/znoc-macos-tests.tar
           retention-days: 1
 
   Build_Ubuntu:
@@ -48,16 +56,28 @@ jobs:
         run: |
           cd znoc
           CC=clang CXX=clang++ make
+      - name: Build tests
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ make test
+      - name: Archive executable
+        run: |
+          cd znoc/build
+          tar -cf znoc-linux.tar znoc
+      - name: Archive tests
+        run: |
+          cd znoc/test/unit/build
+          tar -cf znoc-linux-tests.tar znoc-test-numeric_literal
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-linux
-          path: znoc/build/znoc
-      - name: Upload built objects
+          name: znoc-linux.tar
+          path: znoc/build/znoc-linux.tar
+      - name: Upload built tests
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-linux-obj
-          path: znoc/build/**/*.o
+          name: znoc-linux-tests.tar
+          path: znoc/test/unit/build/znoc-linux-tests.tar
           retention-days: 1
   
   Build_Windows:
@@ -98,8 +118,11 @@ jobs:
       - name: Download tests
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-tests
+          name: znoc-macos-tests.tar
           if-no-files-found: error
+      - name: Extract tests
+        run: |
+          tar -xf znoc-macos-tests.tar
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
