@@ -3,6 +3,7 @@
 #include "../types/type.hpp"
 #include "../types/builtins.hpp"
 #include "../memory/variable.hpp"
+#include "../memory/memory_location.hpp"
 #include "../attributes.hpp"
 #include "../llvm_module.hpp"
 #include "../parsing.hpp"
@@ -31,8 +32,6 @@ llvm::Value* AST::Function::codegen() {
 	llvm::Function *F = generated;
 
 	if (body) {
-		stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
-
 		llvm::BasicBlock *block = llvm::BasicBlock::Create(*TheContext, "entry", F);
 		llvm::IRBuilder<> builder(block);
 
@@ -52,8 +51,6 @@ llvm::Value* AST::Function::codegen() {
 
 		verifyFunction(*F, &llvm::errs());
 		//TheFPM->run(*F);
-
-		stack_allocations.pop_front(); // End scope
 	}
 
 	return nullptr;
@@ -80,7 +77,7 @@ void AST::Function::codegen_prototype() {
 // FUNCTION
 // function = function_prototype (codeblock | ';');
 std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST::TypeInstance> self_type) {
-	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
+	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
 	auto name = EXPECT_IDENTIFIER("function name after 'func'");
@@ -123,8 +120,9 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	}, {
 		body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 	});
-
-	stack_allocations.pop_front(); // End scope
+	
+	auto scope_pop = pop_scope();
+	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
 	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body));
 }

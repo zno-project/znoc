@@ -17,6 +17,9 @@ namespace AST {
 		public:
 		CodeBlock(std::vector<std::unique_ptr<AST::Expression>> body): Expression(body.back()->getType()), body(std::move(body)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
+		void push_before_return(std::unique_ptr<AST::Expression> expr) {
+			body.insert(body.end()-1, std::move(expr));
+		}
 	};
 }
 

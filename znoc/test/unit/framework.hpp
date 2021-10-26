@@ -16,7 +16,7 @@ std::unique_ptr<AST::Namespace> GlobalNamespace;
 class CompilerGlobals {
  public:
   CompilerGlobals() {
-		stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>());
+		push_new_scope();
 		GlobalNamespace = std::make_unique<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }

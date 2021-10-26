@@ -5,6 +5,7 @@
 #include "../macros.hpp"
 #include "../parsing.hpp"
 #include "reference.hpp"
+#include "../memory/memory_location.hpp"
 #include "construction_parse.hpp"
 
 #include <llvm/IR/Value.h>
@@ -17,7 +18,7 @@
 
 llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
 	//emitLocation(builder, this);
-	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>()); // Create new scope
+	//push_new_scope(); // Create new scope
 	auto conditionCond = condition->codegen(builder, "__if_condition");
 	//auto condition = builder->CreateFCmpONE(conditionCond, llvm::ConstantFP::get(*TheContext, llvm::APFloat(0.0f)), "__if_condition_casted");
 
@@ -43,7 +44,7 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 	}
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(MergeBB);
 
-	stack_allocations.pop_front(); // Remove scope of condition
+	//pop_scope(); // Remove scope of condition
 
 	TheFunction->getBasicBlockList().push_back(MergeBB);
 	builder->SetInsertPoint(MergeBB);
@@ -63,9 +64,12 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
 	EXPECT(tok_if, "to start if statement");
 
+	push_new_scope();
+
 	auto condition = parse_binary_expression(f);
 
-	std::unique_ptr<AST::Expression> if_body = parse_code_block(f);
+	std::unique_ptr<AST::CodeBlock> if_body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
+	if_body->push_before_return(pop_scope());
 
 	IF_TOK_ELSE(tok_else, {
 		std::unique_ptr<AST::Expression> else_body;
