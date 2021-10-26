@@ -12,25 +12,22 @@ jobs:
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
       - name: Build executable
         run: |
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
-          export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
-          export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
-          export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
           cd znoc
           CC=clang CXX=clang++ gmake
+          CC=clang CXX=clang++ gmake test
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos
           path: znoc/build/znoc
-      - name: Upload built objects
+      - name: Upload built tests
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/**/*.o
+          name: znoc-macos-tests
+          path: znoc/test/unit/build/znoc-test-numeric_literal
           retention-days: 1
 
   Build_Ubuntu:
@@ -93,41 +90,23 @@ jobs:
     runs-on: macos-latest
     needs: Build_macos
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: Download built object code
+      - name: Download tests
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/
+          name: znoc-macos-tests
           if-no-files-found: error
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm cmake
-      - name: Build googletest
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
+      - name: Run test executable
         run: |
-          cd znoc/test/unit
-          mkdir -p build
-          cd build
-          cmake ../gtest
-          make
-      - name: Build and run test executable
-        run: |
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
-          export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
-          export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
-          export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
-          cd znoc/test/unit
-          clang++ -Igtest/googletest/include -I../../src numeric_literal.cpp ../../build/attributes.o ../../build/casting.o ../../build/constructions/binary_op.o ../../build/constructions/break_continue.o ../../build/constructions/codeblock.o ../../build/constructions/expression.o ../../build/constructions/fallthrough.o ../../build/constructions/function_call.o ../../build/constructions/function_def.o ../../build/constructions/if.o ../../build/constructions/namespace.o ../../build/constructions/numeric_literal.o ../../build/constructions/reference.o ../../build/constructions/return.o ../../build/constructions/switch.o ../../build/constructions/typedef.o ../../build/constructions/unary_op.o ../../build/constructions/while.o ../../build/llvm_module.o ../../build/location.o ../../build/mangling.o ../../build/memory/gep.o ../../build/memory/memory_location.o ../../build/memory/variable.o ../../build/parsing.o ../../build/types/builtins.o ../../build/types/casting.o ../../build/types/type.o  -Lbuild/lib/ -lgtest_main -lgtest -o build/znoc-test --std=c++20 `llvm-config --cppflags | sed 's/-I/-isystem /g'` `llvm-config --ldflags --libs core native` -lfmt
-          ./build/znoc-test --gtest_output="xml:build/out.xml"
+          ./znoc-test-numeric_literal --gtest_output="xml:out.xml"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-tests
-          path: znoc/test/unit/build/out.xml
+          name: znoc-macos-test-results
+          path: out.xml
           retention-days: 1
 
   Publish_tests:
@@ -138,7 +117,7 @@ jobs:
       - name: Download built object code
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-tests
+          name: znoc-macos-test-results
           if-no-files-found: error
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
