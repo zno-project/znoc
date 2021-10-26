@@ -21,7 +21,7 @@ OBJS = $(patsubst src/%.cpp, build/%.o, $(SRCS))
 OBJS_CONSTRUCT = $(patsubst src/constructions/%.cpp, build/constructions/%.o, $(SRCS_CONSTRUCT))
 OBJS_TYPES = $(patsubst src/types/%.cpp, build/types/%.o, $(SRCS_TYPES))
 OBJS_MEMORY = $(patsubst src/memory/%.cpp, build/memory/%.o, $(SRCS_MEMORY))
-OBJS_TEST = $(filter-out build/main.o, $(OBJS)) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
+MAIN_OBJS_FOR_TEST = $(filter-out build/main.o, $(OBJS)) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY)
 
 DEPENDS = $(patsubst src/%.cpp, build/%.d, $(SRCS))
 DEPENDS_CONSTRUCT = $(patsubst src/constructions/%.cpp, build/constructions/%.d, $(SRCS_CONSTRUCT))
@@ -30,7 +30,9 @@ DEPENDS_MEMORY = $(patsubst src/memory/%.cpp, build/memory/%.d, $(SRCS_MEMORY))
 
 GTEST = test/unit/gtest
 GTEST_LIB = test/unit/build/lib
-UNIT_TESTS = $(patsubst test/unit/%.cpp, test/unit/build/znoc-test-%, $(wildcard test/unit/*.cpp))
+UNIT_TESTS = test/unit/build/znoc-test#$(patsubst test/unit/%.cpp, test/unit/build/znoc-test-%, $(wildcard test/unit/*.cpp))
+SRCS_UNIT_TEST = $(wildcard test/unit/*.cpp)
+UNIT_TEST_OBJS = $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(SRCS_UNIT_TEST))
 
 REGRESSION_TESTS = $(filter-out test/regression/stdio.zno, $(wildcard test/regression/*.zno))
 REGRESSION_TESTS_LOG = test/regression/log.log
@@ -84,10 +86,11 @@ $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a: $(GTEST)/googletest/src/* 
 	$(MAKE) -C test/unit/build gtest gtest_main
 	touch $(GTEST_LIB)/libgtest.a
 $(GTEST_LIB)/libgtest.a: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
+$(GTEST_LIB)/googletest/include: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
 
-.SECONDARY: $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(wildcard test/unit/*.cpp))    ## prevent make from automatically removing "intermediate" object files
-test/unit/build/%.o: test/unit/%.cpp | test/unit/build
+#.SECONDARY: $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(wildcard test/unit/*.cpp))    ## prevent make from automatically removing "intermediate" object files
+test/unit/build/%.o: test/unit/%.cpp $(GTEST_LIB)/googletest/include | test/unit/build
 	$(CXX) -I$(GTEST)/googletest/include -Isrc $< -o $@ $(CFLAGS) $(CF) -c
 
-test/unit/build/znoc-test-%: test/unit/build/%.o $(OBJS_TEST) $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a | test/unit/build
-	$(CXX) -o $@ $< $(OBJS_TEST) -L$(GTEST_LIB) -lgtest -lgtest_main $(LDFLAGS) $(LDF) -lpthread
+test/unit/build/znoc-test: $(UNIT_TEST_OBJS) $(MAIN_OBJS_FOR_TEST) $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a | test/unit/build
+	$(CXX) -o $@ $(UNIT_TEST_OBJS) $(MAIN_OBJS_FOR_TEST) -L$(GTEST_LIB) -lgtest -lgtest_main $(LDFLAGS) $(LDF) -lpthread
