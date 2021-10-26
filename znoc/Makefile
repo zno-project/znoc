@@ -1,13 +1,15 @@
+CXX ?= clang++
+LLVM_CONFIG ?= llvm-config
+
+ifeq ($(shell uname),Darwin)
+CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags | sed 's/-I/-isystem /g'` -g
+else
+CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags`
+endif
+LDF = -g -lfmt `$(LLVM_CONFIG) --ldflags --libs core native`
+
 CFLAGS ?=
 LDFLAGS ?=
-ifeq ($(shell uname),Darwin)
-CF = -MMD -MP --std=gnu++17 `llvm-config --cppflags | sed 's/-I/-isystem /g'` -g
-else
-CF = -MMD -MP --std=gnu++17 `llvm-config --cppflags`
-endif
-LDF = -g -lfmt `llvm-config --ldflags --libs core native`
-
-CXX ?= clang++
 
 SRCS = $(wildcard src/*.cpp)
 SRCS_CONSTRUCT = $(wildcard src/constructions/*.cpp)
