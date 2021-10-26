@@ -68,7 +68,7 @@ int parse_file(std::filesystem::path p,
 	ret;	\
 })
 
-#define EXPECT_NUMBERIC_LITERAL(err) ({ \
+#define EXPECT_NUMERIC_LITERAL(err) ({ \
 	if (currentToken != tok_decimal_numeric_literal && currentToken != tok_integer_numeric_literal) throw UNEXPECTED_CHAR(currentToken, err);	\
 	auto contains_dp = currentToken == tok_decimal_numeric_literal;	\
 	auto ret = std::get<double>(currentTokenVal);	\

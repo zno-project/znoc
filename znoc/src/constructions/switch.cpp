@@ -82,7 +82,7 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	EXPECT(tok_case, "inside switch statement");
 
 	while (1) {
-		auto numeric_literal = EXPECT_NUMBERIC_LITERAL("numeric literal for case value");
+		auto numeric_literal = EXPECT_NUMERIC_LITERAL("numeric literal for case value");
 		int val = std::get<0>(numeric_literal);
 		bool is_decimal = std::get<1>(numeric_literal);
 		if (is_decimal) throw std::runtime_error("case values may only be integer literals");

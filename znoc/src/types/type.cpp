@@ -107,7 +107,7 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		IF_TOK_ELSE('[', {
 			bool is_float;
 			size_t array_len;
-			std::tie(array_len, is_float) = EXPECT_NUMBERIC_LITERAL("array length");
+			std::tie(array_len, is_float) = EXPECT_NUMERIC_LITERAL("array length");
 			if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
 			EXPECT(']', "after array length");
 			type_base.array_lengths.push_back(array_len);

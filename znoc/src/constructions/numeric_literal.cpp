@@ -25,7 +25,7 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribut
 // numeric_literal = NUMBER+;
 std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
 	//std::cout << "parse numlit" << std::endl;
-	auto [ val, contains_dp ] = EXPECT_NUMBERIC_LITERAL("to start numeric literal");/*std::get<double>(currentTokenVal);
+	auto [ val, contains_dp ] = EXPECT_NUMERIC_LITERAL("to start numeric literal");/*std::get<double>(currentTokenVal);
 	get_next_token(f); // Move onto token after number*/
 
 	IF_TOK_ELSE_IDENTIFIER(post_num_modifier, {
