@@ -1,0 +1,10 @@
+uses 'stdio.zno'
+
+struct ArrayStruct {
+	d: _fundamentals::i32[5]
+}
+
+func main() {
+	let s: ArrayStruct[10];
+	return;
+}
