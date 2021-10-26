@@ -22,12 +22,12 @@ jobs:
         with:
           name: znoc-macos
           path: znoc/build/znoc
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: macos-build-${{ github.run_id }}
 
   build-linux:
     runs-on: ubuntu-latest
@@ -47,12 +47,12 @@ jobs:
         with:
           name: znoc-linux
           path: znoc/build/znoc
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-linux-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: linux-build-${{ github.run_id }}
   
   build-windows:
     runs-on: windows-latest
@@ -77,12 +77,12 @@ jobs:
         with:
           name: znoc-windows
           path: znoc/build/znoc.exe
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-windows-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: windows-build-${{ github.run_id }}
 
 
   test-macos:
@@ -93,15 +93,21 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: Download built object code
-        uses: actions/download-artifact@v2
+      - name: Retrieve build from cache
+        id: cache-retrieve
+        uses: actions/cache@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/
-          if-no-files-found: error
+          path: |
+            znoc/build/
+          key: macos-build-${{ github.run_id }}
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+      - name: Build executable
+        if: steps.cache-retrieve.outputs.cache-hit != 'true'
+        run: |
+          cd znoc
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
       - name: Run tests
         run: |
           cd znoc
@@ -122,16 +128,22 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: Download built object code
-        uses: actions/download-artifact@v2
+      - name: Retrieve build from cache
+        id: cache-retrieve
+        uses: actions/cache@v2
         with:
-          name: znoc-linux-obj
-          path: znoc/build/
-          if-no-files-found: error
+          path: |
+            znoc/build/
+          key: linux-build-${{ github.run_id }}
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install libfmt-dev llvm
+      - name: Build executable
+        if: steps.cache-retrieve.outputs.cache-hit != 'true'
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ make
       - name: Run tests
         run: |
           cd znoc
