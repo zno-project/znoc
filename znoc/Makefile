@@ -1,3 +1,4 @@
+CC ?= clang
 CXX ?= clang++
 PKG_CONFIG ?= pkg-config
 LLVM_CONFIG ?= llvm-config
@@ -34,20 +35,26 @@ UNIT_TESTS = test/unit/build/znoc-test#$(patsubst test/unit/%.cpp, test/unit/bui
 SRCS_UNIT_TEST = $(wildcard test/unit/*.cpp)
 UNIT_TEST_OBJS = $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(SRCS_UNIT_TEST))
 
-REGRESSION_TESTS = $(filter-out test/regression/stdio.zno, $(wildcard test/regression/*.zno))
-REGRESSION_TESTS_LOG = test/regression/log.log
-
 GTEST_OUTPUT ?= xml:test/unit/build/out.xml
 
-.PHONY: all clean test
+REGRESSION_TESTS_OBJ = $(patsubst test/regression/%.zno, test/regression/build/%.o, $(filter-out test/regression/stdio.zno, $(wildcard test/regression/*.zno)))
+REGRESSION_TESTS = $(patsubst test/regression/build/%.o, test/regression/build/tests/%, $(REGRESSION_TESTS_OBJ))
+REGRESSION_TESTS_LOG = test/regression/log.log
+
+ZNOC = build/znoc
+
+.PHONY: all test check clean
 
 all: build/znoc
 
 clean:
-	rm -rf build test/unit/build
+	rm -rf build test/unit/build test/regression/build
 
 test: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
+
+check: $(REGRESSION_TESTS)
+	cd test/regression/build/tests && for test in *; do ./$$test | diff -q - ../../compare/$$test; done
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
@@ -64,6 +71,10 @@ build/types:
 
 test/unit/build:
 	mkdir -p test/unit/build
+test/regression/build:
+	mkdir -p test/regression/build
+test/regression/build/tests:
+	mkdir -p test/regression/build/tests
 
 ## znoc
 
@@ -79,10 +90,10 @@ build/types/%.o: src/types/%.cpp | build/types
 build/memory/%.o: src/memory/%.cpp | build/memory
 	$(CXX) $< -o $@ $(CFLAGS) $(CF) -c
 
-build/znoc: $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) | build
+$(ZNOC): $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) | build
 	$(CXX) -o $@ $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) $(LDFLAGS) $(LDF)
 
-## tests
+## unit tests
 
 $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a: $(GTEST)/googletest/src/* | test/unit/build
 	cd test/unit/build && cmake ../gtest
@@ -96,3 +107,12 @@ test/unit/build/%.o: test/unit/%.cpp $(GTEST)/googletest/include | test/unit/bui
 
 test/unit/build/znoc-test: $(UNIT_TEST_OBJS) $(MAIN_OBJS_FOR_TEST) $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a | test/unit/build
 	$(CXX) -o $@ $(UNIT_TEST_OBJS) $(MAIN_OBJS_FOR_TEST) -L$(GTEST_LIB) -lgtest -lgtest_main $(LDFLAGS) $(LDF) -lpthread
+
+# regression tests
+
+.SECONDARY: $(REGRESSION_TESTS_OBJ)
+test/regression/build/%.o: test/regression/%.zno $(ZNOC) | test/regression/build
+	$(ZNOC) $< $@
+
+test/regression/build/tests/%: test/regression/build/%.o | test/regression/build/tests
+	$(CC) -no-pie $< trampoline.c -o $@
