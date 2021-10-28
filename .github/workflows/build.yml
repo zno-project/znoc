@@ -192,7 +192,7 @@ jobs:
         run: |
           ls znoc/build
           cd znoc
-          CC=clang CXX=clang++ CMAKE_ARGS="-G Unix\\ Makefiles" mingw32-make test
+          CC=clang CXX=clang++ CMAKE="CMAKE_MAKE_PROGRAM=mingw32-make cmake" CMAKE_ARGS="-G MSYS\\ Makefiles" mingw32-make test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
