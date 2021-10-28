@@ -1,0 +1,16 @@
+uses 'stdio.zno'
+
+struct Struct {
+	d: _fundamentals::i32,
+	e: _fundamentals::i32
+}
+
+func main() {
+	let s = Struct {
+		.d = 7,
+		.e = 5
+	};
+
+	stdio::printI(s.d);
+	stdio::printI(s.e);
+}
