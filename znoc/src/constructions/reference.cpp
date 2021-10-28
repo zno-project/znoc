@@ -14,6 +14,7 @@
 #include "construction_parse.hpp"
 #include "function_call.hpp"
 #include "../parsing.hpp"
+#include "struct_init.hpp"
 
 // IDENTIFIER EXPRESSION
 // identifier_expr = identifier |
@@ -25,7 +26,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 
 	if (parsed_namespace.next_token == '(') { // Function call
 		auto func_name = parsed_namespace.next_identifier;
-		std::cout << "call to func " << parsed_namespace.parsed_namespace->get_name() << ":" << func_name << "(...)" << std::endl;
+
 
 		std::vector<std::unique_ptr<AST::Expression>> args;
 
@@ -34,6 +35,9 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 		}, "function args");
 
 		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
+	} else if (parsed_namespace.next_token == '{') { // Aggregate type init
+		auto type_name = parsed_namespace.next_identifier;
+		return parse_struct_init(f, parsed_namespace.parsed_namespace->get_type_by_name(type_name));
 	} else {
 		std::cout << "Variable reference or member func - ignoring namespaces" << std::endl;
 		std::shared_ptr<AST::MemoryLoc> variable = AST::get_var(parsed_namespace.next_identifier);
