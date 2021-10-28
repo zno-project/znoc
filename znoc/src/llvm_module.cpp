@@ -11,6 +11,7 @@
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Support/Host.h>
+#include <llvm/Analysis/TargetLibraryInfo.h>
 
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
@@ -36,6 +37,7 @@ void make_llvm_module(std::string name) {
 
 	TheFPM = std::make_unique<llvm::legacy::FunctionPassManager>(TheModule.get());
 
+	TheFPM->add(new llvm::TargetLibraryInfoWrapperPass());
 	// Remove dead code
 	TheFPM->add(llvm::createDeadCodeEliminationPass());
 	// Promote allocas to registers.
