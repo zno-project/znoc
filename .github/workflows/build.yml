@@ -29,6 +29,13 @@ jobs:
           path: |
             znoc/build/
           key: macos-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc
 
   build-linux:
     runs-on: ubuntu-latest
@@ -54,6 +61,13 @@ jobs:
           path: |
             znoc/build/
           key: linux-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc
   
   build-windows:
     runs-on: windows-latest
@@ -84,6 +98,13 @@ jobs:
           path: |
             znoc/build/
           key: windows-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc.exe
 
 
   test-macos:
