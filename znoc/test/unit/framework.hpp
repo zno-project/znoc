@@ -5,6 +5,7 @@
 #include "parsing.hpp"
 #include "location.hpp"
 #include "constructions/expression.hpp"
+#include "win_posix.hpp"
 
 #include <deque>
 #include <map>
