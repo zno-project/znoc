@@ -43,9 +43,11 @@ REGRESSION_TESTS_LOG = test/regression/log.log
 
 ZNOC = build/znoc
 
-.PHONY: all test check clean
+.PHONY: all compiler test check clean
 
-all: build/znoc
+compiler: $(ZNOC)
+
+all: $(ZNOC) $(UNIT_TESTS) $(REGRESSION_TESTS)
 
 clean:
 	rm -rf build test/unit/build test/regression/build
