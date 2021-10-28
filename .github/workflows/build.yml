@@ -257,11 +257,7 @@ jobs:
           if-no-files-found: error
           path: windows
       - name: Publish executable on discord
-        uses: sinshutu/upload-to-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            macos/znoc
-            linux/znoc
-            windows/znoc.exe
+        with: |
+          curl -F 'payload_json={"content": "macos build"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "linux build"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "windows build"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
