@@ -239,3 +239,7 @@ TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 		delete c;
 	}
 }
+
+TEST(Failiure, CoolItWorks) {
+	ASSERT_EQ(0, 1);
+}
