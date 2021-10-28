@@ -106,7 +106,7 @@ $(ZNOC): $(OBJS) $(OBJS_CONSTRUCT) $(OBJS_TYPES) $(OBJS_MEMORY) | build
 ## unit tests
 
 $(GTEST_LIB)/libgtest.a $(GTEST_LIB)/libgtest_main.a: $(GTEST)/googletest/src/* | test/unit/build
-	cd test/unit/build && $(CMAKE) ../gtest
+	cd test/unit/build && $(CMAKE) $(CMAKE_ARGS) ../gtest
 	$(MAKE) -C test/unit/build gtest gtest_main
 	touch $(GTEST_LIB)/libgtest.a
 $(GTEST_LIB)/libgtest.a: $(GTEST_LIB)/libgtest_main.a    ## prevent make trying to build these in parallel
