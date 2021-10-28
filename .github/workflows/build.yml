@@ -29,13 +29,6 @@ jobs:
           path: |
             znoc/build/
           key: macos-build-${{ github.run_id }}
-      - name: Publish executable on discord
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-        uses: sinshutu/upload-to-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: znoc/build/znoc
 
   build-linux:
     runs-on: ubuntu-latest
@@ -61,13 +54,6 @@ jobs:
           path: |
             znoc/build/
           key: linux-build-${{ github.run_id }}
-      - name: Publish executable on discord
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-        uses: sinshutu/upload-to-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: znoc/build/znoc
   
   build-windows:
     runs-on: windows-latest
@@ -98,13 +84,6 @@ jobs:
           path: |
             znoc/build/
           key: windows-build-${{ github.run_id }}
-      - name: Publish executable on discord
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-        uses: sinshutu/upload-to-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: znoc/build/znoc.exe
 
 
   test-macos:
@@ -253,3 +232,35 @@ jobs:
             macos/out.xml
             linux/out.xml
             windows/out.xml
+            
+  publish-discord:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    needs: [build-macos, build-linux, build-windows]
+      - name: Download executable (macos)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-macos
+          if-no-files-found: error
+          path: macos
+      - name: Download executable (linux)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-linux
+          if-no-files-found: error
+          path: linux
+      - name: Download executable (windows)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-windows
+          if-no-files-found: error
+          path: windows
+      - name: Publish executable on discord
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            macos/znoc
+            linux/znoc
+            windows/znoc.exe
