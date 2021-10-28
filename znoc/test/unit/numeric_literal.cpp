@@ -241,5 +241,6 @@ TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 }
 
 TEST(Failiure, CoolItWorks) {
+	EXPECT_EQ(5,6);
 	ASSERT_EQ(0, 1);
 }

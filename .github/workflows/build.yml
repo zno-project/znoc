@@ -227,6 +227,7 @@ jobs:
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
+          report_individual_runs: "true"
           files: |
             macos/out.xml
             linux/out.xml
