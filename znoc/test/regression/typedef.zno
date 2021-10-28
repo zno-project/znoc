@@ -1,25 +1,21 @@
 uses 'stdio.zno'
 
-struct Thingy<A, B> {
+struct Struct<A, B> {
 	a: A,
 	b: B
 }
 
-func printAStructThing(s: Thingy<_fundamentals::i32, _fundamentals::i32>) -> _fundamentals::i32 {
+func printAStructThing(s: Struct<_fundamentals::i32, _fundamentals::i32>) -> _fundamentals::i32 {
 	stdio::printI(s.a);
 	return s.b;
 }
 
-typedef Thingy as OtherThingy
+typedef Struct<_fundamentals::i32, _fundamentals::i32> as IntStruct
 
-func main() {
-	let s: OtherThingy<_fundamentals::i32, _fundamentals::i32>;
-	let p: OtherThingy<_fundamentals::i64, _fundamentals::i64>;
+func main() -> _fundamentals::i32 {
+	let s: IntStruct;
 	s.a = 32;
 	s.b = 65;
-	p.b = 72;
-	stdio::printI(s.a);
-	let x = s.b;
-	stdio::printI(x);
-	return;
+	stdio::printI(printAStructThing(s));
+	return 0;
 }

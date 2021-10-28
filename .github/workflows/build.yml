@@ -1,45 +1,50 @@
 name: Build and test
 on:
   push:
+    branches:
+      - master
   pull_request:
-    types: [opened, reopened]
 
 jobs:
-  Build_macos:
+  build-macos:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
       - name: Build executable
         run: |
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
-          export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
-          export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
-          export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
           cd znoc
-          CC=clang CXX=clang++ make
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos
           path: znoc/build/znoc
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: macos-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc
 
-  Build_Ubuntu:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
+          sudo apt update
           sudo apt install libfmt-dev llvm
       - name: Build executable
         run: |
@@ -50,14 +55,21 @@ jobs:
         with:
           name: znoc-linux
           path: znoc/build/znoc
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-linux-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: linux-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc
   
-  Build_Windows:
+  build-windows:
     runs-on: windows-latest
     defaults:
       run:
@@ -70,7 +82,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: mingw-w64-x86_64-toolchain mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
+          install: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
       - name: Build executable
         run: |
           cd znoc
@@ -80,66 +92,164 @@ jobs:
         with:
           name: znoc-windows
           path: znoc/build/znoc.exe
-      - name: Upload built objects
-        uses: actions/upload-artifact@v2
+      - name: Cache object code
+        uses: actions/cache@v2
         with:
-          name: znoc-windows-obj
-          path: znoc/build/**/*.o
-          retention-days: 1
+          path: |
+            znoc/build/
+          key: windows-build-${{ github.run_id }}
+      - name: Publish executable on discord
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: sinshutu/upload-to-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: znoc/build/znoc.exe
 
 
-  Test_macos:
+  test-macos:
     runs-on: macos-latest
-    needs: Build_macos
+    needs: build-macos
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: Download built object code
-        uses: actions/download-artifact@v2
+      - name: Retrieve build from cache
+        id: cache-retrieve
+        uses: actions/cache@v2
         with:
-          name: znoc-macos-obj
-          path: znoc/build/
-          if-no-files-found: error
+          path: |
+            znoc/build/
+          key: macos-build-${{ github.run_id }}
       - name: Install dependencies
         run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm cmake
-      - name: Build googletest
+          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+      - name: Build executable
+        if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
-          cd znoc/test/unit
-          mkdir -p build
-          cd build
-          cmake ../gtest
-          make
-      - name: Build and run test executable
+          cd znoc
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
+      - name: Run tests
         run: |
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
-          export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
-          export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
-          export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
-          cd znoc/test/unit
-          clang++ -Igtest/googletest/include -I../../src numeric_literal.cpp ../../build/attributes.o ../../build/casting.o ../../build/constructions/binary_op.o ../../build/constructions/break_continue.o ../../build/constructions/codeblock.o ../../build/constructions/expression.o ../../build/constructions/fallthrough.o ../../build/constructions/function_call.o ../../build/constructions/function_def.o ../../build/constructions/if.o ../../build/constructions/namespace.o ../../build/constructions/numeric_literal.o ../../build/constructions/reference.o ../../build/constructions/return.o ../../build/constructions/switch.o ../../build/constructions/typedef.o ../../build/constructions/unary_op.o ../../build/constructions/while.o ../../build/llvm_module.o ../../build/location.o ../../build/mangling.o ../../build/memory/gep.o ../../build/memory/memory_location.o ../../build/memory/variable.o ../../build/parsing.o ../../build/types/builtins.o ../../build/types/casting.o ../../build/types/type.o  -Lbuild/lib/ -lgtest_main -lgtest -o build/znoc-test --std=c++20 `llvm-config --cppflags | sed 's/-I/-isystem /g'` `llvm-config --ldflags --libs core native` -lfmt
-          ./build/znoc-test --gtest_output="xml:build/out.xml"
+          ls znoc/build
+          cd znoc
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-tests
+          name: znoc-macos-test-results
+          path: znoc/test/unit/build/out.xml
+          retention-days: 1
+  
+  test-linux:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Retrieve build from cache
+        id: cache-retrieve
+        uses: actions/cache@v2
+        with:
+          path: |
+            znoc/build/
+          key: linux-build-${{ github.run_id }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libfmt-dev llvm
+      - name: Build executable
+        if: steps.cache-retrieve.outputs.cache-hit != 'true'
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ make
+      - name: Run tests
+        run: |
+          ls znoc/build
+          cd znoc
+          CC=clang CXX=clang++ make test
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-linux-test-results
           path: znoc/test/unit/build/out.xml
           retention-days: 1
 
-  Publish_tests:
+  test-windows:
+    runs-on: windows-latest
+    needs: build-windows
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Install msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
+      - name: Retrieve build from cache
+        id: cache-retrieve
+        uses: actions/cache@v2
+        with:
+          path: |
+            znoc/build/
+          key: windows-build-${{ github.run_id }}
+      - name: Build executable
+        if: steps.cache-retrieve.outputs.cache-hit != 'true'
+        run: |
+          cd znoc
+          CC=clang CXX=clang++ mingw32-make
+      - name: Run tests
+        run: |
+          ls znoc/build
+          cd znoc
+          CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make test
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-windows-test-results
+          path: znoc/test/unit/build/out.xml
+          retention-days: 1
+
+  publish-tests:
     runs-on: ubuntu-latest
-    needs: [Test_macos]
+    needs: [test-macos, test-linux, test-windows]
     if: always()
     steps:
-      - name: Download built object code
+      - name: Download test results (macos)
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-tests
+          name: znoc-macos-test-results
           if-no-files-found: error
+          path: macos
+      - name: Download test results (linux)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-linux-test-results
+          if-no-files-found: error
+          path: linux
+      - name: Download test results (windows)
+        uses: actions/download-artifact@v2
+        with:
+          name: znoc-windows-test-results
+          if-no-files-found: error
+          path: windows
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          files: out.xml
+          report_individual_runs: "true"
+          files: |
+            macos/out.xml
+            linux/out.xml
+            windows/out.xml

@@ -1,11 +1,11 @@
 uses 'stdio.zno'
 
-func main() {
+func main() -> _fundamentals::i32 {
 	let x = 10;
 	while (x > 0) {
 		x = x - 1;
 		if (x == 5) { continue; }
 		stdio::printI(x);
 	}
-	return;
+	return 0;
 }

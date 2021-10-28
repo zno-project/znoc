@@ -1,5 +1,3 @@
 #[extern] func printI(x: _fundamentals::i32);
 #[extern] func allocate() -> _fundamentals::ptr<_fundamentals::i32>;
-#[extern] func allocate6() -> _fundamentals::ptr<_fundamentals::i64>;
-#[extern] func allocate6p() -> _fundamentals::ptr<_fundamentals::ptr<_fundamentals::i64>>;
 #[extern] func deallocate(x: _fundamentals::ptr<_fundamentals::i32>);

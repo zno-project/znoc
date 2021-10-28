@@ -34,9 +34,10 @@ int advance(FILE *f) {
 	return LastChar;
 }
 
+std::map<FILE*, char> lastChars;
+
 int get_token(FILE *f) {
 	//std::cout << "get_token" << std::endl;
-	static std::map<FILE*, char> lastChars = std::map<FILE*, char>();
 	if (lastChars[f] == 0) lastChars[f] = advance(f);
 	char &lastChar = lastChars[f];
 	//std::cout << "after advance should be called" << std::endl;
