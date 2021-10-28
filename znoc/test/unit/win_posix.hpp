@@ -5,8 +5,8 @@
 #include <atomic>
 #include <fmt/format.h>
 
-#if !__has_include(<unistd.h>)
-	// If non-posix then add filler for fmemopen
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	// If windows then add filler for fmemopen
 	std::atomic_uint32_t fmem_count = 0;
 
 	FILE* fmemopen(void *buf, size_t size, const char *mode) {
