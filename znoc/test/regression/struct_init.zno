@@ -5,12 +5,31 @@ struct Struct {
 	e: _fundamentals::i32
 }
 
+struct Templatable<T> {
+	a: T
+}
+
 func main() {
 	let s = Struct {
 		.d = 7,
 		.e = 5
 	};
 
+	let t = Templatable<_fundamentals::i32> {
+		.a = 3
+	};
+
+	let p = Templatable<_fundamentals::ptr<_fundamentals::i32>> {
+		.a = stdio::allocate()
+	};
+
 	stdio::printI(s.d);
 	stdio::printI(s.e);
+
+	stdio::printI(t.a);
+
+	*p.a = 65;
+	stdio::printI(*p.a);
+
+	stdio::deallocate(p.a);
 }

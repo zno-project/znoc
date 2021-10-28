@@ -11,6 +11,12 @@
 #include <memory>
 
 std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeInstance to_init) {
+	std::vector<AST::TypeInstance> template_types;
+	OPTIONAL_LIST('<', ',', '>', {
+		template_types.push_back(Parser::parse_type(f));
+	}, "template list");
+	to_init.get_or_create_template(template_types);
+
 	std::vector<std::unique_ptr<AST::Expression>> cb_exprs;
 	auto struct_var = AST::Variable::create_in_scope("struct_init", to_init);
 	LIST('{', ',', '}', {

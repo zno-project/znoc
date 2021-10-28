@@ -151,6 +151,8 @@ namespace AST {
 			if (cmp.template_instance_id != template_instance_id) return false;
 			return cmp.array_lengths == array_lengths;
 		};
+
+		void get_or_create_template(std::vector<AST::TypeInstance> template_types);
 	};
 }
 

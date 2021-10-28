@@ -79,6 +79,20 @@ void AST::init_builtin_types() {
 	*GlobalNamespace << std::move(fundamentals);
 }
 
+void AST::TypeInstance::get_or_create_template(std::vector<AST::TypeInstance> template_types) {
+	auto expected_num_template_args = base_type->get_generic_type_interfaces().size();
+	auto found_num_template_args = template_types.size();
+
+	if (is_templateable() && found_num_template_args != 0) { // Allow not 'generic' version of type eg. in typedefs
+		if (expected_num_template_args != found_num_template_args) throw std::runtime_error(fmt::format("Expected {} typeargs for type {}. Found {}.", expected_num_template_args, base_type->get_name(), found_num_template_args));
+		if (template_instance_id.has_value()) throw std::runtime_error(fmt::format("Cannot template already templated type {}", base_type->get_name()));
+		template_instance_id = base_type->add_generic_instance(template_types);
+	} else {
+		// Cannot template untemplatable type
+		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", base_type->get_name()));
+	}
+}
+
 AST::TypeInstance Parser::parse_type(FILE* f) {
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "name of type");
 	auto parsed_namespace_data = Parser::parse_namespace(f);
@@ -91,7 +105,7 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		template_types.push_back(Parser::parse_type(f));
 	}, "template list");
 
-	auto expected_num_template_args = type_base.base_type->get_generic_type_interfaces().size();
+	/*auto expected_num_template_args = type_base.base_type->get_generic_type_interfaces().size();
 	auto found_num_template_args = template_types.size();
 
 	if (type_base.is_templateable() && found_num_template_args != 0) { // Allow not 'generic' version of type eg. in typedefs
@@ -101,7 +115,8 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	} else {
 		// Cannot template untemplatable type
 		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
-	}
+	}*/
+	type_base.get_or_create_template(template_types);
 
 	while (1) {
 		IF_TOK_ELSE('[', {

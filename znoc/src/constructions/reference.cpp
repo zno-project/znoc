@@ -35,7 +35,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 		}, "function args");
 
 		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
-	} else if (parsed_namespace.next_token == '{') { // Aggregate type init
+	} else if (parsed_namespace.next_token == '{' || parsed_namespace.next_token == '<') { // Aggregate type init
 		auto type_name = parsed_namespace.next_identifier;
 		return parse_struct_init(f, parsed_namespace.parsed_namespace->get_type_by_name(type_name));
 	} else {
