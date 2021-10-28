@@ -55,6 +55,9 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 	if (non_semicolon_statement) return non_semicolon_statement;
 
 	switch (currentToken) {
+		case tok_string: {
+			return parse_string(f);
+		}
 		case tok_identifier: {
 			return parse_identifier_expression(f);
 		}

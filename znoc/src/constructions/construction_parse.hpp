@@ -19,6 +19,7 @@ namespace Parser {
 	std::unique_ptr<AST::Expression> parse_while(FILE* f);
 	std::unique_ptr<AST::Expression> parse_variable_def(FILE* f);
 	std::unique_ptr<AST::Expression> parse_fallthrough(FILE* f);
+	std::unique_ptr<AST::Expression> parse_string(FILE* f);
 }
 
 #endif

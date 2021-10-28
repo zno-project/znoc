@@ -28,9 +28,6 @@ int advance(FILE *f) {
 		LexLoc.Line++;
 		LexLoc.Col = 0;
 	} else LexLoc.Col++;
-	if (LastChar == ')') {
-		__asm__("nop");
-	}
 	return LastChar;
 }
 
@@ -43,6 +40,34 @@ int get_token(FILE *f) {
 
 	// skip whitespace
 	while (isspace(lastChar)) lastChar = advance(f);
+
+	if (lastChar == '"') {
+		std::string s;
+
+		while (true) {
+			lastChar = advance(f);
+			if (lastChar == '\\') {
+				char escapedChar = advance(f);
+				switch (escapedChar) {
+					case 'a': s += '\a'; break;
+					case 'b': s += '\b'; break;
+					case 'f': s += '\f'; break;
+					case 'n': s += '\n'; break;
+					case 'r': s += '\r'; break;
+					case 't': s += '\t'; break;
+					case 'v': s += '\v'; break;
+					default: s += escapedChar; break;
+				}
+				continue;
+			}
+			if (lastChar == '"') break;
+			s += lastChar;
+		}
+
+		lastChar = advance(f);
+		currentTokenVal = s;
+		return tok_string;
+	}
 
 	if (isalpha(lastChar) | (lastChar == '_')) {
 		std::string identifier;
