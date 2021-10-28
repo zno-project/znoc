@@ -43,14 +43,20 @@ REGRESSION_TESTS_LOG = test/regression/log.log
 
 ZNOC = build/znoc
 
-.PHONY: all compiler test check clean
+.PHONY: all compiler test check clean clean-compiler clean-test clean-check
 
 compiler: $(ZNOC)
 
 all: $(ZNOC) $(UNIT_TESTS) $(REGRESSION_TESTS)
 
-clean:
-	rm -rf build test/unit/build test/regression/build
+clean: clean-compiler clean-test clean-check
+	
+clean-compiler:
+	rm -rf build
+clean-test:
+	rm -rf test/unit/build
+clean-check:
+	rm -rf test/regression/build
 
 test: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
