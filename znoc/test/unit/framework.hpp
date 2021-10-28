@@ -43,7 +43,9 @@ class CompilerMain: CompilerGlobals {
 		get_next_token(f);
   }
 
-  virtual ~CompilerMain() = default;
+  virtual CompilerMain() {
+	  fclose(f);
+  };
 
   // void TearDown() override {}
 };
