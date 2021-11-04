@@ -79,6 +79,7 @@ int get_token(FILE *f) {
 
 		if (identifier == "func") return tok_func;
 		else if (identifier == "let") return tok_let;
+		else if (identifier == "const") return tok_const;
 		else if (identifier == "struct") return tok_struct;
 		else if (identifier == "return") return tok_return;
 		else if (identifier == "if") return tok_if;
