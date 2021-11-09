@@ -14,10 +14,6 @@ namespace AST {
 		StructConstAccess(std::string linkage_name, AST::TypeInstance ty): linkage_name(std::move(linkage_name)), MemoryLoc(ty) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) {
 			auto global = TheModule->getGlobalVariable(linkage_name, true);
-			std::string type_str_src;
-			llvm::raw_string_ostream rso(type_str_src);
-			global->getType()->print(rso);
-			std::cout << type_str_src << std::endl;
 			return global;
 		}
 	};
