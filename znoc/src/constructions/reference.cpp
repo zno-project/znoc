@@ -8,6 +8,7 @@
 #include "../macros.hpp"
 #include "../memory/variable.hpp"
 #include "../memory/memory_ref.hpp"
+#include "../memory/struct_const.hpp"
 #include "../memory/gep.hpp"
 #include "binary_op.hpp"
 #include "unary_op.hpp"
@@ -58,7 +59,14 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 			} else {
 				// Variable ref
 				auto field_info = variable->underlying_type.get_field_info_by_name(field_name);
-				variable = std::make_unique<AST::GEP>(variable, field_info.index);
+
+				if (std::holds_alternative<AST::FieldInfoField>(field_info)) {
+					variable = std::make_unique<AST::GEP>(variable, std::get<AST::FieldInfoField>(field_info).index);
+				} else {
+					auto constant = std::get<AST::FieldInfoConst>(field_info);
+					variable = std::make_unique<AST::StructConstAccess>(constant.linkage_name, constant.type);
+				}
+				std::cout << "aaaaaaa" << std::endl;
 			}
 		});
 

@@ -59,7 +59,7 @@ namespace AST {
 
 	class fundamental_ptr: public TypeBase {
 		public:
-		fundamental_ptr() : TypeBase("ptr", {}, {}, {AST::Interface {}}) {}
+		fundamental_ptr() : TypeBase("ptr", {}, {}, {AST::Interface {}}, {}) {}
 		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			auto t = generic_types.at(template_instance).at(0).codegen();
 			return t->getPointerTo();

@@ -142,23 +142,30 @@ std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string f
 }
 
 AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, size_t template_instance_id) {
-	try {
-		auto f_idx = fields_by_name.at(field_name);
-		return get_field_info_by_index(f_idx, template_instance_id);
-	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find field {}:{}", name, field_name));
+	auto f_idx = fields_by_name.find(field_name);
+	auto c_idx = constants.find(field_name);
+
+	if (f_idx != fields_by_name.end()) {
+		return get_field_info_by_index(f_idx->second, template_instance_id);
+	} else if (c_idx != constants.end()) {
+		return FieldInfoConst {
+			.type = c_idx->second.type,
+			.linkage_name = fmt::format("{}.{}", name, field_name)
+		};
+	} else {
+		throw std::runtime_error(fmt::format("Cannot find field {}::{}", name, field_name));
 	}
 }
 
 AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t template_instance_id) {
-	auto f = AST::FieldInfo {
+	auto f = AST::FieldInfoField {
 		.type = std::holds_alternative<AST::TypeInstance>(fields_by_index.at(idx)) ? std::get<AST::TypeInstance>(fields_by_index.at(idx)) : generic_types.at(template_instance_id).at(std::get<AST::GenericInstance>(fields_by_index.at(idx)).generic_type_index),
 		.index = idx
 	};
 	return f;
 }
 
-AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces) {
+AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces, std::map<std::string, AST::Constant> constants) {
 	std::vector<AST::field_type_t> fields_by_index;
 	std::map<std::string, size_t> fields_by_name;
 
@@ -167,7 +174,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 		fields_by_name[fields[i].first] = i;
 	}
 
-	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces));
+	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces), std::move(constants));
 
 	return AST::TypeInstance {
 		.base_type = s,
@@ -175,6 +182,8 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 		.array_lengths = std::vector<size_t>()
 	};
 }
+
+#include "../constructions/construction_parse.hpp"
 
 AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	EXPECT(tok_struct, "to begin struct definition");
@@ -199,6 +208,7 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	}
 
 	std::vector<std::pair<std::string, AST::field_type_t>> fields;
+	std::map<std::string, AST::Constant> constants;
 
 	AST::TypeInstance ret;
 	bool all_fields_defined = false;
@@ -224,22 +234,48 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 
 			fields.push_back(std::pair<std::string, AST::field_type_t>(fieldName, std::move(fieldType)));
 		}, {
-			if (!all_fields_defined) {
-				// If first member function, prevent additional fields being created, plus finalise the type
-				all_fields_defined = true;
-				ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces));
-			}
-			ret.base_type->add_func(Parser::parse_function(f, ret));
+			IF_TOK_ELSE(tok_const, {
+				std::string const_name = EXPECT_IDENTIFIER("after `const`");
+				
+				std::optional<AST::TypeInstance> type;
+
+				OPTIONAL(':', {
+					type = parse_type(f);
+				});
+
+				EXPECT('=', " or type after const field name");
+
+				std::unique_ptr<AST::Expression> val = parse_numeric_literal(f);
+				if (!type) type = val->getType();
+
+				AST::Constant constant;
+				constant.type = type.value();
+				constant.val = std::move(val);
+
+				constants[const_name] = std::move(constant);
+			}, {
+				if (!all_fields_defined) {
+					// If first member function, prevent additional fields being created, plus finalise the type
+					all_fields_defined = true;
+					ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces), std::move(constants));
+				}
+				ret.base_type->add_func(Parser::parse_function(f, ret));
+			});
 		});
 	}, "struct fields and functions");
 
-	if (!all_fields_defined) ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces));
+	if (!all_fields_defined) ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces), std::move(constants));
 
 	return ret;
 }
 
 llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
 	if (!generated[template_instance]) {
+		for (auto &c: constants) {
+			std::cout << "gen const with linkage name " << fmt::format("{}.{}", name, c.first) << std::endl;
+			new llvm::GlobalVariable(*TheModule, c.second.type.codegen(), true, llvm::GlobalValue::PrivateLinkage, c.second.val->codegen_const(), fmt::format("{}.{}", name, c.first));
+		}
+
 		std::vector<llvm::Type*> f;
 		for (auto &fT : fields_by_index) {
 			if (std::holds_alternative<AST::TypeInstance>(fT)) {
@@ -290,4 +326,47 @@ AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 
 void AST::TypeBase::add_func(std::shared_ptr<AST::Function> f) {
 	functions.insert({f->get_name(), f});
+}
+
+llvm::Type* AST::TypeInstance::codegen() {
+	auto t = base_type->codegen(get_template_id());
+	for (auto& len : array_lengths) {
+		t = llvm::ArrayType::get(t, len);
+	}
+	return t;
+}
+
+bool AST::TypeInstance::is_templateable() {
+	return base_type->get_generic_type_interfaces().size() != 0;
+}
+
+bool AST::TypeInstance::is_array() {
+	return array_lengths.size() > 0;
+}
+
+bool AST::TypeInstance::operator==(const TypeInstance& cmp) const {
+	if (cmp.array_lengths.size() != array_lengths.size()) return false;
+	if (cmp.base_type != base_type) return false;
+	if (cmp.template_instance_id != template_instance_id) return false;
+	return cmp.array_lengths == array_lengths;
+};
+
+std::shared_ptr<AST::Function> AST::TypeInstance::get_function_by_name(std::string name) {
+	return base_type->get_function_by_name(name, get_template_id());
+}
+
+AST::FieldInfo AST::TypeInstance::get_field_info_by_name(std::string name) {
+	return base_type->get_field_info_by_name(name, get_template_id());
+}
+
+AST::FieldInfo AST::TypeInstance::get_field_info_by_index(size_t idx) {
+	return base_type->get_field_info_by_index(idx, get_template_id());
+}
+
+size_t AST::TypeInstance::get_template_id() {
+	if (is_templateable()) {
+		if (!template_instance_id.has_value()) throw std::runtime_error(fmt::format("Type {} must be templated before use", base_type->get_name()));
+		return template_instance_id.value();
+	}
+	return 0;
 }

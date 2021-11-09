@@ -25,7 +25,7 @@ std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeIns
 		EXPECT('=', "before value");
 		auto val = parse_binary_expression(f);
 		auto field_info = to_init.get_field_info_by_name(field_name);
-		auto field_gep = std::make_shared<AST::GEP>(struct_var, field_info.index);
+		auto field_gep = std::make_shared<AST::GEP>(struct_var, std::get<AST::FieldInfoField>(field_info).index);
 		auto field_ref = std::make_unique<AST::MemoryRef>(field_gep);
 		auto assign_expr = std::make_unique<AST::BinaryExpression>(AST::OpType::op_assign, std::move(field_ref), std::move(val));
 		cb_exprs.push_back(std::move(assign_expr));
