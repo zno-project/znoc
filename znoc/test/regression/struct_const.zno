@@ -1,0 +1,12 @@
+uses 'stdio.zno'
+
+struct Struct {
+	x: _fundamentals::i32,
+	const y: _fundamentals::i32 = 74
+}
+
+func main() {
+	let x: Struct = Struct { .x = 42 };
+	stdio::printI(x.x);
+	stdio::printI(x.y);
+}
