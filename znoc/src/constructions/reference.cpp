@@ -66,7 +66,6 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 					auto constant = std::get<AST::FieldInfoConst>(field_info);
 					variable = std::make_unique<AST::StructConstAccess>(constant.linkage_name, constant.type);
 				}
-				std::cout << "aaaaaaa" << std::endl;
 			}
 		});
 
