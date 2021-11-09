@@ -25,7 +25,7 @@ testing::AssertionResult PredicateTypeEquality(const char* lhs_s, const char* rh
 }
 
 TEST(NumericLiteral, TestParsingOfBasicInt) {
-	char *test_data = "45";
+	char test_data[] = "45";
 	auto c = new CompilerMain(test_data);
 	auto r = Parser::parse_numeric_literal(c->f);
 
@@ -38,7 +38,7 @@ TEST(NumericLiteral, TestParsingOfBasicInt) {
 }
 
 TEST(NumericLiteral, TestParsingOfBasicFloat) {
-	char *test_data = "45.6";
+	char test_data[] = "45.6";
 	auto c = new CompilerMain(test_data);
 	auto r = Parser::parse_numeric_literal(c->f);
 
@@ -51,7 +51,7 @@ TEST(NumericLiteral, TestParsingOfBasicFloat) {
 }
 
 TEST(NumericLiteral, TestInvalidModifiers) {
-	char *test_data = "45q8";
+	char test_data[] = "45q8";
 	auto c = new CompilerMain(test_data);
 
 	EXPECT_ANY_THROW(Parser::parse_numeric_literal(c->f));
@@ -60,7 +60,7 @@ TEST(NumericLiteral, TestInvalidModifiers) {
 }
 
 TEST(NumericLiteral, TestInvalidIntLengths) {
-	char *test_data = "45u7";
+	char test_data[] = "45u7";
 	auto c = new CompilerMain(test_data);
 
 	EXPECT_ANY_THROW(Parser::parse_numeric_literal(c->f));
@@ -69,7 +69,7 @@ TEST(NumericLiteral, TestInvalidIntLengths) {
 }
 
 TEST(NumericLiteral, TestInvalidFloatLengths) {
-	char *test_data = "45f8";
+	char test_data[] = "45f8";
 	auto c = new CompilerMain(test_data);
 
 	EXPECT_ANY_THROW(Parser::parse_numeric_literal(c->f));
@@ -79,7 +79,7 @@ TEST(NumericLiteral, TestInvalidFloatLengths) {
 
 TEST(NumericLiteral, TestLengthOfIntModifiers) {
 	{
-		char *test_data = "36u8";
+		char test_data[] = "36u8";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -91,7 +91,7 @@ TEST(NumericLiteral, TestLengthOfIntModifiers) {
 	}
 
 	{
-		char *test_data = "45u16";
+		char test_data[] = "45u16";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -131,7 +131,7 @@ TEST(NumericLiteral, TestLengthOfIntAutoLen) {
 
 TEST(NumericLiteral, TestLengthOfFloatModifiers) {
 	{
-		char *test_data = "36f16";
+		char test_data[] = "36f16";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -143,7 +143,7 @@ TEST(NumericLiteral, TestLengthOfFloatModifiers) {
 	}
 
 	{
-		char *test_data = "45f128";
+		char test_data[] = "45f128";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -195,7 +195,7 @@ TEST(NumericLiteral, TestLengthOfFloatAutoLenIsDouble) {
 
 TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 	{
-		char *test_data = "3.0";
+		char test_data[] = "3.0";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -206,7 +206,7 @@ TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 		delete c;
 	}
 	{
-		char *test_data = "6.0";
+		char test_data[] = "6.0";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -217,7 +217,7 @@ TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 		delete c;
 	}
 	{
-		char *test_data = "1.0";
+		char test_data[] = "1.0";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 
@@ -228,7 +228,7 @@ TEST(NumericLiteral, TestParsingOfIntegerValueFloat) {
 		delete c;
 	}
 	{
-		char *test_data = "0.0";
+		char test_data[] = "0.0";
 		auto c = new CompilerMain(test_data);
 		auto r = Parser::parse_numeric_literal(c->f);
 

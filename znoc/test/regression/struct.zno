@@ -1,23 +1,23 @@
 uses 'stdio.zno'
 
-struct OtherThingy {
+struct StructB {
 	d: _fundamentals::i32,
 	e: _fundamentals::i32
 }
 
-struct Thingy {
+struct StructA {
 	a: _fundamentals::i32,
 	b: _fundamentals::i32,
-	c: OtherThingy
+	c: StructB
 }
 
-func printAStructThing(s: Thingy) -> _fundamentals::i32 {
+func printAStructThing(s: StructA) -> _fundamentals::i32 {
 	stdio::printI(s.c.d);
 	return s.b;
 }
 
 func main() {
-	let s: Thingy;
+	let s: StructA;
 	s.a = 32;
 	s.b = 65;
 	s.c.d = 27;

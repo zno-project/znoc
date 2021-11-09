@@ -1,0 +1,11 @@
+uses 'stdio.zno'
+
+func main() -> _fundamentals::i32 {
+	let x_ptr = stdio::allocate();
+	*x_ptr = 16;
+	stdio::printI(*x_ptr);
+	*x_ptr = 27;
+	stdio::printI(*x_ptr);
+	stdio::deallocate(x_ptr);
+	return 0;
+}

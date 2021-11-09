@@ -1,0 +1,17 @@
+uses 'stdio.zno'
+
+func main() -> _fundamentals::i32 {
+	let x = 32;
+	let xp = &x;
+	stdio::printI(x);
+	stdio::printI(*xp);
+	*xp = 7;
+	stdio::printI(x);
+	stdio::printI(*xp);
+	let xpp = &xp;
+	**xpp = 64;
+	stdio::printI(**xpp);
+	stdio::printI(*xp);
+	stdio::printI(x);
+	return 0;
+}

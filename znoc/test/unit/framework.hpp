@@ -3,6 +3,9 @@
 #include "types/type.hpp"
 #include "constructions/namespace.hpp"
 #include "parsing.hpp"
+#include "location.hpp"
+#include "constructions/expression.hpp"
+#include "win_posix.hpp"
 
 #include <deque>
 #include <map>
@@ -12,11 +15,14 @@
 #include <string.h>
 
 std::unique_ptr<AST::Namespace> GlobalNamespace;
+extern std::map<FILE*, char> lastChars;
 
 class CompilerGlobals {
  public:
   CompilerGlobals() {
 		push_new_scope();
+		LexLoc = {1, 0};
+		lastChars = std::map<FILE*, char>();
 		GlobalNamespace = std::make_unique<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }
@@ -24,6 +30,8 @@ class CompilerGlobals {
   virtual ~CompilerGlobals() {
 	  stack_allocations.clear();
 	  GlobalNamespace = nullptr;
+	  mergeBB = nullptr;
+	  condBB = nullptr;
   }
 
   // void TearDown() override {}
@@ -43,7 +51,9 @@ class CompilerMain: CompilerGlobals {
 		get_next_token(f);
   }
 
-  virtual ~CompilerMain() = default;
+  virtual ~CompilerMain() {
+	  fclose(f);
+  };
 
   // void TearDown() override {}
 };
