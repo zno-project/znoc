@@ -15,39 +15,42 @@ extern int currentToken;
 extern std::variant<std::string, double> currentTokenVal;
 
 enum Token {
-	tok_eof = -1,
+	tok_eof = -__LINE__,
 
 	// commands
-	tok_func = -2,
-	tok_let = -3,
-	tok_return = -4,
+	tok_func = -__LINE__,
+	tok_let = -__LINE__,
+	tok_const = -__LINE__,
+	tok_return = -__LINE__,
 
 	// primary
-	tok_identifier = -5,
-	tok_integer_numeric_literal = -6,
-	tok_decimal_numeric_literal = -7,
+	tok_identifier = -__LINE__,
+	tok_integer_numeric_literal = -__LINE__,
+	tok_decimal_numeric_literal = -__LINE__,
 
 	// typedef
-	tok_struct = -8,
+	tok_struct = -__LINE__,
 
 	// control flow
-	tok_if = -9,
-	tok_else = -10,
-	tok_for = -11,
-	tok_throw = -12,
-	tok_switch = -13,
-	tok_case = -14,
-	tok_break = -15,
-	tok_continue = -16,
-	tok_fallthrough = -17,
-	tok_default = -18,
-	tok_while = -19,
+	tok_if = -__LINE__,
+	tok_else = -__LINE__,
+	tok_for = -__LINE__,
+	tok_throw = -__LINE__,
+	tok_switch = -__LINE__,
+	tok_case = -__LINE__,
+	tok_break = -__LINE__,
+	tok_continue = -__LINE__,
+	tok_fallthrough = -__LINE__,
+	tok_default = -__LINE__,
+	tok_while = -__LINE__,
 
-	tok_uses = -20,
+	tok_uses = -__LINE__,
 
-	tok_class = -21,
-	tok_as = -22,
-	tok_typedef = -23
+	tok_class = -__LINE__,
+	tok_as = -__LINE__,
+	tok_typedef = -__LINE__,
+
+	tok_string = -__LINE__
 };
 
 #include "constructions/namespace.hpp"
@@ -68,7 +71,7 @@ int parse_file(std::filesystem::path p,
 	ret;	\
 })
 
-#define EXPECT_NUMBERIC_LITERAL(err) ({ \
+#define EXPECT_NUMERIC_LITERAL(err) ({ \
 	if (currentToken != tok_decimal_numeric_literal && currentToken != tok_integer_numeric_literal) throw UNEXPECTED_CHAR(currentToken, err);	\
 	auto contains_dp = currentToken == tok_decimal_numeric_literal;	\
 	auto ret = std::get<double>(currentTokenVal);	\

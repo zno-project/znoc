@@ -2,6 +2,7 @@
 #include "../constructions/construction_parse.hpp"
 #include "../parsing.hpp"
 #include "../macros.hpp"
+#include "../llvm_module.hpp"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constant.h>
@@ -14,6 +15,7 @@
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/DataLayout.h>
 
 #include <iostream>
 #include <memory>
@@ -40,6 +42,7 @@ llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder, __attribute__
 	//if (builder) {
 		//emitLocation(builder, this);
 		//auto *alloca = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), name, ty);
+		builder->CreateLifetimeStart(allocaV);
 		if (value) {
 			auto v = value->codegen(builder);
 			builder->CreateStore(v, allocaV);

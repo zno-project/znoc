@@ -57,6 +57,7 @@ llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((
 std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	EXPECT(tok_switch, "in switch statement");
 
+	push_new_scope();
 	auto condition = parse_binary_expression(f);
 	
 	auto body = std::vector<std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>>();
@@ -66,8 +67,11 @@ std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	UNTIL('}', {
 		IF_TOK_ELSE(tok_default, {
 			default_body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
+			default_body->push_before_return(pop_scope());
 		}, {
-			body.push_back(parse_switch_case(f));
+			auto switch_case = parse_switch_case(f);
+			switch_case.second->push_before_return(pop_scope());
+			body.push_back(std::move(switch_case));
 		});
 	});
 
@@ -82,7 +86,7 @@ std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock
 	EXPECT(tok_case, "inside switch statement");
 
 	while (1) {
-		auto numeric_literal = EXPECT_NUMBERIC_LITERAL("numeric literal for case value");
+		auto numeric_literal = EXPECT_NUMERIC_LITERAL("numeric literal for case value");
 		int val = std::get<0>(numeric_literal);
 		bool is_decimal = std::get<1>(numeric_literal);
 		if (is_decimal) throw std::runtime_error("case values may only be integer literals");

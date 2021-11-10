@@ -20,9 +20,9 @@ extern std::map<FILE*, char> lastChars;
 class CompilerGlobals {
  public:
   CompilerGlobals() {
+		push_new_scope();
 		LexLoc = {1, 0};
 		lastChars = std::map<FILE*, char>();
-		stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>());
 		GlobalNamespace = std::make_unique<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }

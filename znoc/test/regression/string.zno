@@ -1,0 +1,6 @@
+uses 'stdio.zno'
+
+func main() {
+	let str = "hello world\n";
+	stdio::printf(str);
+}

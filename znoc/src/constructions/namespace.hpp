@@ -11,7 +11,7 @@
 namespace AST {
 	class Namespace {
 		private:
-		std::map<std::string, std::shared_ptr<AST::TypeBase>> named_types;
+		std::map<std::string, AST::TypeInstance> named_types;
 		std::map<std::string, std::shared_ptr<AST::Function>> named_functions;
 		std::map<std::string, std::unique_ptr<AST::Namespace>> namespaces;
 		std::string name;
@@ -21,16 +21,16 @@ namespace AST {
 		~Namespace() {}
 		virtual std::string get_name() { return name; }
 
-		std::shared_ptr<AST::TypeBase> get_type_by_name(std::string name);
+		AST::TypeInstance get_type_by_name(std::string name);
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
 		AST::Namespace* get_namespace_by_name(std::string name);
 
-		void add_type_with_name(std::shared_ptr<AST::TypeBase> t, std::string name) {
+		void add_type_with_name(AST::TypeInstance t, std::string name) {
 			named_types.insert({name, t});
 		}
 
-		Namespace* operator <<(std::shared_ptr<AST::TypeBase> t) {
-			add_type_with_name(t, t->get_name());
+		Namespace* operator <<(AST::TypeInstance t) {
+			add_type_with_name(t, t.base_type->get_name());
 			return this;
 		}
 

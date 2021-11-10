@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 
 	make_llvm_module(path.string());
 
-	stack_allocations.push_front(std::map<std::string, std::shared_ptr<AST::MemoryLoc>>());
+	push_new_scope();
 	GlobalNamespace = std::make_unique<AST::Namespace>("_G");
 	AST::init_builtin_types();
 

@@ -86,6 +86,13 @@ namespace AST {
 			return std::make_unique<AST::NumericLiteral>((double)v, len);
 		}
 		virtual llvm::Value* codegen(__attribute__((unused)) llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name = "");
+
+		virtual llvm::Constant* codegen_const() {
+			if (is_int_val) {
+				return llvm::ConstantInt::get(expressionType.codegen(), value.i);
+			}
+			return llvm::ConstantFP::get(*TheContext, llvm::APFloat(value.f));
+		};
 	};
 }
 

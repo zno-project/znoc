@@ -7,6 +7,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <variant>
 #include <optional>
+#include <fmt/format.h>
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -60,9 +61,48 @@ namespace AST {
 		size_t generic_type_index;
 	};
 
-	struct FieldInfo {
+	struct FieldInfoField {
 		AST::TypeInstance& type;
 		size_t index;
+	};
+
+	struct FieldInfoConst {
+		AST::TypeInstance& type;
+		std::string linkage_name;
+	};
+
+	typedef std::variant<FieldInfoField, FieldInfoConst> FieldInfo;
+
+	struct Interface {};
+
+	class Expression;
+
+	struct TypeInstance {
+		std::shared_ptr<AST::TypeBase> base_type;
+		std::optional<size_t> template_instance_id;
+		std::vector<size_t> array_lengths;
+
+		private:
+		size_t get_template_id();
+
+		public:
+		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
+		FieldInfo get_field_info_by_name(std::string name);
+		FieldInfo get_field_info_by_index(size_t idx);
+
+		AST::TypeInstance get_pointer_to();
+		AST::TypeInstance get_pointed_to();
+
+		llvm::Type* codegen();
+		bool is_templateable();
+		bool is_array();
+		bool operator==(const TypeInstance& cmp) const;
+		void get_or_create_template(std::vector<AST::TypeInstance> template_types);
+	};
+
+	struct Constant {
+		std::unique_ptr<AST::Expression> val;
+		AST::TypeInstance type;
 	};
 
 	class TypeBase {
@@ -72,12 +112,14 @@ namespace AST {
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
 		std::vector<std::vector<AST::TypeInstance>> generic_types;
+		std::vector<Interface> generic_type_interfaces;
 		std::map<std::string, std::shared_ptr<AST::Function>> functions;
+		std::map<std::string, Constant> constants;
 
 		public:
-		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated() {}
+		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated(), generic_type_interfaces(), constants() {}
 		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::map<std::string, std::shared_ptr<AST::Function>> functions): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(std::move(functions)), generated() {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces, std::map<std::string, Constant> constants): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generic_type_interfaces(std::move(generic_type_interfaces)), generated(), constants(std::move(constants)) {}
 
 		virtual llvm::Type* codegen(size_t template_instance);
 
@@ -88,32 +130,11 @@ namespace AST {
 		FieldInfo get_field_info_by_name(std::string name, size_t template_instance_id);
 		FieldInfo get_field_info_by_index(size_t idx, size_t template_instance_id);
 		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
-	};
-
-	struct TypeInstance {
-		std::shared_ptr<AST::TypeBase> base_type;
-		size_t template_instance_id;
-
-		std::shared_ptr<AST::Function> get_function_by_name(std::string name) {
-			return base_type->get_function_by_name(name, template_instance_id);
+		std::vector<Interface>& get_generic_type_interfaces() {
+			return generic_type_interfaces;
 		}
 
-		FieldInfo get_field_info_by_name(std::string name) {
-			return base_type->get_field_info_by_name(name, template_instance_id);
-		}
-
-		FieldInfo get_field_info_by_index(size_t idx) {
-			return base_type->get_field_info_by_index(idx, template_instance_id);
-		}
-
-		AST::TypeInstance get_pointer_to();
-		AST::TypeInstance get_pointed_to();
-
-		llvm::Type* codegen() {
-			return base_type->codegen(template_instance_id);
-		}
-
-		bool operator==(const TypeInstance&) const = default;
+		void add_func(std::shared_ptr<AST::Function> f);
 	};
 }
 
@@ -182,7 +203,7 @@ namespace AST {
 
 namespace Parser {
 	AST::TypeInstance parse_type(FILE* f);
-	std::shared_ptr<AST::TypeBase> parse_aggregate_type_definition(FILE* f);
+	AST::TypeInstance parse_aggregate_type_definition(FILE* f);
 }
 
 //extern std::map<std::string, std::shared_ptr<AST::Type>> named_types;

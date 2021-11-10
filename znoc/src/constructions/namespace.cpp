@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <iostream>
 
-std::shared_ptr<AST::TypeBase> AST::Namespace::get_type_by_name(std::string type_name) {
+AST::TypeInstance AST::Namespace::get_type_by_name(std::string type_name) {
 	try {
 		return named_types.at(type_name);
 	} catch (std::out_of_range) {
