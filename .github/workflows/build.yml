@@ -16,18 +16,17 @@ jobs:
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
       - name: Build executable
         run: |
-          cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos
-          path: znoc/build/znoc
+          path: build/znoc
       - name: Cache object code
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: macos-build-${{ github.run_id }}
 
   build-linux:
@@ -41,18 +40,17 @@ jobs:
           sudo apt install libfmt-dev llvm
       - name: Build executable
         run: |
-          cd znoc
           CC=clang CXX=clang++ make
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
           name: znoc-linux
-          path: znoc/build/znoc
+          path: build/znoc
       - name: Cache object code
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: linux-build-${{ github.run_id }}
   
   build-windows:
@@ -71,18 +69,17 @@ jobs:
           install: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
       - name: Build executable
         run: |
-          cd znoc
           CC=clang CXX=clang++ mingw32-make
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
           name: znoc-windows
-          path: znoc/build/znoc.exe
+          path: build/znoc.exe
       - name: Cache object code
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: windows-build-${{ github.run_id }}
 
 
@@ -99,7 +96,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: macos-build-${{ github.run_id }}
       - name: Install dependencies
         run: |
@@ -107,19 +104,16 @@ jobs:
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
-          cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
       - name: Run tests
         run: |
-          ls znoc/build
-          cd znoc
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: znoc-macos-test-results
-          path: znoc/test/unit/build/out.xml
+          path: test/unit/build/out.xml
           retention-days: 1
   
   test-linux:
@@ -135,7 +129,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: linux-build-${{ github.run_id }}
       - name: Install dependencies
         run: |
@@ -144,19 +138,16 @@ jobs:
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
-          cd znoc
           CC=clang CXX=clang++ make
       - name: Run tests
         run: |
-          ls znoc/build
-          cd znoc
           CC=clang CXX=clang++ make test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: znoc-linux-test-results
-          path: znoc/test/unit/build/out.xml
+          path: test/unit/build/out.xml
           retention-days: 1
 
   test-windows:
@@ -181,7 +172,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            znoc/build/
+            build/
           key: windows-build-${{ github.run_id }}
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
@@ -190,15 +181,13 @@ jobs:
           CC=clang CXX=clang++ mingw32-make
       - name: Run tests
         run: |
-          ls znoc/build
-          cd znoc
           CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: znoc-windows-test-results
-          path: znoc/test/unit/build/out.xml
+          path: test/unit/build/out.xml
           retention-days: 1
 
   publish-tests:
