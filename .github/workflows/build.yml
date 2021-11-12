@@ -16,7 +16,9 @@ jobs:
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
       - name: Build executable
         run: |
+          echo "::add-matcher::.github/workflows/clang-problem-match.json" 
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+          echo "::remove-matcher owner=clang-warnings::"
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
