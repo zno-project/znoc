@@ -100,6 +100,9 @@ jobs:
           path: |
             build/
           key: macos-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
@@ -135,6 +138,9 @@ jobs:
           path: |
             build/
           key: linux-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Install dependencies
         run: |
           sudo apt update
@@ -178,6 +184,9 @@ jobs:
           path: |
             build/
           key: windows-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
