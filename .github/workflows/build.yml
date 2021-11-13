@@ -17,7 +17,7 @@ jobs:
       - name: Build executable
         run: |
           echo "::add-matcher::.github/workflows/clang-problem-match.json" 
-          CFLAGS="-Wall -Wextra -Wpedantic" LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
           echo "::remove-matcher owner=clang-problems::"
       - name: Upload built executable
         uses: actions/upload-artifact@v2
