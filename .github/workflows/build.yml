@@ -16,7 +16,9 @@ jobs:
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
       - name: Build executable
         run: |
+          echo "::add-matcher::.github/workflows/clang-problem-match.json" 
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+          echo "::remove-matcher owner=clang-problems::"
       - name: Upload built executable
         uses: actions/upload-artifact@v2
         with:
@@ -98,6 +100,9 @@ jobs:
           path: |
             build/
           key: macos-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Install dependencies
         run: |
           env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
@@ -107,7 +112,9 @@ jobs:
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
       - name: Run tests
         run: |
+          echo "::add-matcher::.github/workflows/gtest-problem-match.json" 
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
+          echo "::remove-matcher owner=gtest-problems::"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
@@ -131,6 +138,9 @@ jobs:
           path: |
             build/
           key: linux-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Install dependencies
         run: |
           sudo apt update
@@ -174,6 +184,9 @@ jobs:
           path: |
             build/
           key: windows-build-${{ github.run_id }}
+      - name: touch build in cache
+        if: steps.cache-retrieve.outputs.cache-hit == 'true'
+        run: find ./build -type f -exec touch {} + 
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
