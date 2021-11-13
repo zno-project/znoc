@@ -109,7 +109,9 @@ jobs:
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
       - name: Run tests
         run: |
+          echo "::add-matcher::.github/workflows/gtest-problem-match.json" 
           LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
+          echo "::remove-matcher owner=gtest-problems::"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
