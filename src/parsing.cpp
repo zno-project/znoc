@@ -129,6 +129,24 @@ int get_token(FILE *f) {
 	return thisChar;
 }
 
+int peek_next_token(FILE* f, int offset) {
+	auto currentPos = ftell(f);
+	char oldLastChar = lastChars[f];
+	auto oldLexLoc = LexLoc;
+	auto oldCurrentToken = currentToken;
+	auto oldCurrentTokenVal = currentTokenVal;
+	int ret = 0;
+	for (int i = 0; i < offset; i++) {
+		ret = get_next_token(f);
+	}
+	lastChars[f] = oldLastChar;
+	LexLoc = oldLexLoc;
+	fseek(f, currentPos, SEEK_SET);
+	currentToken = oldCurrentToken;
+	currentTokenVal = oldCurrentTokenVal;
+	return ret;
+}
+
 int get_next_token(FILE *f) {
 	//std::cout << "getnexttoken" << std::endl;
 	currentToken = get_token(f);

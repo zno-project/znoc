@@ -9,6 +9,7 @@
 
 int advance(FILE* f);
 int get_token(FILE* f);
+int peek_next_token(FILE* f, int offset = 1);
 int get_next_token(FILE* f);
 
 extern int currentToken;
