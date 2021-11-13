@@ -4,7 +4,7 @@
             "owner": "gtest-problems",
             "pattern": [
                 {
-                    "regexp": "^(.*)(?=:\\d+):(\\d+):\\s*(Failure)\n(([^/])*)(?=^)",
+                    "regexp": "(.*)(?=:\\d+):(\\d+):\\s*(Failure)\n(([^/])*)(?!.*\/)",
                     "file": 1,
                     "line": 2,
                     "message": 4
