@@ -78,6 +78,9 @@ jobs:
             dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt mingw-w64-x86_64-diffutils mingw-w64-x86_64-sed
             make-command: CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make
             shell: msys2 {0}
+        exclude:
+          - os: windows
+            test-type: regression
     runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
     needs: [build]
     defaults:
