@@ -210,7 +210,7 @@ jobs:
   publish-tests:
     runs-on: ubuntu-latest
     needs: [test-macos, test-linux, test-windows]
-    if: !cancelled()
+    if: success() || failure()
     steps:
       - name: Download test results (macos)
         uses: actions/download-artifact@v2
