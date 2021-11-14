@@ -64,7 +64,7 @@ test-unit: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
 test-regression: $(REGRESSION_TESTS)
-	cd test/regression/build/tests && for test in *; do ./$$test | diff -q - ../../compare/$$test; done
+	cd test/regression/build/tests && for test in *; do ./$$test | diff -q - `echo "../../compare/$$test" | sed "s/\.exe//g"`; done
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
