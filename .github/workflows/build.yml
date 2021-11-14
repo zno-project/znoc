@@ -114,7 +114,9 @@ jobs:
           ${{ matrix.make-command }}
       - name: Run tests
         run: |
+          echo "::add-matcher::.github/workflows/diff-problem-match.json" 
           ${{ matrix.make-command }} test-${{ matrix.test-type }}
+          echo "::remove-matcher owner=diff-problems::"
       - name: Upload test results
         if: ${{ matrix.test-type == 'unit' }}
         uses: actions/upload-artifact@v2
