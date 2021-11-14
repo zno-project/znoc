@@ -3,12 +3,6 @@
         {
             "owner": "diff-problems",
             "pattern": [
-                {
-                    "regexp": "^(Warning): ([^']*'([\\w/.]*)'.*)",
-                    "file": 3,
-                    "message": 2,
-					"severity": 1
-                },
 				{
                     "regexp": "^([^:]*):",
                     "file": 1
@@ -20,6 +14,17 @@
 					"loop": true
 				}
             ]
-        }
+        },
+		{
+			"owner": "diff-warnings",
+			"pattern": [
+                {
+                    "regexp": "^(Warning): ([^']*'([\\w/.]*)'.*)",
+                    "file": 3,
+                    "message": 2,
+					"severity": 1
+                }
+			]
+		}
     ]
 }
