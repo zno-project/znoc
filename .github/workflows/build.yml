@@ -123,37 +123,21 @@ jobs:
           path: test/unit/build/out.xml
           retention-days: 1
 
-  # publish-tests:
-  #   runs-on: ubuntu-latest
-  #   needs: [unit-test-macos, unit-test-linux, unit-test-windows]
-  #   if: always()
-  #   steps:
-  #     - name: Download test results (macos)
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: znoc-macos-test-results
-  #         if-no-files-found: error
-  #         path: macos
-  #     - name: Download test results (linux)
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: znoc-linux-test-results
-  #         if-no-files-found: error
-  #         path: linux
-  #     - name: Download test results (windows)
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: znoc-windows-test-results
-  #         if-no-files-found: error
-  #         path: windows
-  #     - name: Publish Unit Test Results
-  #       uses: EnricoMi/publish-unit-test-result-action@v1
-  #       with:
-  #         report_individual_runs: "true"
-  #         files: |
-  #           macos/out.xml
-  #           linux/out.xml
-  #           windows/out.xml
+  publish-tests:
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: success() || failure()
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v2
+        with:
+          path: test-results
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          report_individual_runs: "true"
+          files: |
+            test-results/**/*.xml
             
   # publish-discord:
   #   runs-on: ubuntu-latest
