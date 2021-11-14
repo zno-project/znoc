@@ -55,9 +55,9 @@ clean: clean-compiler clean-test clean-check
 	
 clean-compiler:
 	rm -rf build
-clean-test:
+clean-unit-tests:
 	rm -rf test/unit/build
-clean-check:
+clean-regression-tests:
 	rm -rf test/regression/build
 
 test-unit: $(UNIT_TESTS)
