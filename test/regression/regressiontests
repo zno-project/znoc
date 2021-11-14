@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd test/regression/build/tests
 
 FAILED=0
