@@ -236,6 +236,7 @@ std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(FILE* f, unsigne
 	} else if (currentToken == '(') {
 		get_next_token(f);
 		lhs = parse_pratt_expression(f);
+		EXPECT(')', "to match opening bracket");
 	} else {
 		auto op = parse_operator(f);
 		advance_op(op, f);
