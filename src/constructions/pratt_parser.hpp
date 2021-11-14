@@ -109,8 +109,4 @@ struct PostfixBindingPower {
 	unsigned int lhs;
 };
 
-namespace Parser {
-	std::unique_ptr<AST::Expression> parse_pratt_expression(FILE* f, unsigned int min_bp = 0);
-}
-
 #endif

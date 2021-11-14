@@ -105,7 +105,7 @@ std::unique_ptr<AST::Expression> Parser::parse_statement(FILE* f) {
 	if (statement) return statement;
 
 	statement = parse_semicolon_statement(f);
-	if (!statement) statement = parse_binary_expression(f);
+	if (!statement) statement = parse_pratt_expression(f);
 
 	//if (currentToken != ';') throw UNEXPECTED_CHAR(currentToken, "; after statement");
 	//get_next_token(f); // trim ;

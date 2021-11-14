@@ -1,6 +1,7 @@
 #include "pratt_parser.hpp"
 #include "expression.hpp"
 #include "../parsing.hpp"
+#include "construction_parse.hpp"
 #include <memory>
 #include <stdio.h>
 

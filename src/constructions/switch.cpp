@@ -58,7 +58,7 @@ std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	EXPECT(tok_switch, "in switch statement");
 
 	push_new_scope();
-	auto condition = parse_binary_expression(f);
+	auto condition = parse_pratt_expression(f);
 	
 	auto body = std::vector<std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>>();
 	std::unique_ptr<AST::CodeBlock> default_body;

@@ -32,7 +32,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 		std::vector<std::unique_ptr<AST::Expression>> args;
 
 		LIST('(', ',', ')', {
-			args.push_back(parse_binary_expression(f));
+			args.push_back(parse_pratt_expression(f));
 		}, "function args");
 
 		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
@@ -52,7 +52,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 				args.push_back(std::make_unique<AST::UnaryExpression>('&', std::make_unique<AST::MemoryRef>(variable)));
 
 				LIST('(', ',', ')', {
-					args.push_back(parse_binary_expression(f));
+					args.push_back(parse_pratt_expression(f));
 				}, "function args");
 
 				return std::make_unique<AST::FunctionCall>(variable->underlying_type.get_function_by_name(field_name), std::move(args));

@@ -27,7 +27,7 @@ llvm::Value* AST::ContinueExpression::codegen(llvm::IRBuilder<> *builder, __attr
 std::unique_ptr<AST::Expression> Parser::parse_break(FILE* f) {
 	EXPECT(tok_break, "in break statement");
 	if (currentToken == ';') return std::make_unique<AST::BreakExpression>(nullptr);
-	else return std::make_unique<AST::BreakExpression>(parse_binary_expression(f));
+	else return std::make_unique<AST::BreakExpression>(parse_pratt_expression(f));
 
 	// NOTE: Can't use OPTIONAL or IF_TOK_ELSE since can't trim semicolon
 }

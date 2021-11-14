@@ -23,7 +23,7 @@ std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeIns
 		EXPECT('.', "struct field reference");
 		auto field_name = EXPECT_IDENTIFIER("field name");
 		EXPECT('=', "before value");
-		auto val = parse_binary_expression(f);
+		auto val = parse_pratt_expression(f);
 		auto field_info = to_init.get_field_info_by_name(field_name);
 		auto field_gep = std::make_shared<AST::GEP>(struct_var, std::get<AST::FieldInfoField>(field_info).index);
 		auto field_ref = std::make_unique<AST::MemoryRef>(field_gep);

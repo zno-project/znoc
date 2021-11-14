@@ -20,6 +20,7 @@ namespace Parser {
 	std::unique_ptr<AST::Expression> parse_variable_def(FILE* f);
 	std::unique_ptr<AST::Expression> parse_fallthrough(FILE* f);
 	std::unique_ptr<AST::Expression> parse_string(FILE* f);
+	std::unique_ptr<AST::Expression> parse_pratt_expression(FILE* f, unsigned int min_bp = 0);
 }
 
 #endif

@@ -121,7 +121,7 @@ std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
 	//if (currentToken != '=') throw UNEXPECTED_CHAR(currentToken, "expected `=` or type after variable name");
 	//get_next_token(f); // Trim the =
 
-	std::unique_ptr<AST::Expression> val = parse_binary_expression(f);
+	std::unique_ptr<AST::Expression> val = parse_pratt_expression(f);
 	if (!type) type = val->getType();
 	return std::make_unique<AST::VariableDef>(name, std::move(*type), std::move(val));
 }
