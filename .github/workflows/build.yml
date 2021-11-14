@@ -82,7 +82,7 @@ jobs:
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
-          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
+          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
       - name: Run tests
         run: |
           echo "::add-matcher::.github/workflows/gtest-problem-match.json" 
