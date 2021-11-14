@@ -64,7 +64,7 @@ test-unit: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
 test-regression: $(REGRESSION_TESTS)
-	test/regression/regressiontests
+	bash test/regression/regressiontests
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
