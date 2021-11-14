@@ -39,10 +39,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Install dependencies
-        if: ${{ matrix.os != windows }}
+        if: ${{ matrix.os != 'windows' }}
         run: ${{ matrix.dep-command }}
       - name: Install msys2
-        if: ${{ matrix.os == windows }}
+        if: ${{ matrix.os == 'windows' }}
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
