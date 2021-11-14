@@ -1,3 +1,6 @@
+#ifndef _ZNO_TEST_FRAMEWORK_H
+#define _ZNO_TEST_FRAMEWORK_H
+
 #include "main.hpp"
 #include "memory/memory_location.hpp"
 #include "types/type.hpp"
@@ -14,7 +17,6 @@
 
 #include <string.h>
 
-std::unique_ptr<AST::Namespace> GlobalNamespace;
 extern std::map<FILE*, char> lastChars;
 
 class CompilerGlobals {
@@ -57,3 +59,5 @@ class CompilerMain: CompilerGlobals {
 
   // void TearDown() override {}
 };
+
+#endif
