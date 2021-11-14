@@ -79,6 +79,7 @@ jobs:
             make-command: CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make
             shell: msys2 {0}
     runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
+    needs: [build]
     defaults:
       run:
         shell: ${{ matrix.shell }}
