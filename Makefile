@@ -60,10 +60,10 @@ clean-test:
 clean-check:
 	rm -rf test/regression/build
 
-test: $(UNIT_TESTS)
+test-unit: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
-check: $(REGRESSION_TESTS)
+test-regression: $(REGRESSION_TESTS)
 	cd test/regression/build/tests && for test in *; do ./$$test | diff -q - ../../compare/$$test; done
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
