@@ -28,6 +28,10 @@ namespace AST {
 		int getLine() const { return Loc.Line; }
 		int getCol() const { return Loc.Col; }
 		AST::TypeInstance getType() { return expressionType; }
+
+		virtual std::string print() const {
+			return "Cannot print this expr";
+		}
 	};
 }
 

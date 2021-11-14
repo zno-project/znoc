@@ -93,6 +93,13 @@ namespace AST {
 			}
 			return llvm::ConstantFP::get(*TheContext, llvm::APFloat(value.f));
 		};
+
+		virtual std::string print() const override {
+			if (is_int_val) {
+				return std::to_string(value.i);
+			}
+			return std::to_string(value.f);
+		}
 	};
 }
 
