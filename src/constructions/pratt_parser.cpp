@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdio.h>
 
-char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|", "~", "^", "&&", "||", "!", "<<", ">>", "==", "!=", "<", ">", "<=", ">=", "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "is", "[]"};
+char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|", "~", "^", "&&", "||", "!", "<<", ">>", "==", "!=", "<", ">", "<=", ">=", "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "is", "["};
 
 void advance_op(operators op, FILE *f) {
 	switch (op) {
@@ -20,6 +20,7 @@ void advance_op(operators op, FILE *f) {
 		case bitwise_xor:
 		case logical_not:
 		case assign:
+		case subscript:
 			get_next_token(f);
 			break;
 		case double_colon:
@@ -258,7 +259,13 @@ std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(FILE* f, unsigne
 			}
 			advance_op(op, f);
 
-			lhs = std::make_unique<AST::UnaryExpressionPostfix>(op, std::move(lhs));
+			if (op == subscript) {
+				auto rhs = parse_pratt_expression(f);
+				EXPECT(']', "to match opening bracket");
+				lhs = std::make_unique<AST::NewBinaryExpression>(op, std::move(lhs), std::move(rhs));
+			} else {
+				lhs = std::make_unique<AST::UnaryExpressionPostfix>(op, std::move(lhs));
+			}
 			continue;
 		}
 
