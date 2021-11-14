@@ -1,0 +1,25 @@
+cd test/regression/build/tests
+
+FAILED=0
+
+for test in *; do
+	TEST_OUTPUT=$(./$test)
+	EXPECTED_OUTPUT_FILE=$(echo "../../compare/$test" | sed "s/\.exe//g")
+	if ! test -f $EXPECTED_OUTPUT_FILE; then
+		echo "Warning: test 'test/regression/$(echo $test | sed "s/\.exe//g").zno' has no corresponding file to compare to"
+		continue
+	fi
+	EXPECTED_OUTPUT=$(cat $EXPECTED_OUTPUT_FILE)
+	
+	diff -q <(echo "$TEST_OUTPUT") $EXPECTED_OUTPUT_FILE > /dev/null
+	if ! [ $? -eq 0 ]; then
+		echo "output of test '$test' did not match expected output from file $EXPECTED_OUTPUT_FILE"
+		FAILED=1
+		echo "test/regression/compare/$test:"
+		diff --old-line-format=" output:%dn: lost '%l'
+" --new-line-format=" output:%dn: inserted '%l'
+" --unchanged-line-format="" <(echo "$TEST_OUTPUT") $EXPECTED_OUTPUT_FILE | sed -r '/^\s*$/d'
+	fi
+done;
+
+exit $FAILED
