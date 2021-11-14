@@ -72,7 +72,7 @@ jobs:
         with:
           path: |
             build/
-          key: macos-build-${{ github.run_id }}
+          key: macos-latest-build-${{ github.run_id }}
       - name: touch build in cache
         if: steps.cache-retrieve.outputs.cache-hit == 'true'
         run: find ./build -type f -exec touch {} + 
@@ -110,7 +110,7 @@ jobs:
         with:
           path: |
             build/
-          key: linux-build-${{ github.run_id }}
+          key: ubuntu-latest-build-${{ github.run_id }}
       - name: touch build in cache
         if: steps.cache-retrieve.outputs.cache-hit == 'true'
         run: find ./build -type f -exec touch {} + 
@@ -156,7 +156,7 @@ jobs:
         with:
           path: |
             build/
-          key: windows-build-${{ github.run_id }}
+          key: windows-latest-build-${{ github.run_id }}
       - name: touch build in cache
         if: steps.cache-retrieve.outputs.cache-hit == 'true'
         run: find ./build -type f -exec touch {} + 
