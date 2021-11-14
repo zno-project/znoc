@@ -55,16 +55,16 @@ clean: clean-compiler clean-test clean-check
 	
 clean-compiler:
 	rm -rf build
-clean-unit-tests:
+clean-test:
 	rm -rf test/unit/build
-clean-regression-tests:
+clean-check:
 	rm -rf test/regression/build
 
-test-unit: $(UNIT_TESTS)
+test: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
-test-regression: $(REGRESSION_TESTS)
-	test/regression/regressiontests
+check: $(REGRESSION_TESTS)
+	cd test/regression/build/tests && for test in *; do ./$$test | diff -q - ../../compare/$$test; done
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
 
