@@ -8,7 +8,6 @@
 #include "../casting.hpp"
 #include "../parsing.hpp"
 #include "../macros.hpp"
-#include "binary_op.hpp"
 #include <fmt/format.h>
 #include <llvm/IR/BasicBlock.h>
 #include "../types/builtins.hpp"

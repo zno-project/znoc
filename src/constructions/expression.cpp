@@ -10,7 +10,7 @@ llvm::BasicBlock *condBB = nullptr; // Condition block of current control flow c
 
 // PARENTHESIS EXPRESSION
 // parenthesis_expr = '(' binary_expr ')';
-std::unique_ptr<AST::Expression> Parser::parse_parentheses_expression(FILE* f) {
+/*std::unique_ptr<AST::Expression> Parser::parse_parentheses_expression(FILE* f) {
 	//get_next_token(f); // Trim (
 	EXPECT('(', "to start parenthesis expression");
 	auto E = parse_binary_expression(f);
@@ -18,7 +18,7 @@ std::unique_ptr<AST::Expression> Parser::parse_parentheses_expression(FILE* f) {
 	//if (currentToken != ')') throw UNEXPECTED_CHAR(currentToken, ") to match opening (");
 	//get_next_token(f); // Trim )
 	return E;
-}
+}*/
 
 // NON SEMICOLON STATEMENT
 // non_semicolon_statement = codeblock |
@@ -68,9 +68,6 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 		case tok_let: {
 			//throw std::runtime_error("variable def");
 			return parse_variable_def(f);
-		}
-		case '(': {
-			return parse_parentheses_expression(f);
 		}
 		default: throw UNEXPECTED_CHAR(currentToken, "r-value");
 	}

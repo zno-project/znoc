@@ -10,7 +10,6 @@
 #include "../llvm_module.hpp"
 #include "../casting.hpp"
 #include "../macros.hpp"
-#include "binary_op.hpp"
 #include "../parsing.hpp"
 #include "expression.hpp"
 #include "construction_parse.hpp"
