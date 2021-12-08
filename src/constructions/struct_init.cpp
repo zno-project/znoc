@@ -11,7 +11,7 @@
 #include <memory>
 
 std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeInstance to_init) {
-	std::vector<AST::TypeInstance> template_types;
+	/*std::vector<AST::TypeInstance> template_types;
 	OPTIONAL_LIST('<', ',', '>', {
 		template_types.push_back(Parser::parse_type(f));
 	}, "template list");
@@ -31,5 +31,5 @@ std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeIns
 		cb_exprs.push_back(std::move(assign_expr));
 	}, "struct fields");
 	cb_exprs.push_back(std::make_unique<AST::MemoryRef>(struct_var));
-	return std::make_unique<AST::CodeBlock>(std::move(cb_exprs));
+	return std::make_unique<AST::CodeBlock>(std::move(cb_exprs));*/
 }

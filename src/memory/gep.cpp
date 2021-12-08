@@ -10,10 +10,6 @@ llvm::Value* AST::GEP::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Value* a[] = {zero, i};
 	auto idxs = llvm::ArrayRef<llvm::Value*>(a);
 
-	llvm::Value *index_loc;
-	if (to_index) index_loc = to_index->codegen(builder);
-	else index_loc = to_index_expr->codegen_to_ptr(builder);
-
-	allocaV = builder->CreateGEP(index_loc, idxs);
+	allocaV = builder->CreateGEP(to_index->codegen_to_ptr(builder), idxs);
 	return allocaV;
 }
