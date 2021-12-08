@@ -15,8 +15,8 @@
 namespace AST {
 	class MemoryLoc {
 		protected:
-		llvm::Value *allocaV;
 		public:
+		llvm::Value *allocaV;
 		AST::TypeInstance underlying_type;
 		
 		MemoryLoc(AST::TypeInstance underlying_type): allocaV(nullptr), underlying_type(underlying_type) {};

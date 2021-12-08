@@ -11,7 +11,7 @@ AST::TypeInstance AST::Namespace::get_type_by_name(std::string type_name) {
 	try {
 		return named_types.at(type_name);
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Could not find type {}:{}", name, type_name));
+		throw std::runtime_error(fmt::format("Could not find type {}::{}", name, type_name));
 	}
 }
 
@@ -20,7 +20,7 @@ std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string 
 		auto f = named_functions.at(func_name);
 		return f;
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find function {}:{}(...)", name, func_name));
+		throw std::runtime_error(fmt::format("Cannot find function {}::{}(...)", name, func_name));
 	}
 }
 

@@ -21,7 +21,17 @@ namespace AST {
 		const std::string& getName() const {return name;}
 	};
 
-	std::shared_ptr<AST::Variable> get_var(std::string var);
+	std::shared_ptr<AST::MemoryLoc> get_var(std::string var);
+
+	class GlobalVariable: public AST::MemoryLoc {
+		private:
+		std::string name;
+		std::unique_ptr<AST::Expression> initializer;
+
+		public:
+		GlobalVariable(std::string name, std::unique_ptr<AST::Expression> initializer): name(name), initializer(std::move(initializer)), MemoryLoc(initializer->getType()) {}
+		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
+	};
 }
 
 #include "../constructions/expression.hpp"

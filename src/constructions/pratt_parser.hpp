@@ -51,7 +51,8 @@ enum operators {
 	assign_shift_right,
 	
 	is,
-	subscript
+	subscript,
+	call
 };
 
 extern char *operator_to_string[];
@@ -59,14 +60,23 @@ extern char *operator_to_string[];
 namespace AST {
 	class UnaryExpressionPrefix: public Expression {
 		private:
+			AST::TypeInstance get_prefix_op_ret_type(operators op, std::unique_ptr<AST::Expression>& expr);
+		public:
 			operators op;
 			std::unique_ptr<Expression> expr;
 		public:
-			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(expr->getType()) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") { return nullptr; }
+			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(get_prefix_op_ret_type(op, expr)) {}
+			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
 			
 			virtual std::string print() const override {
 				return std::string("(") + operator_to_string[op] + " " + expr->print() + ")";
+			}
+
+			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+				if (op == operators::star) {
+					return expr->codegen(builder);
+				}
+				Expression::codegen_to_ptr(builder);
 			}
 	};
 
@@ -76,23 +86,47 @@ namespace AST {
 			std::unique_ptr<Expression> expr;
 		public:
 			UnaryExpressionPostfix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(expr->getType()) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") { return nullptr; }
+			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
 			
 			virtual std::string print() const override {
 				return std::string("(") + expr->print() + " " + operator_to_string[op] = ")";
 			}
 	};
 
+	class NewCallExpression: public Expression {
+		private:
+			std::unique_ptr<Expression> func;
+			std::vector<std::unique_ptr<Expression>> args;
+		public:
+			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : func(std::move(func)), args(std::move(args)), Expression(func->getType().get_return_of_fptr()) {}
+			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
+
+			std::string print() const override {
+				auto ret = std::string("(") + func->print() + "(";
+				for (auto &arg : args) {
+					ret += arg->print() + ", ";
+				}
+				ret += "))";
+				return ret;
+			}
+	};
+
 	class NewBinaryExpression: public Expression {
+		private:
+			AST::TypeInstance get_binop_ret_type(operators op, std::unique_ptr<AST::Expression>& lhs, std::unique_ptr<AST::Expression>& rhs);
 		public:
 			operators op;
 			std::unique_ptr<Expression> lhs, rhs;
 		public:
-			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)), Expression(lhs->getType()) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") { return nullptr; }
+			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)), Expression(get_binop_ret_type(op, lhs, rhs)) {}
+			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
 			
 			std::string print() const override {
 				return std::string("(") + lhs->print() + " " + operator_to_string[op] + " " + rhs->print() + ")";
+			}
+
+			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+				return rhs->codegen_to_ptr(builder);
 			}
 	};
 }

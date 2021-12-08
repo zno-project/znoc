@@ -3,6 +3,7 @@
 #include "../parsing.hpp"
 #include "../macros.hpp"
 #include "../llvm_module.hpp"
+#include "../main.hpp"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constant.h>
@@ -22,6 +23,13 @@
 #include <optional>
 
 llvm::AllocaInst* create_entry_block_alloca(llvm::Function *in_func, std::string name, llvm::Type* t) {
+	std::string type_str_src;
+	llvm::raw_string_ostream rso(type_str_src);
+	t->print(rso);
+
+	std::cout << "Creating entry block alloca for " << name << ": " << type_str_src << std::endl;
+
+
 	llvm::IRBuilder<> tmpBuilder(&in_func->getEntryBlock(), in_func->getEntryBlock().begin());
 	return tmpBuilder.CreateAlloca(t, nullptr, fmt::format("{}_stack", name));
 }
@@ -32,6 +40,15 @@ llvm::Value* AST::Variable::codegen(llvm::IRBuilder<> *builder) {
 	if (!allocaV) {
 		llvm::Type *ty = underlying_type.codegen();
 		allocaV = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), name, ty);
+	}
+	return allocaV;
+}
+
+llvm::Value* AST::GlobalVariable::codegen(__attribute__((unused)) llvm::IRBuilder<> *builder) {
+	if (!allocaV) {
+		allocaV = new llvm::GlobalVariable(*TheModule, underlying_type.codegen(), true, llvm::GlobalValue::PrivateLinkage, initializer->codegen_const(), name);
+		//llvm::Type *ty = underlying_type.codegen();
+		//allocaV = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), name, ty);
 	}
 	return allocaV;
 }
@@ -50,7 +67,7 @@ llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder, __attribute__
 		//auto alloca = builder->CreateAlloca(getCodegenType(type.get()), nullptr, name);
 		//NamedValues.front()[name] = std::pair<llvm::Type*, llvm::Value*>(ty, alloca); // Local variable
 
-		return nullptr;
+		return builder->CreateLoad(allocaV);
 	/*} else {
 		TheModule->getOrInsertGlobal(name, ty);
 		auto global = TheModule->getGlobalVariable(name);
@@ -126,7 +143,7 @@ std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
 	return std::make_unique<AST::VariableDef>(name, std::move(*type), std::move(val));
 }
 
-std::shared_ptr<AST::Variable> AST::get_var(std::string var) {
+std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {
 	for (auto &scope_vars: stack_allocations) {
 		if (scope_vars.find(var) != scope_vars.end()) {
 			auto m = scope_vars[var];
@@ -136,7 +153,11 @@ std::shared_ptr<AST::Variable> AST::get_var(std::string var) {
 		}
 	}
 
-	throw std::runtime_error(fmt::format("Couldn't find variable {} in current scope", var));
+	auto gv = GlobalNamespace->get_var(var);
+	if (gv) return gv;
+
+	std::cerr << fmt::format("Couldn't find variable {} in current scope", var) << std::endl;
+	return nullptr;
 }
 
 /*std::shared_ptr<AST::Variable> AST::get_var(std::string var) {

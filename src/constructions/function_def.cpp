@@ -28,10 +28,17 @@
 #include <llvm/IR/Verifier.h>
 #include <fmt/format.h>
 
-llvm::Value* AST::Function::codegen() {
-	llvm::Function *F = generated;
+llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
+	std::cout << "gen func " << this->name << std::endl;
+	if (allocaV) return allocaV;
+	codegen_prototype();
+	llvm::Function *F = static_cast<llvm::Function*>(allocaV);
+
+	std::cout << "no allocaV for " << this->name << std::endl;
 
 	if (body) {
+		std::cout << "gen body for " << this->name << std::endl;
+
 		llvm::BasicBlock *block = llvm::BasicBlock::Create(*TheContext, "entry", F);
 		llvm::IRBuilder<> builder(block);
 
@@ -53,7 +60,7 @@ llvm::Value* AST::Function::codegen() {
 		//TheFPM->run(*F);
 	}
 
-	return nullptr;
+	return allocaV = (llvm::Value*)F;
 }
 
 void AST::Function::codegen_prototype() {
@@ -66,12 +73,13 @@ void AST::Function::codegen_prototype() {
 	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, false);
 	llvm::FunctionCallee f = TheModule->getOrInsertFunction(this->get_name(), ft);
 
-	generated = (llvm::Function*)(f.getCallee());
-	generated->setCallingConv(llvm::CallingConv::C);
+	auto f2 = (llvm::Function*)(f.getCallee());
+	f2->setCallingConv(llvm::CallingConv::C);
 
 	//std::cout << attributes << std::endl;
 
-	if (attributes[(unsigned long)Attributes::AlwaysInline]) generated->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	allocaV = f2;
 }
 
 // FUNCTION
@@ -80,7 +88,8 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
-	auto name = EXPECT_IDENTIFIER("function name after 'func'");
+	std::string name = self_type.has_value() ? self_type->base_type->get_name() + "::" : "";
+	name += EXPECT_IDENTIFIER("function name after 'func'");
 
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;

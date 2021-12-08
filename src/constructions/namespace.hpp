@@ -7,6 +7,7 @@
 #include "function_def.hpp"
 #include <stdio.h>
 #include <iostream>
+#include <fmt/format.h>
 
 namespace AST {
 	class Namespace {
@@ -45,17 +46,21 @@ namespace AST {
 			return this;
 		}
 
+		std::shared_ptr<AST::MemoryLoc> get_var(std::string var) {
+			if (named_functions.find(var) != named_functions.end()) {
+				auto m = named_functions[var];
+				return m;
+			}
+			return nullptr;
+		}
+
 		void codegen() {
 			for (auto &n : namespaces) {
 				n.second->codegen();
 			}
 
 			for (auto &func : named_functions) {
-				func.second->codegen_prototype();
-			}
-
-			for (auto &func : named_functions) {
-				func.second->codegen();
+				func.second->codegen(nullptr);
 			}
 		}
 	};
