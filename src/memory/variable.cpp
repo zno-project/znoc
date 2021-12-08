@@ -18,6 +18,8 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DataLayout.h>
 
+#include <llvm/Support/raw_ostream.h>
+
 #include <iostream>
 #include <memory>
 #include <optional>

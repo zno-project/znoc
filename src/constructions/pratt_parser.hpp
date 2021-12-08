@@ -76,7 +76,7 @@ namespace AST {
 				if (op == operators::star) {
 					return expr->codegen(builder);
 				}
-				Expression::codegen_to_ptr(builder);
+				return Expression::codegen_to_ptr(builder);
 			}
 	};
 
