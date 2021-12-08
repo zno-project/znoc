@@ -10,260 +10,163 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-macos:
-    runs-on: macos-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os-version: [latest]
+        os: [macos, ubuntu, windows]
+        include:
+          - os: macos
+            dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+            build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+            shell: bash
+          - os: ubuntu
+            dep-command: sudo apt update; sudo apt install libfmt-dev llvm
+            build-command: CC=clang CXX=clang++ make
+            shell: bash
+          - os: windows
+            dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
+            build-command: CC=clang CXX=clang++ mingw32-make
+            shell: msys2 {0}
+    runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Install dependencies
-        run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+        if: ${{ matrix.os != 'windows' }}
+        run: ${{ matrix.dep-command }}
+      - name: Install msys2
+        if: ${{ matrix.os == 'windows' }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: ${{ matrix.dep-command }}
       - name: Build executable
         run: |
           echo "::add-matcher::.github/workflows/clang-problem-match.json" 
-          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+          ${{ matrix.build-command }}
           echo "::remove-matcher owner=clang-problems::"
-      - name: Upload built executable
-        uses: actions/upload-artifact@v2
-        with:
-          name: znoc-macos
-          path: build/znoc
       - name: Cache object code
         uses: actions/cache@v2
         with:
           path: |
             build/
-          key: macos-build-${{ github.run_id }}
+          key: ${{ matrix.os }}-${{ matrix.os-version }}-build-${{ github.run_id }}
 
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install libfmt-dev llvm
-      - name: Build executable
-        run: |
-          CC=clang CXX=clang++ make
-      - name: Upload built executable
-        uses: actions/upload-artifact@v2
-        with:
-          name: znoc-linux
-          path: build/znoc
-      - name: Cache object code
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/
-          key: linux-build-${{ github.run_id }}
-  
-  build-windows:
-    runs-on: windows-latest
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os-version: [latest]
+        os: [macos, ubuntu, windows]
+        test-type: [unit, regression]
+        include:
+          - os: macos
+            dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+            make-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+            shell: bash
+          - os: ubuntu
+            dep-command: sudo apt update; sudo apt install libfmt-dev llvm
+            make-command: CC=clang CXX=clang++ make
+            shell: bash
+          - os: windows
+            dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt mingw-w64-x86_64-diffutils mingw-w64-x86_64-sed
+            make-command: CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make
+            shell: msys2 {0}
+    runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
+    needs: [build]
     defaults:
       run:
-        shell: msys2 {0}
+        shell: ${{ matrix.shell }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Install dependencies
+        if: ${{ matrix.os != 'windows' }}
+        run: ${{ matrix.dep-command }}
       - name: Install msys2
+        if: ${{ matrix.os == 'windows' }}
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           update: true
-          install: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
-      - name: Build executable
-        run: |
-          CC=clang CXX=clang++ mingw32-make
-      - name: Upload built executable
-        uses: actions/upload-artifact@v2
-        with:
-          name: znoc-windows
-          path: build/znoc.exe
-      - name: Cache object code
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/
-          key: windows-build-${{ github.run_id }}
-
-
-  test-macos:
-    runs-on: macos-latest
-    needs: build-macos
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
+          install: ${{ matrix.dep-command }}
       - name: Retrieve build from cache
         id: cache-retrieve
         uses: actions/cache@v2
         with:
           path: |
             build/
-          key: macos-build-${{ github.run_id }}
+          key: ${{ matrix.os }}-${{ matrix.os-version }}-build-${{ github.run_id }}
       - name: touch build in cache
         if: steps.cache-retrieve.outputs.cache-hit == 'true'
-        run: find ./build -type f -exec touch {} + 
-      - name: Install dependencies
-        run: |
-          env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
+        run: find ./build -type f -exec touch {} +
       - name: Build executable
         if: steps.cache-retrieve.outputs.cache-hit != 'true'
         run: |
-          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ make
+          ${{ matrix.make-command }}
       - name: Run tests
         run: |
-          echo "::add-matcher::.github/workflows/gtest-problem-match.json" 
-          LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake test
-          echo "::remove-matcher owner=gtest-problems::"
+          echo "::add-matcher::.github/workflows/diff-problem-match.json" 
+          ${{ matrix.make-command }} test-${{ matrix.test-type }}
+          echo "::remove-matcher owner=diff-problems::"
+          echo "::remove-matcher owner=diff-warnings::"
       - name: Upload test results
-        if: always()
+        if: ${{ matrix.test-type == 'unit' }}
         uses: actions/upload-artifact@v2
         with:
-          name: znoc-macos-test-results
-          path: test/unit/build/out.xml
-          retention-days: 1
-  
-  test-linux:
-    runs-on: ubuntu-latest
-    needs: build-linux
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: Retrieve build from cache
-        id: cache-retrieve
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/
-          key: linux-build-${{ github.run_id }}
-      - name: touch build in cache
-        if: steps.cache-retrieve.outputs.cache-hit == 'true'
-        run: find ./build -type f -exec touch {} + 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install libfmt-dev llvm
-      - name: Build executable
-        if: steps.cache-retrieve.outputs.cache-hit != 'true'
-        run: |
-          CC=clang CXX=clang++ make
-      - name: Run tests
-        run: |
-          CC=clang CXX=clang++ make test
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: znoc-linux-test-results
-          path: test/unit/build/out.xml
-          retention-days: 1
-
-  test-windows:
-    runs-on: windows-latest
-    needs: build-windows
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: Install msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
-      - name: Retrieve build from cache
-        id: cache-retrieve
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/
-          key: windows-build-${{ github.run_id }}
-      - name: touch build in cache
-        if: steps.cache-retrieve.outputs.cache-hit == 'true'
-        run: find ./build -type f -exec touch {} + 
-      - name: Build executable
-        if: steps.cache-retrieve.outputs.cache-hit != 'true'
-        run: |
-          cd znoc
-          CC=clang CXX=clang++ mingw32-make
-      - name: Run tests
-        run: |
-          CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make test
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: znoc-windows-test-results
+          name: znoc-${{ matrix.os }}-${{ matrix.os-version }}-test-results
           path: test/unit/build/out.xml
           retention-days: 1
 
   publish-tests:
     runs-on: ubuntu-latest
-    needs: [test-macos, test-linux, test-windows]
+    needs: [test]
     if: success() || failure()
     steps:
-      - name: Download test results (macos)
+      - name: Download all test results
         uses: actions/download-artifact@v2
         with:
-          name: znoc-macos-test-results
-          if-no-files-found: error
-          path: macos
-      - name: Download test results (linux)
-        uses: actions/download-artifact@v2
-        with:
-          name: znoc-linux-test-results
-          if-no-files-found: error
-          path: linux
-      - name: Download test results (windows)
-        uses: actions/download-artifact@v2
-        with:
-          name: znoc-windows-test-results
-          if-no-files-found: error
-          path: windows
+          path: test-results
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           report_individual_runs: "true"
           files: |
-            macos/out.xml
-            linux/out.xml
-            windows/out.xml
+            test-results/**/*.xml
             
-  publish-discord:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-    needs: [build-macos, build-linux, build-windows]
-    steps:
-      - name: Download executable (macos)
-        uses: actions/download-artifact@v2
-        with:
-          name: znoc-macos
-          if-no-files-found: error
-          path: macos
-      - name: Download executable (linux)
-        uses: actions/download-artifact@v2
-        with:
-          name: znoc-linux
-          if-no-files-found: error
-          path: linux
-      - name: Download executable (windows)
-        uses: actions/download-artifact@v2
-        with:
-          name: znoc-windows
-          if-no-files-found: error
-          path: windows
-      - name: Publish executable on discord
-        run: |
-          curl -F 'payload_json={"content": "macos build"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "linux build"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "windows build"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+  # publish-discord:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+  #   needs: [build]
+  #   steps:
+  #     - name: Download executable (macos)
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: znoc-macos
+  #         if-no-files-found: error
+  #         path: macos
+  #     - name: Download executable (linux)
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: znoc-linux
+  #         if-no-files-found: error
+  #         path: linux
+  #     - name: Download executable (windows)
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: znoc-windows
+  #         if-no-files-found: error
+  #         path: windows
+  #     - name: Publish executable on discord
+  #       run: |
+  #         curl -F 'payload_json={"content": "macos build"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+  #         curl -F 'payload_json={"content": "linux build"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+  #         curl -F 'payload_json={"content": "windows build"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
