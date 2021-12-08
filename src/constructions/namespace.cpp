@@ -24,16 +24,26 @@ std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string 
 	}
 }
 
-AST::Namespace* AST::Namespace::get_namespace_by_name(std::string namespace_name) {
+std::shared_ptr<AST::Namespace> AST::Namespace::get_namespace_by_name(std::string namespace_name) {
 	try {
-		return &*namespaces.at(namespace_name);
+		return namespaces.at(namespace_name);
 	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find namespace {}:{}", name, namespace_name));
+	/*	throw std::runtime_error(fmt::format("Cannot find namespace {}::{}", name, namespace_name));
+	}
+}
+
+std::shared_ptr<AST::MemoryLoc> AST::Namespace::get_global_var_by_name(std::string var_name) {
+	try {
+		return named_variables.at(var_name);
+	} catch (std::out_of_range) {
+		throw std::runtime_error(fmt::format("Cannot find variable {}:{}", name, var_name));*/
+		std::cerr << fmt::format("Cannot find variable {}:{}", name, namespace_name) << std::endl;
+		return nullptr;
 	}
 }
 
 Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
-	auto n = &*GlobalNamespace;
+	auto n = GlobalNamespace;
 	std::string identifier;
 	while (1) {
 		identifier = std::get<std::string>(currentTokenVal);
@@ -48,7 +58,7 @@ Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
 	}
 
 	return Parser::NamespaceParseReturn {
-		.parsed_namespace = n,
+		.parsed_namespace = &*n,
 		.next_identifier = std::move(identifier),
 		.next_token = currentToken
 	};

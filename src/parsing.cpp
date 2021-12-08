@@ -164,7 +164,7 @@ bool has_searched_path(std::filesystem::path p) {
 }
 
 int parse_file(std::filesystem::path path,
-	std::unique_ptr<AST::Namespace> &current_namespace,
+	std::shared_ptr<AST::Namespace> &current_namespace,
 	bool insideUses) {
 	searchedIncludes.push_back(path);
 
@@ -218,7 +218,7 @@ int parse_file(std::filesystem::path path,
 				}
 
 				std::cout << "Parsing include " << newP.string() << " as " << namespace_name << std::endl;
-				auto new_namespace = std::make_unique<AST::Namespace>(namespace_name);
+				auto new_namespace = std::make_shared<AST::Namespace>(namespace_name);
 
 				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);

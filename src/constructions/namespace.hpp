@@ -13,7 +13,7 @@ namespace AST {
 		private:
 		std::map<std::string, AST::TypeInstance> named_types;
 		std::map<std::string, std::shared_ptr<AST::Function>> named_functions;
-		std::map<std::string, std::unique_ptr<AST::Namespace>> namespaces;
+		std::map<std::string, std::shared_ptr<AST::Namespace>> namespaces;
 		std::string name;
 
 		public:
@@ -23,7 +23,7 @@ namespace AST {
 
 		AST::TypeInstance get_type_by_name(std::string name);
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
-		AST::Namespace* get_namespace_by_name(std::string name);
+		std::shared_ptr<AST::Namespace> get_namespace_by_name (std::string name);
 
 		void add_type_with_name(AST::TypeInstance t, std::string name) {
 			named_types.insert({name, t});
@@ -39,7 +39,7 @@ namespace AST {
 			return this;
 		}
 
-		Namespace* operator <<(std::unique_ptr<AST::Namespace> n) {
+		Namespace* operator <<(std::shared_ptr<AST::Namespace> n) {
 			//std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
 			namespaces.insert({n->get_name(), std::move(n)});
 			return this;

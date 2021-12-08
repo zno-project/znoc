@@ -4,6 +4,6 @@
 #include <memory>
 
 namespace AST { class Namespace; }
-extern std::unique_ptr<AST::Namespace> GlobalNamespace;
+extern std::shared_ptr<AST::Namespace> GlobalNamespace;
 
 #endif
