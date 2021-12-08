@@ -57,6 +57,27 @@ namespace AST {
 		}
 	};
 
+	class fundamental_fptr: public TypeBase {
+		public:
+		fundamental_fptr() : TypeBase("fptr", {}, {}, {AST::Interface {}}, {}) {}
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
+			auto t = generic_types.at(template_instance).at(0).codegen();
+			return llvm::FunctionType::get(t, false);
+		}
+
+		AST::TypeInstance get_return_of_fptr(size_t template_instance) {
+			return generic_types.at(template_instance).at(0);
+		}
+	};
+
+	class fundamental_namespace_ref: public TypeBase {
+		public:
+		fundamental_namespace_ref() : TypeBase("namespace_ref") {}
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
+			return llvm::FunctionType::get(llvm::Type::getVoidTy(*TheContext), false);
+		}
+	};
+
 	class fundamental_ptr: public TypeBase {
 		public:
 		fundamental_ptr() : TypeBase("ptr", {}, {}, {AST::Interface {}}, {}) {}

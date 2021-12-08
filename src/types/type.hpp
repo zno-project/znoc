@@ -93,6 +93,9 @@ namespace AST {
 		AST::TypeInstance get_pointer_to();
 		AST::TypeInstance get_pointed_to();
 
+		AST::TypeInstance get_function_returning();
+		AST::TypeInstance get_return_of_fptr();
+
 		llvm::Type* codegen();
 		bool is_templateable();
 		bool is_array();
