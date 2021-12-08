@@ -25,7 +25,7 @@ class CompilerGlobals {
 		push_new_scope();
 		LexLoc = {1, 0};
 		lastChars = std::map<FILE*, char>();
-		GlobalNamespace = std::make_unique<AST::Namespace>("_G");
+		GlobalNamespace = std::make_shared<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }
 
