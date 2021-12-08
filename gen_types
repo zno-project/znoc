@@ -1,0 +1,5 @@
+int/half/float/double/fp128/void - llvm::Value* of correct type
+fptr - llvm::Value* of func pointer
+ptr - llvm::Value* of pointer
+namespace_ref - AST::Namespace* casted to llvm::Value*
+type_ref - 
