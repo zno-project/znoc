@@ -126,6 +126,16 @@ namespace AST {
 			}
 
 			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+				if (op == subscript) {
+					auto zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0));
+					auto i = rhs->codegen_const();
+					llvm::Value* a[] = {zero, i};
+					auto idxs = llvm::ArrayRef<llvm::Value*>(a);
+
+					auto gep = builder->CreateGEP(lhs->codegen_to_ptr(builder), idxs);
+					return gep;
+				}
+				
 				return rhs->codegen_to_ptr(builder);
 			}
 	};

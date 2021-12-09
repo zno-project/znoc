@@ -380,6 +380,11 @@ AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std
 		}
 	}
 
+	if (op == subscript) {
+		if (!lhs->getType().is_array()) throw std::runtime_error("Cannot subscript a non-array");
+		return lhs->getType().get_array_elem_of();
+	}
+
 	return lhs->getType();
 }
 
@@ -446,6 +451,8 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder, std::
 		case compare_gte:
 			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUGE(LHS_value, RHS_value, name);
 			else return builder->CreateICmpUGE(LHS_value, RHS_value, name);
+		case subscript: 
+			return builder->CreateLoad(this->codegen_to_ptr(builder));
 		default: throw std::runtime_error(fmt::format("unimplemented binary op {}", operator_to_string[op]));
 	}
 }
