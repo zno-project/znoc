@@ -94,7 +94,7 @@ namespace AST {
 		AST::TypeInstance get_pointed_to();
 
 		AST::TypeInstance get_function_returning();
-		AST::TypeInstance get_return_of_fptr();
+		AST::TypeInstance get_return_of_function();
 
 		AST::TypeInstance get_array_elem_of();
 

@@ -481,8 +481,7 @@ llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder, st
 }
 
 llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
-	if (!(func->getType().base_type == AST::get_fundamental_type("fptr").base_type)) throw std::runtime_error(fmt::format("callee is not a function pointer - cannot call a {}", func->getType().base_type->get_name()));
-	std::cout << "trying to call fptr" << std::endl;
+	if (!(func->getType().base_type == AST::get_fundamental_type("function").base_type)) throw std::runtime_error(fmt::format("callee is not a function - cannot call a {}", func->getType().base_type->get_name()));
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
 
 	for (auto &arg: args) {
@@ -490,6 +489,7 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder, std::st
 		fargs.push_back(aV);
 	}
 
-	auto llvm_fptr = static_cast<llvm::Function*>(func->codegen_to_ptr(builder));
-	return builder->CreateCall(llvm_fptr->getFunctionType(), llvm_fptr, fargs);
+	auto codegen_func = func->codegen(builder);
+	auto llvm_function_ty = static_cast<llvm::FunctionType*>(codegen_func->getType()->getPointerElementType());
+	return builder->CreateCall(llvm_function_ty, codegen_func, fargs);
 }

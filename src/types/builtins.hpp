@@ -57,15 +57,15 @@ namespace AST {
 		}
 	};
 
-	class fundamental_fptr: public TypeBase {
+	class fundamental_function: public TypeBase {
 		public:
-		fundamental_fptr() : TypeBase("fptr", {}, {}, {AST::Interface {}}, {}) {}
+		fundamental_function() : TypeBase("function", {}, {}, {AST::Interface {}}, {}) {}
 		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			auto t = generic_types.at(template_instance).at(0).codegen();
-			return llvm::FunctionType::get(t, false);
+			return llvm::FunctionType::get(t, false)->getPointerTo();
 		}
 
-		AST::TypeInstance get_return_of_fptr(size_t template_instance) {
+		AST::TypeInstance get_return_of_function(size_t template_instance) {
 			return generic_types.at(template_instance).at(0);
 		}
 	};

@@ -98,7 +98,7 @@ namespace AST {
 			std::unique_ptr<Expression> func;
 			std::vector<std::unique_ptr<Expression>> args;
 		public:
-			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : func(std::move(func)), args(std::move(args)), Expression(func->getType().get_return_of_fptr()) {}
+			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : func(std::move(func)), args(std::move(args)), Expression(func->getType().get_return_of_function()) {}
 			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
 
 			std::string print() const override {

@@ -76,7 +76,7 @@ void AST::init_builtin_types() {
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
-		.base_type = std::make_shared<AST::fundamental_fptr>(),
+		.base_type = std::make_shared<AST::fundamental_function>(),
 		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
@@ -326,7 +326,7 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 }
 
 AST::TypeInstance AST::TypeInstance::get_function_returning() {
-	auto t = AST::get_fundamental_type("fptr");
+	auto t = AST::get_fundamental_type("function");
 	t.template_instance_id = t.base_type->add_generic_instance({*this});
 	return t;
 }
@@ -346,10 +346,10 @@ AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	return p->get_pointed_to(get_template_id());
 }
 
-AST::TypeInstance AST::TypeInstance::get_return_of_fptr() {
-	auto p = std::dynamic_pointer_cast<AST::fundamental_fptr>(base_type);
-	if (!p) throw std::runtime_error(fmt::format("Can only get ret type of fptr - attempted to get ret type of {}", this->base_type->get_name()));
-	return p->get_return_of_fptr(get_template_id());
+AST::TypeInstance AST::TypeInstance::get_return_of_function() {
+	auto p = std::dynamic_pointer_cast<AST::fundamental_function>(base_type);
+	if (!p) throw std::runtime_error(fmt::format("Can only get ret type of function - attempted to get ret type of {}", this->base_type->get_name()));
+	return p->get_return_of_function(get_template_id());
 }
 
 void AST::TypeBase::add_func(std::shared_ptr<AST::Function> f) {

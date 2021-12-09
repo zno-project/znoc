@@ -47,7 +47,6 @@ namespace AST {
 			this->var = var;
 			this->type = T::var;
 			this->expressionType = var->underlying_type;
-			std::cout << "add var " << name << " to ref" << std::endl;
 		}
 
 		void add_namespace(std::shared_ptr<AST::Namespace> ns) {
@@ -57,7 +56,11 @@ namespace AST {
 		}
 
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string _name = "") override {
-			if (this->type == T::var) return builder->CreateLoad(var->codegen(builder));
+			if (this->type == T::var) {
+				auto codegenned_var = var->codegen(builder);
+				if (codegenned_var->getType()->getPointerElementType()->isFunctionTy()) return codegenned_var;
+				else return builder->CreateLoad(var->codegen(builder));
+			}
 			else return (llvm::Value*)&*ns;
 		}
 
