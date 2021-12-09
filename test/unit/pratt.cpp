@@ -153,14 +153,3 @@ TEST(PrattParser, SubscriptUnmatchedBrackets) {
 
 	delete c;
 }
-
-TEST(PrattParser, FunctionCall) {
-	char test_data[] = "&1::2(2,3,4)[0] + 5";
-
-	auto c = new CompilerMain(test_data);
-	auto r = Parser::parse_pratt_expression(c->f);
-
-	EXPECT_EQ(r->print(), "((1 [ 2) [ 3)");
-
-	delete c;
-}
