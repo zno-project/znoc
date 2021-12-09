@@ -14,14 +14,13 @@ llvm::AllocaInst* create_entry_block_alloca(llvm::Function *in_func, std::string
 namespace AST {
 	class Function: public MemoryLoc {
 		private:
-		std::string name;
 		std::vector<std::shared_ptr<AST::Variable>> args;
 		AST::TypeInstance returnType;
 		attributes_t attributes;
 		std::unique_ptr<AST::CodeBlock> body;
 
 		public:
-		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body): name(name), args(args), returnType(returnType), attributes(attributes), body(std::move(body)), MemoryLoc(returnType.get_function_returning()) {}
+		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body): args(args), returnType(returnType), attributes(attributes), body(std::move(body)), MemoryLoc(returnType.get_function_returning(), name) {}
 		void codegen_prototype();
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder);
 		AST::TypeInstance getRetType() { return returnType; } ;

@@ -330,28 +330,28 @@ AST::TypeInstance AST::UnaryExpressionPrefix::get_prefix_op_ret_type(operators o
 	else return expr->getType();
 }
 
+#include "../types/type_base.hpp"
+
 AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std::unique_ptr<AST::Expression>& lhs, std::unique_ptr<AST::Expression>& rhs) {
 	if (op == double_colon) {
-		if (lhs->getType() == AST::get_fundamental_type("namespace_ref")) {
-			auto lhs_ns = (AST::Namespace*)lhs->codegen(nullptr);
+		AST::Namespace* lhs_ns;
+		if (lhs->getType() == AST::get_fundamental_type("namespace_ref")) lhs_ns = (AST::Namespace*)lhs->codegen(nullptr);
+		else lhs_ns = &*(lhs->getType().base_type);
 
-			auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
-			auto v = lhs_ns->get_var(rhs_ref->name);
-			if (v) {
-				rhs_ref->add_var(v);
-				return v->underlying_type;
-			}
-
-			auto ns = lhs_ns->get_namespace_by_name(rhs_ref->name);
-			if (ns) {
-				rhs_ref->add_namespace(ns);
-				return AST::get_fundamental_type("namespace_ref");
-			}
-
-			throw std::runtime_error("");
-		} else {
-			throw std::runtime_error("Attempted to :: a not namespace");
+		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
+		auto v = lhs_ns->get_var(rhs_ref->name);
+		if (v) {
+			rhs_ref->add_var(v);
+			return v->underlying_type;
 		}
+
+		auto ns = lhs_ns->get_namespace_by_name(rhs_ref->name);
+		if (ns) {
+			rhs_ref->add_namespace(ns);
+			return AST::get_fundamental_type("namespace_ref");
+		}
+
+		throw std::runtime_error(fmt::format("couldn't find {} in {}", rhs_ref->name, lhs_ns->get_name()));
 	}
 
 	if (op == dot) {
@@ -399,11 +399,7 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder, std::
 	}
 
 	if (op == double_colon) {
-		if (lhs->getType() == AST::get_fundamental_type("namespace_ref")) {
-			return rhs->codegen(builder);
-		} else {
-			throw std::runtime_error("Attempted to :: a not namespace");
-		}
+		return rhs->codegen(builder);
 	}
 
 	if (op == assign) {

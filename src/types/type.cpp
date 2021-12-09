@@ -152,7 +152,13 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 		fields_by_name[fields[i].first] = i;
 	}
 
-	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces), std::move(constants));
+	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces));
+
+	auto sn = std::dynamic_pointer_cast<AST::Namespace>(s);
+	
+	for (auto& constant : constants) {
+		*sn << std::dynamic_pointer_cast<AST::MemoryLoc>(std::make_shared<AST::GlobalVariable>(constant.first, fmt::format("Struct.{}.{}", name, constant.first), std::move(constant.second.val)));
+	}
 
 	return AST::TypeInstance {
 		.base_type = s,

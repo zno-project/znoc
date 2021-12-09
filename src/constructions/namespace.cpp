@@ -38,6 +38,9 @@ std::shared_ptr<AST::MemoryLoc> AST::Namespace::get_global_var_by_name(std::stri
 	} catch (std::out_of_range) {
 		throw std::runtime_error(fmt::format("Cannot find variable {}:{}", name, var_name));*/
 		//std::cerr << fmt::format("Cannot find variable {}:{}", name, namespace_name) << std::endl;
+		try {
+			return std::dynamic_pointer_cast<AST::Namespace>(named_types.at(namespace_name).base_type);
+		} catch (std::out_of_range) {}
 		return nullptr;
 	}
 }
@@ -71,8 +74,8 @@ AST::Namespace* AST::Namespace::operator <<(AST::TypeInstance t) {
 	return this;
 }
 
-AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::Function> f) {
-	global_variables.insert({f->get_name(), f});
+AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::MemoryLoc> f) {
+	global_variables.insert({f->name, f});
 	return this;
 }
 

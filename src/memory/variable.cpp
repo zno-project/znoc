@@ -48,7 +48,7 @@ llvm::Value* AST::Variable::codegen(llvm::IRBuilder<> *builder) {
 
 llvm::Value* AST::GlobalVariable::codegen(__attribute__((unused)) llvm::IRBuilder<> *builder) {
 	if (!allocaV) {
-		allocaV = new llvm::GlobalVariable(*TheModule, underlying_type.codegen(), true, llvm::GlobalValue::PrivateLinkage, initializer->codegen_const(), name);
+		allocaV = new llvm::GlobalVariable(*TheModule, underlying_type.codegen(), true, llvm::GlobalValue::PrivateLinkage, initializer->codegen_const(), link_name);
 		//llvm::Type *ty = underlying_type.codegen();
 		//allocaV = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), name, ty);
 	}

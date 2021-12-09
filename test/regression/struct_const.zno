@@ -6,7 +6,9 @@ struct Struct {
 }
 
 func main() {
-	let x: Struct = Struct { .x = 42 };
+	let x: Struct;
+	x.x = 42;
 	stdio::printI(x.x);
-	stdio::printI(x.y);
+	stdio::printI(x::y);
+	stdio::printI(Struct::y);
 }

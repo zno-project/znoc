@@ -11,11 +11,9 @@
 
 namespace AST {
 	class Variable: public AST::MemoryLoc {
-		private:
-		std::string name;
 
 		public:
-		Variable(std::string name, AST::TypeInstance type): name(name), MemoryLoc(type) {}
+		Variable(std::string name, AST::TypeInstance type): MemoryLoc(type, name) {}
 		static std::shared_ptr<AST::Variable> create_in_scope(std::string name, AST::TypeInstance type);
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder);
 		const std::string& getName() const {return name;}
@@ -25,11 +23,11 @@ namespace AST {
 
 	class GlobalVariable: public AST::MemoryLoc {
 		private:
-		std::string name;
+		std::string link_name;
 		std::unique_ptr<AST::Expression> initializer;
 
 		public:
-		GlobalVariable(std::string name, std::unique_ptr<AST::Expression> initializer): name(name), initializer(std::move(initializer)), MemoryLoc(initializer->getType()) {}
+		GlobalVariable(std::string name, std::string link_name, std::unique_ptr<AST::Expression> initializer): link_name(link_name), initializer(std::move(initializer)), MemoryLoc(initializer->getType(), name) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }

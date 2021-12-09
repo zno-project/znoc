@@ -32,7 +32,7 @@ namespace AST {
 
 		Namespace* operator <<(AST::TypeInstance t);
 
-		Namespace* operator <<(std::shared_ptr<AST::Function> f);
+		Namespace* operator <<(std::shared_ptr<AST::MemoryLoc> f);
 
 		Namespace* operator <<(std::shared_ptr<AST::Namespace> n);
 

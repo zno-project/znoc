@@ -7,7 +7,6 @@
 #include <llvm/IR/Type.h>
 #include "../macros.hpp"
 #include "../memory/variable.hpp"
-#include "../memory/struct_const.hpp"
 #include "../memory/gep.hpp"
 #include "construction_parse.hpp"
 #include "../memory/memory_ref.hpp"
