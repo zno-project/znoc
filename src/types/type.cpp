@@ -331,6 +331,12 @@ AST::TypeInstance AST::TypeInstance::get_function_returning() {
 	return t;
 }
 
+AST::TypeInstance AST::TypeInstance::get_array_elem_of() {
+	auto t = *this;
+	t.array_lengths.pop_back();
+	return t;
+}
+
 #include "builtins.hpp"
 
 AST::TypeInstance AST::TypeInstance::get_pointed_to() {
