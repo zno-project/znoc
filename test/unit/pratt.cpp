@@ -123,28 +123,6 @@ TEST(PrattParser, RightAssociation) {
 	delete c;
 }
 
-TEST(PrattParser, Subscript) {
-	char test_data[] = "1[2]";
-
-	auto c = new CompilerMain(test_data);
-	auto r = Parser::parse_pratt_expression(c->f);
-
-	EXPECT_EQ(r->print(), "(1 [ 2)");
-
-	delete c;
-}
-
-TEST(PrattParser, SubscriptMultiDimensional) {
-	char test_data[] = "1[2][3]";
-
-	auto c = new CompilerMain(test_data);
-	auto r = Parser::parse_pratt_expression(c->f);
-
-	EXPECT_EQ(r->print(), "((1 [ 2) [ 3)");
-
-	delete c;
-}
-
 TEST(PrattParser, SubscriptUnmatchedBrackets) {
 	char test_data[] = "1[2";
 
