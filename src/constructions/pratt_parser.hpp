@@ -57,6 +57,8 @@ enum operators {
 
 extern char *operator_to_string[];
 
+#include "function_def.hpp"
+
 namespace AST {
 	class UnaryExpressionPrefix: public Expression {
 		private:
@@ -108,6 +110,13 @@ namespace AST {
 				}
 				ret += "))";
 				return ret;
+			}
+
+			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+				auto val = codegen(builder);
+				auto alloca = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), "func_ret", val->getType());
+				builder->CreateStore(val, alloca);
+				return alloca;
 			}
 	};
 
