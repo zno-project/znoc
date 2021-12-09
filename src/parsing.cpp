@@ -222,7 +222,7 @@ int parse_file(std::filesystem::path path,
 
 				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);
-				std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
+				//std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
 				*current_namespace << std::move(new_namespace);
 				currentToken = old_current_token;
 

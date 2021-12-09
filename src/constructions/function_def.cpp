@@ -29,15 +29,15 @@
 #include <fmt/format.h>
 
 llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
-	std::cout << "gen func " << this->name << std::endl;
+	//std::cout << "gen func " << this->name << std::endl;
 	if (allocaV) return allocaV;
 	codegen_prototype();
 	llvm::Function *F = static_cast<llvm::Function*>(allocaV);
 
-	std::cout << "no allocaV for " << this->name << std::endl;
+	//std::cout << "no allocaV for " << this->name << std::endl;
 
 	if (body) {
-		std::cout << "gen body for " << this->name << std::endl;
+		//std::cout << "gen body for " << this->name << std::endl;
 
 		llvm::BasicBlock *block = llvm::BasicBlock::Create(*TheContext, "entry", F);
 		llvm::IRBuilder<> builder(block);

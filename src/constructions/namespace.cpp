@@ -37,7 +37,7 @@ std::shared_ptr<AST::MemoryLoc> AST::Namespace::get_global_var_by_name(std::stri
 		return named_variables.at(var_name);
 	} catch (std::out_of_range) {
 		throw std::runtime_error(fmt::format("Cannot find variable {}:{}", name, var_name));*/
-		std::cerr << fmt::format("Cannot find variable {}:{}", name, namespace_name) << std::endl;
+		//std::cerr << fmt::format("Cannot find variable {}:{}", name, namespace_name) << std::endl;
 		return nullptr;
 	}
 }

@@ -29,7 +29,7 @@ llvm::AllocaInst* create_entry_block_alloca(llvm::Function *in_func, std::string
 	llvm::raw_string_ostream rso(type_str_src);
 	t->print(rso);
 
-	std::cout << "Creating entry block alloca for " << name << ": " << type_str_src << std::endl;
+	//std::cout << "Creating entry block alloca for " << name << ": " << type_str_src << std::endl;
 
 
 	llvm::IRBuilder<> tmpBuilder(&in_func->getEntryBlock(), in_func->getEntryBlock().begin());
@@ -158,7 +158,7 @@ std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {
 	auto gv = GlobalNamespace->get_var(var);
 	if (gv) return gv;
 
-	std::cerr << fmt::format("Couldn't find variable {} in current scope", var) << std::endl;
+	//std::cerr << fmt::format("Couldn't find variable {} in current scope", var) << std::endl;
 	return nullptr;
 }
 
@@ -171,6 +171,7 @@ std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {
 }*/
 
 std::shared_ptr<AST::Variable> AST::Variable::create_in_scope(std::string name, AST::TypeInstance type) {
+	if (AST::get_var(name)) std::cerr << "WARNING: Redeclaration of variable " << name << std::endl;
 	auto v = std::make_shared<AST::Variable>(name, type);
 	stack_allocations.front()[name] = v;
 	return v;

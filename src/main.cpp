@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 2) throw std::runtime_error("No input file specified");
 
 	auto path = std::filesystem::current_path().append(argv[1]);
-	std::cout << "path: " << path.string() << std::endl;
+	//std::cout << "path: " << path.string() << std::endl;
 
 	make_llvm_module(path.string());
 
