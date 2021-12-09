@@ -128,7 +128,7 @@ namespace AST {
 			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 				if (op == subscript) {
 					auto zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0));
-					auto i = rhs->codegen_const();
+					auto i = rhs->codegen(builder);
 					llvm::Value* a[] = {zero, i};
 					auto idxs = llvm::ArrayRef<llvm::Value*>(a);
 
