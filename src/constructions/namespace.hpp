@@ -13,17 +13,17 @@ namespace AST {
 	class Namespace {
 		protected:
 		std::map<std::string, AST::TypeInstance> named_types;
-		std::map<std::string, std::shared_ptr<AST::Function>> named_functions;
+		std::map<std::string, std::shared_ptr<AST::MemoryLoc>> global_variables;
 		std::map<std::string, std::shared_ptr<AST::Namespace>> namespaces;
 		std::string name;
 
 		public:
-		Namespace(std::string name): name(name), named_types(), named_functions(), namespaces() {}
+		Namespace(std::string name): name(name), named_types(), global_variables(), namespaces() {}
 		~Namespace() {}
 		virtual std::string get_name() { return name; }
 
 		AST::TypeInstance get_type_by_name(std::string name);
-		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
+		//std::shared_ptr<AST::Function> get_function_by_name(std::string name);
 		std::shared_ptr<AST::Namespace> get_namespace_by_name (std::string name);
 
 		void add_type_with_name(AST::TypeInstance t, std::string name) {
@@ -37,8 +37,8 @@ namespace AST {
 		Namespace* operator <<(std::shared_ptr<AST::Namespace> n);
 
 		std::shared_ptr<AST::MemoryLoc> get_var(std::string var) {
-			if (named_functions.find(var) != named_functions.end()) {
-				auto m = named_functions[var];
+			if (global_variables.find(var) != global_variables.end()) {
+				auto m = global_variables[var];
 				return m;
 			}
 			return nullptr;
@@ -49,7 +49,7 @@ namespace AST {
 				n.second->codegen();
 			}
 
-			for (auto &func : named_functions) {
+			for (auto &func : global_variables) {
 				func.second->codegen(nullptr);
 			}
 		}

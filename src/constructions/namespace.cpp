@@ -15,14 +15,14 @@ AST::TypeInstance AST::Namespace::get_type_by_name(std::string type_name) {
 	}
 }
 
-std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string func_name) {
+/*std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string func_name) {
 	try {
-		auto f = named_functions.at(func_name);
+		auto f = global_variables.at(func_name);
 		return f;
 	} catch (std::out_of_range) {
 		throw std::runtime_error(fmt::format("Cannot find function {}::{}(...)", name, func_name));
 	}
-}
+}*/
 
 std::shared_ptr<AST::Namespace> AST::Namespace::get_namespace_by_name(std::string namespace_name) {
 	try {
@@ -72,7 +72,7 @@ AST::Namespace* AST::Namespace::operator <<(AST::TypeInstance t) {
 }
 
 AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::Function> f) {
-	named_functions.insert({f->get_name(), f});
+	global_variables.insert({f->get_name(), f});
 	return this;
 }
 
