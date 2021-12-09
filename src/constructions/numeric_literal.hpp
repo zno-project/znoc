@@ -2,10 +2,10 @@
 #define _NUMERICAL_LITERAL_H
 
 #include "expression.hpp"
-#include "../types/builtins.hpp"
 #include <llvm/IR/Constant.h>
 #include <llvm/ADT/APFloat.h>
 #include <cfloat>
+#include "../llvm_module.hpp"
 
 namespace AST {
 	class NumericLiteral: public AST::Expression {

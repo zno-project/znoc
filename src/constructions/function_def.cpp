@@ -1,7 +1,6 @@
 #include "function_def.hpp"
 
 #include "../types/type.hpp"
-#include "../types/builtins.hpp"
 #include "../memory/variable.hpp"
 #include "../memory/memory_location.hpp"
 #include "../attributes.hpp"
@@ -27,6 +26,7 @@
 #include <llvm/IR/CallingConv.h>
 #include <llvm/IR/Verifier.h>
 #include <fmt/format.h>
+#include "../types/type_base.hpp"
 
 llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
 	//std::cout << "gen func " << this->name << std::endl;

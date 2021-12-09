@@ -7,7 +7,7 @@
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 #include "codeblock.hpp"
-#include "../types/builtins.hpp"
+#include "../types/type.hpp"
 #include "construction_parse.hpp"
 
 namespace AST {

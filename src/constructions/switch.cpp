@@ -10,7 +10,7 @@
 #include "../macros.hpp"
 #include <fmt/format.h>
 #include <llvm/IR/BasicBlock.h>
-#include "../types/builtins.hpp"
+#include "../types/type.hpp"
 #include "construction_parse.hpp"
 #include "../llvm_module.hpp"
 

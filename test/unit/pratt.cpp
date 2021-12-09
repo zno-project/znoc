@@ -8,7 +8,7 @@
 #include "main.hpp"
 #include "memory/memory_location.hpp"
 #include "types/type.hpp"
-#include "types/builtins.hpp"
+#include "types/type.hpp"
 #include "constructions/namespace.hpp"
 #include "constructions/numeric_literal.hpp"
 #include "constructions/construction_parse.hpp"

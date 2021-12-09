@@ -63,3 +63,21 @@ Parser::NamespaceParseReturn Parser::parse_namespace(FILE* f) {
 		.next_token = currentToken
 	};
 }
+
+#include "../types/type_base.hpp"
+
+AST::Namespace* AST::Namespace::operator <<(AST::TypeInstance t) {
+	add_type_with_name(t, t.base_type->get_name());
+	return this;
+}
+
+AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::Function> f) {
+	named_functions.insert({f->get_name(), f});
+	return this;
+}
+
+AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::Namespace> n) {
+	//std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
+	namespaces.insert({n->get_name(), std::move(n)});
+	return this;
+}

@@ -480,6 +480,8 @@ llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder, st
 	throw std::runtime_error(fmt::format("unimplemented postfix op {}", operator_to_string[op]));
 }
 
+#include "../types/type_base.hpp"
+
 llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
 	if (!(func->getType().base_type == AST::get_fundamental_type("function").base_type)) throw std::runtime_error(fmt::format("callee is not a function - cannot call a {}", func->getType().base_type->get_name()));
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();

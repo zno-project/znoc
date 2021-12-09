@@ -5,7 +5,7 @@
 #include "construction_parse.hpp"
 #include "../parsing.hpp"
 #include "../macros.hpp"
-#include "../types/builtins.hpp"
+#include "../types/type.hpp"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Value.h>
 

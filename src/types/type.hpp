@@ -110,107 +110,12 @@ namespace AST {
 		AST::TypeInstance type;
 	};
 
-	class TypeBase {
-		protected:
-		std::string name;
-		std::map<size_t, llvm::Type*> generated;
-		std::map<std::string, size_t> fields_by_name;
-		std::vector<AST::field_type_t> fields_by_index;
-		std::vector<std::vector<AST::TypeInstance>> generic_types;
-		std::vector<Interface> generic_type_interfaces;
-		std::map<std::string, std::shared_ptr<AST::Function>> functions;
-		std::map<std::string, Constant> constants;
-
-		public:
-		TypeBase(std::string name): name(std::move(name)), fields_by_name(), fields_by_index(), functions(), generic_types(), generated(), generic_type_interfaces(), constants() {}
-		//TypeBase(std::string name, std::map<std::string, std::map<std::string, size_t> fields_by_name): name(std::move(name)), fields(std::move(fields)), functions() {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces, std::map<std::string, Constant> constants): name(std::move(name)), fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generic_type_interfaces(std::move(generic_type_interfaces)), generated(), constants(std::move(constants)) {}
-
-		virtual llvm::Type* codegen(size_t template_instance);
-
-		virtual std::string get_name() { return name; }
-		virtual ~TypeBase() = default;
-
-		std::shared_ptr<AST::Function> get_function_by_name(std::string name, size_t template_instance_id);
-		FieldInfo get_field_info_by_name(std::string name, size_t template_instance_id);
-		FieldInfo get_field_info_by_index(size_t idx, size_t template_instance_id);
-		size_t add_generic_instance(std::vector<AST::TypeInstance> types);
-		std::vector<Interface>& get_generic_type_interfaces() {
-			return generic_type_interfaces;
-		}
-
-		void add_func(std::shared_ptr<AST::Function> f);
-	};
+	AST::TypeInstance get_fundamental_type(std::string name);
 }
-
-/*namespace AST {
-	typedef struct TypeUsage type_usage_t;
-	typedef struct TemplatedFieldType templated_field_type_t;
-
-	typedef std::variant<AST::templated_field_type_t, AST::type_usage_t> field_type_t;
-}*/
-
-//#include "../mangling.hpp"
-//#include "../constructions/function.hpp"
-
-/*namespace AST {
-	class Type {
-		//std::vector<int> get_field_idxs(std::vector<std::string> fieldNames, int template_instance);
-		friend type_usage_t;
-
-		protected:
-		std::map<std::string, int> fieldIndices; // Map of names to field indices
-		std::vector<AST::field_type_t> fieldTypes; // Array of types of fields
-
-		public:
-		std::string name;
-		std::vector<std::vector<AST::type_usage_t>> templatedTypes;
-		
-		Type(std::string name): templatedTypes(), fieldIndices(), fieldTypes(), name(std::move(name)) {}
-		Type(std::string name, std::vector<AST::field_type_t> fieldTypes, std::map<std::string, int> fieldIndices, std::vector<std::vector<AST::type_usage_t>> templatedTypes): templatedTypes(std::move(templatedTypes)), fieldIndices(std::move(fieldIndices)), fieldTypes(std::move(fieldTypes)), name(std::move(name)) {}
-		virtual llvm::Type* codegen(int template_instance) = 0;
-		virtual const std::string& get_name() { return name; }
-		virtual ~Type() = default;
-
-		std::shared_ptr<AST::Function> get_function_by_name(std::string name);
-		AST::Namespace* get_namespace_by_name(std::string name);
-		std::pair<std::unique_ptr<AST::GEP>, AST::type_usage_t> get_field(std::string field_name, int template_instance);
-	};
-
-	// An instance of the usage of a type
-	struct TypeUsage {
-		std::shared_ptr<AST::Type> type; // The type used
-		int template_instance; // which templated instance is being referenced
-
-		bool operator !() {
-			return !type;
-		}
-
-		std::shared_ptr<AST::Type> operator ->() {
-			return type;
-		}
-
-		llvm::Type* codegen() {
-			return type->codegen(template_instance);
-		}
-
-		std::pair<std::unique_ptr<AST::Expression>, AST::type_usage_t> get_field(std::string field_name) {
-			return type->get_field(field_name, template_instance);
-		}
-	};
-
-	struct TemplatedFieldType {
-		int typeIndex; // Which index in the list of templated args this field is
-	};
-
-	void init_builtin_types();
-}*/
 
 namespace Parser {
 	AST::TypeInstance parse_type(FILE* f);
 	AST::TypeInstance parse_aggregate_type_definition(FILE* f);
 }
-
-//extern std::map<std::string, std::shared_ptr<AST::Type>> named_types;
 
 #endif

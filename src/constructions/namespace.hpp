@@ -11,7 +11,7 @@
 
 namespace AST {
 	class Namespace {
-		private:
+		protected:
 		std::map<std::string, AST::TypeInstance> named_types;
 		std::map<std::string, std::shared_ptr<AST::Function>> named_functions;
 		std::map<std::string, std::shared_ptr<AST::Namespace>> namespaces;
@@ -30,21 +30,11 @@ namespace AST {
 			named_types.insert({name, t});
 		}
 
-		Namespace* operator <<(AST::TypeInstance t) {
-			add_type_with_name(t, t.base_type->get_name());
-			return this;
-		}
+		Namespace* operator <<(AST::TypeInstance t);
 
-		Namespace* operator <<(std::shared_ptr<AST::Function> f) {
-			named_functions.insert({f->get_name(), f});
-			return this;
-		}
+		Namespace* operator <<(std::shared_ptr<AST::Function> f);
 
-		Namespace* operator <<(std::shared_ptr<AST::Namespace> n) {
-			//std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
-			namespaces.insert({n->get_name(), std::move(n)});
-			return this;
-		}
+		Namespace* operator <<(std::shared_ptr<AST::Namespace> n);
 
 		std::shared_ptr<AST::MemoryLoc> get_var(std::string var) {
 			if (named_functions.find(var) != named_functions.end()) {

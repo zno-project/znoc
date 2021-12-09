@@ -6,6 +6,7 @@
 #include <llvm/IR/Type.h>
 #include "../llvm_module.hpp"
 #include <fmt/format.h>
+#include "type_base.hpp"
 
 namespace AST {
 	template <unsigned int N>
@@ -90,8 +91,6 @@ namespace AST {
 			return generic_types.at(template_instance).at(0);
 		}
 	};
-
-	AST::TypeInstance get_fundamental_type(std::string name);
 }
 
 #endif
