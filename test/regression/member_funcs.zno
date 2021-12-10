@@ -3,6 +3,7 @@ uses 'stdio.zno'
 struct Thingy {
 	a: _fundamentals::i32,
 	b: _fundamentals::i32,
+	c: _fundamentals::function<_fundamentals::void>,
 
 	func printB() {
 		stdio::printI(5);
@@ -10,13 +11,28 @@ struct Thingy {
 
 	func printC() {
 		stdio::printI(6);
+	},
+
+	func printA(self) {
+		stdio::printI((*self).a);
 	}
 }
 
+struct ThingyContainer {
+	thingy: _fundamentals::ptr<Thingy>
+}
+
+func print3 () {
+	stdio::printI(3);
+}
+
 func main() {
-	let s: Thingy;
-	s.a = 32;
-	s.b = 65;
-	s::printB();
+	let s: Thingy[5];
+
+	s[0]::printB();
 	Thingy::printC();
+	s[0].a = 1;
+	s[0].printA();
+	s[0].c = print3;
+	s[0].c();
 }
