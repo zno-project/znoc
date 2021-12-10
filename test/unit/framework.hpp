@@ -4,6 +4,7 @@
 #include "main.hpp"
 #include "memory/memory_location.hpp"
 #include "types/type.hpp"
+#include "types/type_base.hpp"
 #include "constructions/namespace.hpp"
 #include "parsing.hpp"
 #include "location.hpp"
