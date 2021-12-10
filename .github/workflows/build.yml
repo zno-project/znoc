@@ -151,22 +151,30 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            macos/
+            build/
           key: macos-latest-build-${{ github.run_id }}
+      - name: Publish executable on discord (macos)
+        run: |
+          curl -F 'payload_json={"content": "macos build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          rm -rf build
       - name: Download executable (linux)
         uses: actions/cache@v2
         with:
           path: |
-            linux/
+            build/
           key: ubuntu-latest-build-${{ github.run_id }}
+      - name: Publish executable on discord (Linux)
+        run: |
+          curl -F 'payload_json={"content": "linux build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          rm -rf build
       - name: Download executable (windows)
         uses: actions/cache@v2
         with:
           path: |
-            windows/
+            build/
           key: windows-latest-build-${{ github.run_id }}
-      - name: Publish executable on discord
+      - name: Publish executable on discord (Windows)
         run: |
-          curl -F 'payload_json={"content": "macos build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "linux build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "windows build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "windows build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+          rm -rf build
+
