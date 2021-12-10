@@ -19,15 +19,15 @@ jobs:
         include:
           - os: macos
             dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
-            build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+            build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j5
             shell: bash
           - os: ubuntu
             dep-command: sudo apt update; sudo apt install libfmt-dev llvm
-            build-command: CC=clang CXX=clang++ make
+            build-command: CC=clang CXX=clang++ make -j3
             shell: bash
           - os: windows
             dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
-            build-command: CC=clang CXX=clang++ mingw32-make
+            build-command: CC=clang CXX=clang++ mingw32-make -j3
             shell: msys2 {0}
     runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
     defaults:
@@ -68,15 +68,15 @@ jobs:
         include:
           - os: macos
             dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
-            make-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake
+            make-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j5
             shell: bash
           - os: ubuntu
             dep-command: sudo apt update; sudo apt install libfmt-dev llvm
-            make-command: CC=clang CXX=clang++ make
+            make-command: CC=clang CXX=clang++ make -j3
             shell: bash
           - os: windows
             dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt mingw-w64-x86_64-diffutils mingw-w64-x86_64-sed
-            make-command: CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make
+            make-command: CC=clang CXX=clang++ CMAKE_ARGS="-G \"MinGW Makefiles\"" mingw32-make -j3
             shell: msys2 {0}
     runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
     needs: [build]
