@@ -10,7 +10,6 @@
 #include "../llvm_module.hpp"
 #include "../casting.hpp"
 #include "../macros.hpp"
-#include "binary_op.hpp"
 #include "../parsing.hpp"
 #include "expression.hpp"
 #include "construction_parse.hpp"
@@ -48,7 +47,7 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((u
 std::unique_ptr<AST::Expression> Parser::parse_while(FILE* f) {
 	EXPECT(tok_while, "to start while loop");
 	push_new_scope();
-	auto condition = parse_binary_expression(f);
+	auto condition = parse_pratt_expression(f);
 	
 	std::unique_ptr<AST::CodeBlock> body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 	body->push_before_return(pop_scope());

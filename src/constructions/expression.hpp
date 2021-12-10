@@ -28,11 +28,19 @@ namespace AST {
 		int getLine() const { return Loc.Line; }
 		int getCol() const { return Loc.Col; }
 		AST::TypeInstance getType() { return expressionType; }
+
+		virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) {
+			throw std::runtime_error(fmt::format("Cannot codegen {} as ptr", typeid(*this).name()));
+		}
+
+		virtual std::string print() const {
+			return "Cannot print this expr";
+		}
 	};
 }
 
 namespace Parser {
-	std::unique_ptr<AST::Expression> parse_parentheses_expression(FILE* f);
+	//std::unique_ptr<AST::Expression> parse_parentheses_expression(FILE* f);
 	std::unique_ptr<AST::Expression> parse_non_semicolon_statement(FILE* f);
 	std::unique_ptr<AST::Expression> parse_r_value(FILE* f);
 	std::unique_ptr<AST::Expression> parse_semicolon_statement(FILE* f);

@@ -9,6 +9,7 @@ llvm::Value* AST::GEP::codegen(llvm::IRBuilder<> *builder) {
 	auto i = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, idx));
 	llvm::Value* a[] = {zero, i};
 	auto idxs = llvm::ArrayRef<llvm::Value*>(a);
-	allocaV = builder->CreateGEP(to_index->codegen(builder), idxs);
+
+	allocaV = builder->CreateGEP(to_index->codegen_to_ptr(builder), idxs);
 	return allocaV;
 }

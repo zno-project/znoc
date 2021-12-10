@@ -9,6 +9,7 @@
 
 int advance(FILE* f);
 int get_token(FILE* f);
+int peek_next_token(FILE* f, int offset = 1);
 int get_next_token(FILE* f);
 
 extern int currentToken;
@@ -56,7 +57,7 @@ enum Token {
 #include "constructions/namespace.hpp"
 
 int parse_file(std::filesystem::path p,
-	std::unique_ptr<AST::Namespace> &current_namespace,
+	std::shared_ptr<AST::Namespace> &current_namespace,
 	bool insideUses = false);
 
 #define EXPECT(tok, err) { \

@@ -1,7 +1,6 @@
 #include "function_def.hpp"
 
 #include "../types/type.hpp"
-#include "../types/builtins.hpp"
 #include "../memory/variable.hpp"
 #include "../memory/memory_location.hpp"
 #include "../attributes.hpp"
@@ -27,11 +26,19 @@
 #include <llvm/IR/CallingConv.h>
 #include <llvm/IR/Verifier.h>
 #include <fmt/format.h>
+#include "../types/type_base.hpp"
 
-llvm::Value* AST::Function::codegen() {
-	llvm::Function *F = generated;
+llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
+	//std::cout << "gen func " << this->name << std::endl;
+	if (allocaV) return allocaV;
+	codegen_prototype();
+	llvm::Function *F = static_cast<llvm::Function*>(allocaV);
+
+	//std::cout << "no allocaV for " << this->name << std::endl;
 
 	if (body) {
+		//std::cout << "gen body for " << this->name << std::endl;
+
 		llvm::BasicBlock *block = llvm::BasicBlock::Create(*TheContext, "entry", F);
 		llvm::IRBuilder<> builder(block);
 
@@ -53,7 +60,7 @@ llvm::Value* AST::Function::codegen() {
 		//TheFPM->run(*F);
 	}
 
-	return nullptr;
+	return allocaV = (llvm::Value*)F;
 }
 
 void AST::Function::codegen_prototype() {
@@ -66,12 +73,14 @@ void AST::Function::codegen_prototype() {
 	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, false);
 	llvm::FunctionCallee f = TheModule->getOrInsertFunction(this->get_name(), ft);
 
-	generated = (llvm::Function*)(f.getCallee());
-	generated->setCallingConv(llvm::CallingConv::C);
+	auto f2 = (llvm::Function*)(f.getCallee());
+	f2->setCallingConv(llvm::CallingConv::C);
 
 	//std::cout << attributes << std::endl;
 
-	if (attributes[(unsigned long)Attributes::AlwaysInline]) generated->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (is_member_func) f2->addFnAttr("member_func");
+	allocaV = f2;
 }
 
 // FUNCTION
@@ -80,22 +89,26 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
-	auto name = EXPECT_IDENTIFIER("function name after 'func'");
+	//std::string name = self_type.has_value() ? self_type->base_type->get_name() + "::" : "";
+	std::string name = EXPECT_IDENTIFIER("function name after 'func'");
 
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;
-
-	if (self_type.has_value()) {
-		auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
-		argsP.push_back(std::move(arg));
-	}
+	bool is_member_func = false;
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
-		EXPECT(':', "after argument name");
-		AST::TypeInstance type = parse_type(f);
-		auto arg = arg_t(name, std::move(type));
-		argsP.push_back(std::move(arg));
+
+		if (argsP.size() == 0 && name == "self" && self_type.has_value()) {
+			auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
+			argsP.push_back(std::move(arg));
+			is_member_func = true;
+		} else {
+			EXPECT(':', "after argument name");
+			AST::TypeInstance type = parse_type(f);
+			auto arg = arg_t(name, std::move(type));
+			argsP.push_back(std::move(arg));
+		}
 	}, "argument list");
 
 	std::vector<std::shared_ptr<AST::Variable>> args;
@@ -124,5 +137,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body));
+	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func);
 }

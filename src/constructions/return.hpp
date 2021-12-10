@@ -5,7 +5,7 @@
 #include <llvm/IR/IRBuilder.h>
 
 #include "expression.hpp"
-#include "../types/builtins.hpp"
+#include "../types/type.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>

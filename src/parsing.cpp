@@ -129,6 +129,24 @@ int get_token(FILE *f) {
 	return thisChar;
 }
 
+int peek_next_token(FILE* f, int offset) {
+	auto currentPos = ftell(f);
+	char oldLastChar = lastChars[f];
+	auto oldLexLoc = LexLoc;
+	auto oldCurrentToken = currentToken;
+	auto oldCurrentTokenVal = currentTokenVal;
+	int ret = 0;
+	for (int i = 0; i < offset; i++) {
+		ret = get_next_token(f);
+	}
+	lastChars[f] = oldLastChar;
+	LexLoc = oldLexLoc;
+	fseek(f, currentPos, SEEK_SET);
+	currentToken = oldCurrentToken;
+	currentTokenVal = oldCurrentTokenVal;
+	return ret;
+}
+
 int get_next_token(FILE *f) {
 	//std::cout << "getnexttoken" << std::endl;
 	currentToken = get_token(f);
@@ -146,7 +164,7 @@ bool has_searched_path(std::filesystem::path p) {
 }
 
 int parse_file(std::filesystem::path path,
-	std::unique_ptr<AST::Namespace> &current_namespace,
+	std::shared_ptr<AST::Namespace> &current_namespace,
 	bool insideUses) {
 	searchedIncludes.push_back(path);
 
@@ -200,11 +218,11 @@ int parse_file(std::filesystem::path path,
 				}
 
 				std::cout << "Parsing include " << newP.string() << " as " << namespace_name << std::endl;
-				auto new_namespace = std::make_unique<AST::Namespace>(namespace_name);
+				auto new_namespace = std::make_shared<AST::Namespace>(namespace_name);
 
 				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);
-				std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
+				//std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
 				*current_namespace << std::move(new_namespace);
 				currentToken = old_current_token;
 

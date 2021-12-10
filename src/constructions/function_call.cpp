@@ -24,10 +24,9 @@
 #include "../parsing.hpp"
 #include "codeblock.hpp"
 #include "../mangling.hpp"
-#include "../types/builtins.hpp"
 
 llvm::Value* AST::FunctionCall::codegen(llvm::IRBuilder<> *builder, std::string name) {
-	llvm::Function *F = function->generated;
+	/*llvm::Function *F = function->generated;
 
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
 
@@ -37,5 +36,6 @@ llvm::Value* AST::FunctionCall::codegen(llvm::IRBuilder<> *builder, std::string 
 	}
 
 	auto funcCall = builder->CreateCall(F, llvm::ArrayRef<llvm::Value*>(fargs), name);
-	return funcCall;
+	return funcCall;*/
+	return nullptr;
 }

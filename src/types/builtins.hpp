@@ -6,6 +6,7 @@
 #include <llvm/IR/Type.h>
 #include "../llvm_module.hpp"
 #include <fmt/format.h>
+#include "type_base.hpp"
 
 namespace AST {
 	template <unsigned int N>
@@ -57,9 +58,30 @@ namespace AST {
 		}
 	};
 
+	class fundamental_function: public TypeBase {
+		public:
+		fundamental_function() : TypeBase("function", {}, {}, {AST::Interface {}}) {}
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
+			auto t = generic_types.at(template_instance).at(0).codegen();
+			return llvm::FunctionType::get(t, false)->getPointerTo();
+		}
+
+		AST::TypeInstance get_return_of_function(size_t template_instance) {
+			return generic_types.at(template_instance).at(0);
+		}
+	};
+
+	class fundamental_namespace_ref: public TypeBase {
+		public:
+		fundamental_namespace_ref() : TypeBase("namespace_ref") {}
+		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
+			return llvm::FunctionType::get(llvm::Type::getVoidTy(*TheContext), false);
+		}
+	};
+
 	class fundamental_ptr: public TypeBase {
 		public:
-		fundamental_ptr() : TypeBase("ptr", {}, {}, {AST::Interface {}}, {}) {}
+		fundamental_ptr() : TypeBase("ptr", {}, {}, {AST::Interface {}}) {}
 		virtual llvm::Type* codegen(__attribute__((unused)) size_t template_instance) {
 			auto t = generic_types.at(template_instance).at(0).codegen();
 			return t->getPointerTo();
@@ -69,8 +91,6 @@ namespace AST {
 			return generic_types.at(template_instance).at(0);
 		}
 	};
-
-	AST::TypeInstance get_fundamental_type(std::string name);
 }
 
 #endif

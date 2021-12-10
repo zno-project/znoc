@@ -7,43 +7,50 @@
 #include <llvm/IR/Type.h>
 #include "../macros.hpp"
 #include "../memory/variable.hpp"
-#include "../memory/memory_ref.hpp"
-#include "../memory/struct_const.hpp"
 #include "../memory/gep.hpp"
-#include "binary_op.hpp"
-#include "unary_op.hpp"
 #include "construction_parse.hpp"
+#include "../memory/memory_ref.hpp"
 #include "function_call.hpp"
 #include "../parsing.hpp"
 #include "struct_init.hpp"
+#include "../main.hpp"
 
 // IDENTIFIER EXPRESSION
 // identifier_expr = identifier |
 //                   identifier '(' (binary_expr ',')* ')';
 std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
-	std::vector<std::string> fields;
+	//std::vector<std::string> fields;
 
-	auto parsed_namespace = Parser::parse_namespace(f);
+	auto id = EXPECT_IDENTIFIER("identifier");
 
-	if (parsed_namespace.next_token == '(') { // Function call
-		auto func_name = parsed_namespace.next_identifier;
-
+	/*if (currentToken == '(') { // Function call
+		auto func_name = id;
 
 		std::vector<std::unique_ptr<AST::Expression>> args;
 
 		LIST('(', ',', ')', {
-			args.push_back(parse_binary_expression(f));
+			args.push_back(parse_pratt_expression(f));
 		}, "function args");
 
 		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
 	} else if (parsed_namespace.next_token == '{' || parsed_namespace.next_token == '<') { // Aggregate type init
 		auto type_name = parsed_namespace.next_identifier;
 		return parse_struct_init(f, parsed_namespace.parsed_namespace->get_type_by_name(type_name));
-	} else {
-		std::cout << "Variable reference or member func - ignoring namespaces" << std::endl;
-		std::shared_ptr<AST::MemoryLoc> variable = AST::get_var(parsed_namespace.next_identifier);
+	} else {*/
+	//try {
+	//	auto v = AST::get_var(id);
+	//	return std::make_unique<AST::MemoryRef>(std::move(v));
+	//} catch (std::runtime_error) {
+		auto v = AST::get_var(id);
+		if (v) return std::make_unique<AST::Reference>(v, id);
+		
+		auto n = GlobalNamespace->get_namespace_by_name(id);
+		if (n) return std::make_unique<AST::Reference>(n, id);
 
-		UNTIL_NOT('.', {
+		return std::make_unique<AST::Reference>(id);
+	//}
+
+		/*UNTIL_NOT('.', {
 			auto field_name = EXPECT_IDENTIFIER("field name");
 			if (currentToken == '(') {
 				// Call to member function
@@ -52,7 +59,7 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 				args.push_back(std::make_unique<AST::UnaryExpression>('&', std::make_unique<AST::MemoryRef>(variable)));
 
 				LIST('(', ',', ')', {
-					args.push_back(parse_binary_expression(f));
+					args.push_back(parse_pratt_expression(f));
 				}, "function args");
 
 				return std::make_unique<AST::FunctionCall>(variable->underlying_type.get_function_by_name(field_name), std::move(args));
@@ -67,8 +74,8 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
 					variable = std::make_unique<AST::StructConstAccess>(constant.linkage_name, constant.type);
 				}
 			}
-		});
+		});*/
 
-		return std::make_unique<AST::MemoryRef>(variable);
-	}
+		//return std::make_unique<AST::MemoryRef>(variable);
+	//}
 }

@@ -1,6 +1,10 @@
+#ifndef _ZNO_TEST_FRAMEWORK_H
+#define _ZNO_TEST_FRAMEWORK_H
+
 #include "main.hpp"
 #include "memory/memory_location.hpp"
 #include "types/type.hpp"
+#include "types/type_base.hpp"
 #include "constructions/namespace.hpp"
 #include "parsing.hpp"
 #include "location.hpp"
@@ -14,7 +18,6 @@
 
 #include <string.h>
 
-std::unique_ptr<AST::Namespace> GlobalNamespace;
 extern std::map<FILE*, char> lastChars;
 
 class CompilerGlobals {
@@ -23,7 +26,7 @@ class CompilerGlobals {
 		push_new_scope();
 		LexLoc = {1, 0};
 		lastChars = std::map<FILE*, char>();
-		GlobalNamespace = std::make_unique<AST::Namespace>("_G");
+		GlobalNamespace = std::make_shared<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }
 
@@ -57,3 +60,5 @@ class CompilerMain: CompilerGlobals {
 
   // void TearDown() override {}
 };
+
+#endif

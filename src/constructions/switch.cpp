@@ -8,10 +8,9 @@
 #include "../casting.hpp"
 #include "../parsing.hpp"
 #include "../macros.hpp"
-#include "binary_op.hpp"
 #include <fmt/format.h>
 #include <llvm/IR/BasicBlock.h>
-#include "../types/builtins.hpp"
+#include "../types/type.hpp"
 #include "construction_parse.hpp"
 #include "../llvm_module.hpp"
 
@@ -58,7 +57,7 @@ std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 	EXPECT(tok_switch, "in switch statement");
 
 	push_new_scope();
-	auto condition = parse_binary_expression(f);
+	auto condition = parse_pratt_expression(f);
 	
 	auto body = std::vector<std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>>();
 	std::unique_ptr<AST::CodeBlock> default_body;

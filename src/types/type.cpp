@@ -10,69 +10,80 @@
 #include <fmt/format.h>
 #include <optional>
 #include <algorithm>
+#include "type_base.hpp"
 
 //std::map<std::string, std::shared_ptr<AST::Type>> named_types;
 
 void AST::init_builtin_types() {
-	auto fundamentals = std::make_unique<AST::Namespace>("_fundamentals");
+	auto fundamentals = std::make_shared<AST::Namespace>("_fundamentals");
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<1>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<8>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<16>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<32>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<64>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_int<128>>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_half>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_float>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_double>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_fp128>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_void>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 	*fundamentals << AST::TypeInstance {
 		.base_type = std::make_shared<AST::fundamental_ptr>(),
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
+		.array_lengths = std::vector<size_t>()
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_function>(),
+		.template_instance_id = std::nullopt,
+		.array_lengths = std::vector<size_t>()
+	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_namespace_ref>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 
@@ -132,39 +143,6 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 	return type_base;
 }
 
-std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {
-	try {
-		auto f = functions.at(func_name);
-		return f;
-	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find function {}:{}(...)", name, func_name));
-	}
-}
-
-AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, size_t template_instance_id) {
-	auto f_idx = fields_by_name.find(field_name);
-	auto c_idx = constants.find(field_name);
-
-	if (f_idx != fields_by_name.end()) {
-		return get_field_info_by_index(f_idx->second, template_instance_id);
-	} else if (c_idx != constants.end()) {
-		return FieldInfoConst {
-			.type = c_idx->second.type,
-			.linkage_name = fmt::format("{}.{}", name, field_name)
-		};
-	} else {
-		throw std::runtime_error(fmt::format("Cannot find field {}::{}", name, field_name));
-	}
-}
-
-AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t template_instance_id) {
-	auto f = AST::FieldInfoField {
-		.type = std::holds_alternative<AST::TypeInstance>(fields_by_index.at(idx)) ? std::get<AST::TypeInstance>(fields_by_index.at(idx)) : generic_types.at(template_instance_id).at(std::get<AST::GenericInstance>(fields_by_index.at(idx)).generic_type_index),
-		.index = idx
-	};
-	return f;
-}
-
 AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces, std::map<std::string, AST::Constant> constants) {
 	std::vector<AST::field_type_t> fields_by_index;
 	std::map<std::string, size_t> fields_by_name;
@@ -174,11 +152,17 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 		fields_by_name[fields[i].first] = i;
 	}
 
-	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces), std::move(constants));
+	auto s = std::make_shared<AST::TypeBase>(name, std::move(fields_by_name), std::move(fields_by_index), std::move(template_type_interfaces));
+
+	auto sn = std::dynamic_pointer_cast<AST::Namespace>(s);
+	
+	for (auto& constant : constants) {
+		*sn << std::dynamic_pointer_cast<AST::MemoryLoc>(std::make_shared<AST::GlobalVariable>(constant.first, fmt::format("Struct.{}.{}", name, constant.first), std::move(constant.second.val)));
+	}
 
 	return AST::TypeInstance {
 		.base_type = s,
-		.template_instance_id = std::optional<size_t>(),
+		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
 }
@@ -259,7 +243,7 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 					all_fields_defined = true;
 					ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces), std::move(constants));
 				}
-				ret.base_type->add_func(Parser::parse_function(f, ret));
+				*ret.base_type << Parser::parse_function(f, ret);
 			});
 		});
 	}, "struct fields and functions");
@@ -269,53 +253,23 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	return ret;
 }
 
-llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
-	if (!generated[template_instance]) {
-		for (auto &c: constants) {
-			std::cout << "gen const with linkage name " << fmt::format("{}.{}", name, c.first) << std::endl;
-			new llvm::GlobalVariable(*TheModule, c.second.type.codegen(), true, llvm::GlobalValue::PrivateLinkage, c.second.val->codegen_const(), fmt::format("{}.{}", name, c.first));
-		}
-
-		std::vector<llvm::Type*> f;
-		for (auto &fT : fields_by_index) {
-			if (std::holds_alternative<AST::TypeInstance>(fT)) {
-				f.push_back(std::get<AST::TypeInstance>(fT).codegen());
-			} else {
-				auto field_idx = std::get<AST::GenericInstance>(fT).generic_type_index;
-				f.push_back(generic_types.at(template_instance).at(field_idx).codegen());
-			}
-		}
-		auto gen = llvm::StructType::create(*TheContext, llvm::ArrayRef<llvm::Type*>(f));
-		gen->setName(fmt::format("{}_instance{}", name, template_instance));
-		generated[template_instance] = gen;
-
-		for (auto &func : functions) {
-			func.second->codegen_prototype();
-		}
-		for (auto &func : functions) {
-			func.second->codegen();
-		}
-	}
-	return generated[template_instance];
-};
-
-size_t AST::TypeBase::add_generic_instance(std::vector<AST::TypeInstance> types) {
-	auto res = std::find(generic_types.begin(), generic_types.end(), types);
-	if (res == generic_types.end()) {
-		generic_types.push_back(std::move(types));
-		return generic_types.size() - 1;
-	} else {
-		return res - generic_types.begin();
-	}
-}
-
 AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 	auto t = AST::get_fundamental_type("ptr");
 	t.template_instance_id = t.base_type->add_generic_instance({*this});
 	return t;
 }
 
-#include "builtins.hpp"
+AST::TypeInstance AST::TypeInstance::get_function_returning() {
+	auto t = AST::get_fundamental_type("function");
+	t.template_instance_id = t.base_type->add_generic_instance({*this});
+	return t;
+}
+
+AST::TypeInstance AST::TypeInstance::get_array_elem_of() {
+	auto t = *this;
+	t.array_lengths.pop_back();
+	return t;
+}
 
 AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	if (is_array()) throw std::runtime_error("Can only deref a pointer - attempted to deref an array");
@@ -324,8 +278,10 @@ AST::TypeInstance AST::TypeInstance::get_pointed_to() {
 	return p->get_pointed_to(get_template_id());
 }
 
-void AST::TypeBase::add_func(std::shared_ptr<AST::Function> f) {
-	functions.insert({f->get_name(), f});
+AST::TypeInstance AST::TypeInstance::get_return_of_function() {
+	auto p = std::dynamic_pointer_cast<AST::fundamental_function>(base_type);
+	if (!p) throw std::runtime_error(fmt::format("Can only get ret type of function - attempted to get ret type of {}", this->base_type->get_name()));
+	return p->get_return_of_function(get_template_id());
 }
 
 llvm::Type* AST::TypeInstance::codegen() {
@@ -349,7 +305,7 @@ bool AST::TypeInstance::operator==(const TypeInstance& cmp) const {
 	if (cmp.base_type != base_type) return false;
 	if (cmp.template_instance_id != template_instance_id) return false;
 	return cmp.array_lengths == array_lengths;
-};
+}
 
 std::shared_ptr<AST::Function> AST::TypeInstance::get_function_by_name(std::string name) {
 	return base_type->get_function_by_name(name, get_template_id());

@@ -66,7 +66,7 @@ std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
 
 	push_new_scope();
 
-	auto condition = parse_binary_expression(f);
+	auto condition = parse_pratt_expression(f);
 
 	std::unique_ptr<AST::CodeBlock> if_body = std::unique_ptr<AST::CodeBlock>(static_cast<AST::CodeBlock*>(parse_code_block(f).release()));
 	if_body->push_before_return(pop_scope());

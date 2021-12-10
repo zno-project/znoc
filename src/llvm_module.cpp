@@ -87,7 +87,9 @@ void init_objcode_producer() {
 
 void produce_objcode(std::string filename) {
 	std::error_code EC;
+	std::error_code EC2;
 	llvm::raw_fd_ostream dest(filename, EC, llvm::sys::fs::OF_None);
+	llvm::raw_fd_ostream dest2("output.ll", EC2, llvm::sys::fs::OF_None);
 
 	if (EC) {
 		llvm::errs() << "Could not open file: " << EC.message();
@@ -98,6 +100,8 @@ void produce_objcode(std::string filename) {
 	auto FileType = llvm::CGFT_ObjectFile;
 
 	pass.add(llvm::createAlwaysInlinerLegacyPass());
+
+	TheModule->print(dest2, nullptr);
 
 	if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
 		llvm::errs() << "TargetMachine can't emit a file of this type";

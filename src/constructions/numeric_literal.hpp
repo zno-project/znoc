@@ -2,10 +2,10 @@
 #define _NUMERICAL_LITERAL_H
 
 #include "expression.hpp"
-#include "../types/builtins.hpp"
 #include <llvm/IR/Constant.h>
 #include <llvm/ADT/APFloat.h>
 #include <cfloat>
+#include "../llvm_module.hpp"
 
 namespace AST {
 	class NumericLiteral: public AST::Expression {
@@ -85,14 +85,21 @@ namespace AST {
 		static std::unique_ptr<NumericLiteral> NewFloat(double v, size_t len) {
 			return std::make_unique<AST::NumericLiteral>((double)v, len);
 		}
-		virtual llvm::Value* codegen(__attribute__((unused)) llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name = "");
+		virtual llvm::Value* codegen(__attribute__((unused)) llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name = "") override;
 
-		virtual llvm::Constant* codegen_const() {
+		virtual llvm::Constant* codegen_const() override {
 			if (is_int_val) {
 				return llvm::ConstantInt::get(expressionType.codegen(), value.i);
 			}
 			return llvm::ConstantFP::get(*TheContext, llvm::APFloat(value.f));
 		};
+
+		virtual std::string print() const override {
+			if (is_int_val) {
+				return std::to_string(value.i);
+			}
+			return std::to_string(value.f);
+		}
 	};
 }
 

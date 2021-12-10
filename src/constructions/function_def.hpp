@@ -4,6 +4,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>
 #include "../memory/variable.hpp"
+#include "../memory/memory_location.hpp"
 #include "../types/type.hpp"
 #include "../attributes.hpp"
 #include "codeblock.hpp"
@@ -11,21 +12,18 @@
 llvm::AllocaInst* create_entry_block_alloca(llvm::Function *in_func, std::string name, llvm::Type* t);
 
 namespace AST {
-	class Function {
+	class Function: public MemoryLoc {
 		private:
-		std::string name;
 		std::vector<std::shared_ptr<AST::Variable>> args;
 		AST::TypeInstance returnType;
 		attributes_t attributes;
-
 		std::unique_ptr<AST::CodeBlock> body;
+		bool is_member_func;
 
 		public:
-		llvm::Function *generated;
-
-		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body): name(name), args(args), returnType(returnType), attributes(attributes), body(std::move(body)), generated(nullptr) {}
+		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body, bool is_member_func): is_member_func(is_member_func), args(args), returnType(returnType), attributes(attributes), body(std::move(body)), MemoryLoc(returnType.get_function_returning(), name) {}
 		void codegen_prototype();
-		virtual llvm::Value* codegen();
+		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder);
 		AST::TypeInstance getRetType() { return returnType; } ;
 		virtual std::string get_name() { return name; }
 	};

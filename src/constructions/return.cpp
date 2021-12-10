@@ -26,7 +26,7 @@ llvm::Value* AST::ReturnExpression::codegen(llvm::IRBuilder<> *builder, std::str
 std::unique_ptr<AST::Expression> Parser::parse_return(FILE* f) {
 	EXPECT(tok_return, "in return statement")
 	if (currentToken == ';') return std::make_unique<AST::ReturnExpression>(nullptr);
-	else return std::make_unique<AST::ReturnExpression>(parse_binary_expression(f));
+	else return std::make_unique<AST::ReturnExpression>(parse_pratt_expression(f));
 
 	// NOTE: Can't use OPTIONAL or IF_TOK_ELSE since can't trim semicolon
 }
