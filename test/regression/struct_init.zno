@@ -10,18 +10,22 @@ struct Templatable<T> {
 }
 
 func main() {
-	let s = Struct {
-		.d = 7,
-		.e = 5
-	};
+	let s: Struct;
+	{
+		s.d = 7;
+		s.e = 5;
+	}
 
-	let t = Templatable<_fundamentals::i32> {
-		.a = 3
-	};
+	let t: Templatable<_fundamentals::i32>;
+	{
+		let i = 5;
+		t.a = 3;
+	}
 
-	let p = Templatable<_fundamentals::ptr<_fundamentals::i32>> {
-		.a = stdio::allocate()
-	};
+	let p: Templatable<_fundamentals::ptr<_fundamentals::i32>>;
+	{
+		p.a = stdio::allocate();
+	}
 
 	stdio::printI(s.d);
 	stdio::printI(s.e);
