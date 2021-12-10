@@ -147,6 +147,8 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [build]
     steps:
+      - name: Set env
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
       - name: Download executable (macos)
         uses: actions/cache@v2
         with:
@@ -155,7 +157,7 @@ jobs:
           key: macos-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (macos)
         run: |
-          curl -F 'payload_json={"content": "macos build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "macos build - ${{ env.GITHUB_SHA_SHORT }}`"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
       - name: Download executable (linux)
         uses: actions/cache@v2
@@ -165,7 +167,7 @@ jobs:
           key: ubuntu-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (Linux)
         run: |
-          curl -F 'payload_json={"content": "linux build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "linux build - ${{ env.GITHUB_SHA_SHORT }}"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
       - name: Download executable (windows)
         uses: actions/cache@v2
@@ -175,6 +177,7 @@ jobs:
           key: windows-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (Windows)
         run: |
-          curl -F 'payload_json={"content": "windows build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@build/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+          ls build
+          curl -F 'payload_json={"content": "windows build - ${{ env.GITHUB_SHA_SHORT }}"}' -F "file1=@build/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
 
