@@ -79,6 +79,7 @@ void AST::Function::codegen_prototype() {
 	//std::cout << attributes << std::endl;
 
 	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (is_member_func) f2->addFnAttr("member_func");
 	allocaV = f2;
 }
 
@@ -88,23 +89,26 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
-	std::string name = self_type.has_value() ? self_type->base_type->get_name() + "::" : "";
-	name += EXPECT_IDENTIFIER("function name after 'func'");
+	//std::string name = self_type.has_value() ? self_type->base_type->get_name() + "::" : "";
+	std::string name = EXPECT_IDENTIFIER("function name after 'func'");
 
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;
-
-	if (self_type.has_value()) {
-		auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
-		argsP.push_back(std::move(arg));
-	}
+	bool is_member_func = false;
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
-		EXPECT(':', "after argument name");
-		AST::TypeInstance type = parse_type(f);
-		auto arg = arg_t(name, std::move(type));
-		argsP.push_back(std::move(arg));
+
+		if (argsP.size() == 0 && name == "self" && self_type.has_value()) {
+			auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
+			argsP.push_back(std::move(arg));
+			is_member_func = true;
+		} else {
+			EXPECT(':', "after argument name");
+			AST::TypeInstance type = parse_type(f);
+			auto arg = arg_t(name, std::move(type));
+			argsP.push_back(std::move(arg));
+		}
 	}, "argument list");
 
 	std::vector<std::shared_ptr<AST::Variable>> args;
@@ -133,5 +137,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body));
+	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func);
 }

@@ -367,7 +367,15 @@ AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std
 		std::cout << "pratt_parser.cpp:354 lhs name " << lhs_ref->name << std::endl;
 		assert(lhs_ref->type == AST::Reference::T::var);
 		auto lhs_var = lhs_ref->get_var();*/
+		
 		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
+
+		auto v = lhs->getType().base_type->get_var(rhs_ref->name);
+		if (v) {
+			rhs_ref->add_var(v);
+			return v->underlying_type;
+		}
+
 		auto field_info = lhs->getType().get_field_info_by_name(rhs_ref->get_name());
 
 		if (std::holds_alternative<AST::FieldInfoField>(field_info)) {
@@ -481,13 +489,17 @@ llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder, st
 llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
 	if (!(func->getType().base_type == AST::get_fundamental_type("function").base_type)) throw std::runtime_error(fmt::format("callee is not a function - cannot call a {}", func->getType().base_type->get_name()));
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
+	auto codegen_func = func->codegen(builder);
+
+	if (auto lhs_dot_op = dynamic_cast<AST::NewBinaryExpression*>(&*func)) if (lhs_dot_op->op == dot && static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("member_func")) {
+		fargs.push_back(lhs_dot_op->lhs->codegen_to_ptr(builder));
+	}
 
 	for (auto &arg: args) {
 		auto aV = arg->codegen(builder);
 		fargs.push_back(aV);
 	}
 
-	auto codegen_func = func->codegen(builder);
 	auto llvm_function_ty = static_cast<llvm::FunctionType*>(codegen_func->getType()->getPointerElementType());
 	return builder->CreateCall(llvm_function_ty, codegen_func, fargs);
 }
