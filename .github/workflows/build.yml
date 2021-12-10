@@ -167,6 +167,6 @@ jobs:
           key: windows-latest-build-${{ github.run_id }}
       - name: Publish executable on discord
         run: |
-          curl -F 'payload_json={"content": "macos build"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "linux build"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
-          curl -F 'payload_json={"content": "windows build"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "macos build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@macos/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "linux build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@linux/znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          curl -F 'payload_json={"content": "windows build - `git rev-parse --short "$GITHUB_SHA"`"}' -F "file1=@windows/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
