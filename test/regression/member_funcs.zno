@@ -5,8 +5,11 @@ struct Thingy {
 	b: _fundamentals::i32,
 
 	func printB() {
-		let t = *self;
-		stdio::printI(t.b);
+		stdio::printI(5);
+	},
+
+	func printC() {
+		stdio::printI(6);
 	}
 }
 
@@ -14,5 +17,6 @@ func main() {
 	let s: Thingy;
 	s.a = 32;
 	s.b = 65;
-	s.printB();
+	s::printB();
+	Thingy::printC();
 }
