@@ -10,7 +10,7 @@
 #include <memory>
 #include <tuple>
 
-llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
+llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder) {
 	if (is_int_val) {
 		return llvm::ConstantInt::get(expressionType.codegen(), value.i);
 	}

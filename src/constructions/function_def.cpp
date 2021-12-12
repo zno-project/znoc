@@ -30,7 +30,7 @@
 
 llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
 	if (allocaV) return allocaV;
-	
+
 	codegen_prototype();
 	llvm::Function *F = static_cast<llvm::Function*>(allocaV);
 
@@ -48,7 +48,7 @@ llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
 			builder.CreateStore(a, a_stack);
 		}
 
-		body->codegen(&builder, fmt::format("f_{}", name));
+		body->codegen(&builder);
 
 		if (!builder.GetInsertBlock()->getTerminator()) builder.CreateRetVoid(); // If no terminator, add a `ret void`
 

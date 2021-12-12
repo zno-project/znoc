@@ -11,7 +11,7 @@ namespace AST {
 		
 		public:
 		GEP(AST::Expression* to_index, int idx): idx(idx), to_index(std::move(to_index)), MemoryLoc(std::get<AST::FieldInfoField>(to_index->getType().get_field_info_by_index(idx)).type, "") {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder);
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

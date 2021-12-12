@@ -27,7 +27,7 @@ std::unique_ptr<ScopeEnd> pop_scope() {
 	return std::make_unique<ScopeEnd>(std::move(out_of_scope_vars));
 }
 
-llvm::Value* ScopeEnd::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* ScopeEnd::codegen(llvm::IRBuilder<> *builder) {
 	for (auto& var: out_of_scope_vars) {
 		//builder->CreateLifetimeEnd(var->codegen(builder));
 	}

@@ -8,7 +8,7 @@
 
 // FALLTHROUGH
 // fallthrough = 'fallthrough';
-llvm::Value* AST::FallthroughExpression::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* AST::FallthroughExpression::codegen(llvm::IRBuilder<> *builder) {
 	llvm::BasicBlock *TheBlock = builder->GetInsertBlock();
 	auto bbList = &(TheBlock->getParent()->getBasicBlockList()); // Get list of blocks in parent
 	bool foundIt = false;

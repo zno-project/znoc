@@ -28,7 +28,6 @@ namespace AST {
 
 		virtual llvm::Type* codegen(size_t template_instance);
 
-		virtual std::string get_name() { return name; }
 		virtual ~TypeBase() = default;
 
 		std::shared_ptr<AST::Function> get_function_by_name(std::string name, size_t template_instance_id);

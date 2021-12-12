@@ -13,7 +13,7 @@
 #include "construction_parse.hpp"
 #include "../llvm_module.hpp"
 
-llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
+llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	llvm::BasicBlock *DefaultBB = llvm::BasicBlock::Create(*TheContext, "case_default");
 	llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(*TheContext, "post_switch");

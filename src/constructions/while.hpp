@@ -16,7 +16,7 @@ namespace AST {
 
 		public:
 		WhileDef(std::unique_ptr<AST::Expression> condition, std::unique_ptr<AST::CodeBlock> body): Expression(body->getType()), condition(std::move(condition)), body(std::move(body)) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string _name = "");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

@@ -44,7 +44,7 @@ llvm::Value* AST::GlobalVariable::codegen(__attribute__((unused)) llvm::IRBuilde
 	return allocaV;
 }
 
-llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
+llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder) {
 	auto allocaV = var_ref->codegen(builder);
 	
 	builder->CreateLifetimeStart(allocaV);

@@ -15,8 +15,8 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/BasicBlock.h>
 
-llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
-	auto conditionCond = condition->codegen(builder, "__if_condition");
+llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder) {
+	auto conditionCond = condition->codegen(builder);
 	
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(*TheContext, "then", TheFunction);

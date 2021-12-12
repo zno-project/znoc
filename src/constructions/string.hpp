@@ -15,7 +15,7 @@ namespace AST {
 		std::string s;
 		public:
 		String(std::string s): Expression(AST::get_fundamental_type("i8").get_pointer_to()), s(std::move(s)) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

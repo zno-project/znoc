@@ -17,7 +17,7 @@
 
 std::vector<AST::CodeBlock*> codeblocks;
 
-llvm::Value* AST::CodeBlock::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* AST::CodeBlock::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Value *returnExp = nullptr;
 	for (auto &exp: body) {
 		returnExp = exp->codegen(builder); // Set returned expression to last statement in block

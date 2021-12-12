@@ -13,9 +13,9 @@
 
 // RETURN
 // return = 'return' binary_expr?;
-llvm::Value* AST::ReturnExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
+llvm::Value* AST::ReturnExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (value) {
-		if (!builder->GetInsertBlock()->getTerminator()) builder->CreateRet(value->codegen(builder, name));
+		if (!builder->GetInsertBlock()->getTerminator()) builder->CreateRet(value->codegen(builder));
 	}
 	else if (!builder->GetInsertBlock()->getTerminator()) builder->CreateRetVoid();
 

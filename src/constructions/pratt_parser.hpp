@@ -68,13 +68,13 @@ namespace AST {
 			std::unique_ptr<Expression> expr;
 		public:
 			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(get_prefix_op_ret_type(op, expr)) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
+			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
-			virtual std::string print() const override {
+			std::string print() const override {
 				return std::string("(") + operator_to_string[op] + " " + expr->print() + ")";
 			}
 
-			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+			llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 				if (op == operators::star) {
 					return expr->codegen(builder);
 				}
@@ -88,9 +88,9 @@ namespace AST {
 			std::unique_ptr<Expression> expr;
 		public:
 			UnaryExpressionPostfix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(expr->getType()) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
+			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
-			virtual std::string print() const override {
+			std::string print() const override {
 				return std::string("(") + expr->print() + " " + operator_to_string[op] = ")";
 			}
 	};
@@ -101,7 +101,7 @@ namespace AST {
 			std::vector<std::unique_ptr<Expression>> args;
 		public:
 			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : func(std::move(func)), args(std::move(args)), Expression(func->getType().get_return_of_function()) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
+			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 
 			std::string print() const override {
 				auto ret = std::string("(") + func->print() + "(";
@@ -112,7 +112,7 @@ namespace AST {
 				return ret;
 			}
 
-			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+			llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 				auto val = codegen(builder);
 				auto alloca = create_entry_block_alloca(builder->GetInsertBlock()->getParent(), "func_ret", val->getType());
 				builder->CreateStore(val, alloca);
@@ -128,13 +128,13 @@ namespace AST {
 			std::unique_ptr<Expression> lhs, rhs;
 		public:
 			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)), Expression(get_binop_ret_type(op, lhs, rhs)) {}
-			virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "") override;
+			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
 			std::string print() const override {
 				return std::string("(") + lhs->print() + " " + operator_to_string[op] + " " + rhs->print() + ")";
 			}
 
-			virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+			llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 				if (op == subscript) {
 					auto zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0));
 					auto i = rhs->codegen(builder);

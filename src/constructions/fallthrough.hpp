@@ -11,7 +11,7 @@ namespace AST {
 	class FallthroughExpression: public AST::Expression {
 		public:
 		FallthroughExpression(): Expression(AST::get_fundamental_type("void")) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "retVal");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

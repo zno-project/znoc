@@ -37,7 +37,7 @@ class ScopeEnd: public AST::Expression {
 
 	public:
 	ScopeEnd(std::vector<std::shared_ptr<AST::Variable>> out_of_scope_vars) : Expression(AST::get_fundamental_type("void")), out_of_scope_vars(std::move(out_of_scope_vars)) {}
-	virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
+	llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 };
 
 std::unique_ptr<ScopeEnd> pop_scope();

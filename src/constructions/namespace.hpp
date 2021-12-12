@@ -20,7 +20,7 @@ namespace AST {
 		public:
 		Namespace(std::string name): name(name), named_types(), global_variables(), namespaces() {}
 		~Namespace() {}
-		virtual std::string get_name() { return name; }
+		std::string get_name() { return name; }
 
 		AST::TypeInstance get_type_by_name(std::string name);
 		std::shared_ptr<AST::Namespace> get_namespace_by_name (std::string name);

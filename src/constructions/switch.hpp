@@ -24,7 +24,7 @@ namespace AST {
 
 		public:
 		SwitchDef(std::unique_ptr<AST::Expression> switching_expr, std::vector<std::pair<switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>>> body, std::unique_ptr<AST::CodeBlock> default_body): Expression(AST::get_fundamental_type("void")), switching_expr(std::move(switching_expr)), body(std::move(body)), default_body(std::move(default_body)) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string _name = "");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

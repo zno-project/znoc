@@ -383,7 +383,7 @@ AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std
 	return lhs->getType();
 }
 
-llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
+llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder) {
 	auto LHS_value = lhs->codegen(builder);
 	auto RHS_value = rhs->codegen(builder);
 
@@ -403,52 +403,52 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder, std::
 
 	switch (op) {
 		case plus:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFAdd(LHS_value, RHS_value, name);
-			else return builder->CreateAdd(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFAdd(LHS_value, RHS_value);
+			else return builder->CreateAdd(LHS_value, RHS_value);
 		case minus:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFSub(LHS_value, RHS_value, name);
-			else return builder->CreateSub(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFSub(LHS_value, RHS_value);
+			else return builder->CreateSub(LHS_value, RHS_value);
 		case star:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFMul(LHS_value, RHS_value, name);
-			else return builder->CreateMul(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFMul(LHS_value, RHS_value);
+			else return builder->CreateMul(LHS_value, RHS_value);
 		case divide:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFDiv(LHS_value, RHS_value, name);
-			else return builder->CreateUDiv(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFDiv(LHS_value, RHS_value);
+			else return builder->CreateUDiv(LHS_value, RHS_value);
 		case mod:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFRem(LHS_value, RHS_value, name);
-			else return builder->CreateURem(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFRem(LHS_value, RHS_value);
+			else return builder->CreateURem(LHS_value, RHS_value);
 
-		case shift_left: return builder->CreateShl(LHS_value, RHS_value, name);
-		case shift_right: return builder->CreateAShr(LHS_value, RHS_value, name);
+		case shift_left: return builder->CreateShl(LHS_value, RHS_value);
+		case shift_right: return builder->CreateAShr(LHS_value, RHS_value);
 
-		case ampersand: return builder->CreateAnd(LHS_value, RHS_value, name);
-		case bitwise_or: return builder->CreateOr(LHS_value, RHS_value, name);
+		case ampersand: return builder->CreateAnd(LHS_value, RHS_value);
+		case bitwise_or: return builder->CreateOr(LHS_value, RHS_value);
 
 		case compare_eq:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUEQ(LHS_value, RHS_value, name);
-			else return builder->CreateICmpEQ(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUEQ(LHS_value, RHS_value);
+			else return builder->CreateICmpEQ(LHS_value, RHS_value);
 		case compare_neq:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUNE(LHS_value, RHS_value, name);
-			else return builder->CreateICmpNE(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUNE(LHS_value, RHS_value);
+			else return builder->CreateICmpNE(LHS_value, RHS_value);
 		case compare_lt:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpULT(LHS_value, RHS_value, name);
-			else return builder->CreateICmpULT(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpULT(LHS_value, RHS_value);
+			else return builder->CreateICmpULT(LHS_value, RHS_value);
 		case compare_lte:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpULE(LHS_value, RHS_value, name);
-			else return builder->CreateICmpULE(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpULE(LHS_value, RHS_value);
+			else return builder->CreateICmpULE(LHS_value, RHS_value);
 		case compare_gt:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUGT(LHS_value, RHS_value, name);
-			else return builder->CreateICmpUGT(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUGT(LHS_value, RHS_value);
+			else return builder->CreateICmpUGT(LHS_value, RHS_value);
 		case compare_gte:
-			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUGE(LHS_value, RHS_value, name);
-			else return builder->CreateICmpUGE(LHS_value, RHS_value, name);
+			if (LHS_value->getType()->isFloatingPointTy()) return builder->CreateFCmpUGE(LHS_value, RHS_value);
+			else return builder->CreateICmpUGE(LHS_value, RHS_value);
 		case subscript: 
 			return builder->CreateLoad(this->codegen_to_ptr(builder));
 		default: throw std::runtime_error(fmt::format("unimplemented binary op {}", operator_to_string[op]));
 	}
 }
 
-llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder, std::string name) {
+llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 	auto value = expr->codegen(builder);
 	switch (op) {
 		case plus:
@@ -467,13 +467,13 @@ llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder, std
 	}
 }
 
-llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder, std::string name) {
+llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder) {
 	throw std::runtime_error(fmt::format("unimplemented postfix op {}", operator_to_string[op]));
 }
 
 #include "../types/type_base.hpp"
 
-llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder, std::string name) {
+llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (!(func->getType().base_type == AST::get_fundamental_type("function").base_type)) throw std::runtime_error(fmt::format("callee is not a function - cannot call a {}", func->getType().base_type->get_name()));
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
 	auto codegen_func = func->codegen(builder);
