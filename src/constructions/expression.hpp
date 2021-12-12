@@ -40,7 +40,6 @@ namespace AST {
 }
 
 namespace Parser {
-	//std::unique_ptr<AST::Expression> parse_parentheses_expression(FILE* f);
 	std::unique_ptr<AST::Expression> parse_non_semicolon_statement(FILE* f);
 	std::unique_ptr<AST::Expression> parse_r_value(FILE* f);
 	std::unique_ptr<AST::Expression> parse_semicolon_statement(FILE* f);

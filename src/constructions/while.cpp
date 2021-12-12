@@ -15,7 +15,6 @@
 #include "construction_parse.hpp"
 
 llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
-	//emitLocation(builder, this);
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	condBB = llvm::BasicBlock::Create(*TheContext, "while_loop_condition");
 	llvm::BasicBlock *WhileLoopBodyBB = llvm::BasicBlock::Create(*TheContext, "while_loop_body");

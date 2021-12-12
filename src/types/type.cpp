@@ -12,8 +12,6 @@
 #include <algorithm>
 #include "type_base.hpp"
 
-//std::map<std::string, std::shared_ptr<AST::Type>> named_types;
-
 void AST::init_builtin_types() {
 	auto fundamentals = std::make_shared<AST::Namespace>("_fundamentals");
 	*fundamentals << AST::TypeInstance {
@@ -116,17 +114,6 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 		template_types.push_back(Parser::parse_type(f));
 	}, "template list");
 
-	/*auto expected_num_template_args = type_base.base_type->get_generic_type_interfaces().size();
-	auto found_num_template_args = template_types.size();
-
-	if (type_base.is_templateable() && found_num_template_args != 0) { // Allow not 'generic' version of type eg. in typedefs
-		if (expected_num_template_args != found_num_template_args) throw std::runtime_error(fmt::format("Expected {} typeargs for type {}. Found {}.", expected_num_template_args, type_name, found_num_template_args));
-		if (type_base.template_instance_id.has_value()) throw std::runtime_error(fmt::format("Cannot template already templated type {}", type_name));
-		type_base.template_instance_id = type_base.base_type->add_generic_instance(template_types);
-	} else {
-		// Cannot template untemplatable type
-		if (found_num_template_args > 0) throw std::runtime_error(fmt::format("Cannot template type {}", type_name));
-	}*/
 	type_base.get_or_create_template(template_types);
 
 	while (1) {
@@ -172,7 +159,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 	EXPECT(tok_struct, "to begin struct definition");
 
-	std::string name = EXPECT_IDENTIFIER("for name of struct");//std::get<std::string>(currentTokenVal);
+	std::string name = EXPECT_IDENTIFIER("for name of struct");
 
 	std::map<std::string, size_t> template_type_names;
 	std::vector<AST::Interface> template_type_interfaces;

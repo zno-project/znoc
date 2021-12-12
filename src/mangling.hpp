@@ -16,6 +16,5 @@ enum class ManglePart {
 std::string full_mangle_name(int partCount, ...);
 std::string full_mangle_name(std::vector<std::pair<ManglePart, std::string>> parts);
 std::string _mangle_name(std::vector<std::pair<ManglePart, std::string>> parts);
-//std::string vmangle_name(int partCount, va_list va);
 
 #endif

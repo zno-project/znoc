@@ -31,7 +31,6 @@ namespace AST {
 
 namespace Parser {
 	std::shared_ptr<AST::Function> parse_function(FILE* f, std::optional<AST::TypeInstance> self_type = std::optional<AST::TypeInstance>());
-	//std::unique_ptr<AST::FunctionPrototype> parse_function_prototype(bool is_inline = false);
-}
+	}
 
 #endif

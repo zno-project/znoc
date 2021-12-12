@@ -21,9 +21,6 @@ namespace AST {
 		enum class T { ns, var, none } type;
 		std::string name;
 		public:
-		/*Reference(std::string name) : var(AST::get_var(name)), name(name), Expression(({auto v = AST::get_var(name); v ? v->underlying_type : AST::get_fundamental_type("void");})) {
-			std::cout << "reference to " << name << std::endl;
-		}*/
 
 		Reference(std::string name): Expression(AST::get_fundamental_type("void")) {
 			this->type = T::none;

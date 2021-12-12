@@ -24,7 +24,6 @@ namespace AST {
 		std::vector<std::unique_ptr<AST::Expression>> args;
 
 		public:
-		//FunctionCall(std::string callee, std::vector<std::unique_ptr<AST::Expression>> args): Expression(AST::get_type_by_name("__llvm_i32")), function(AST::get_function_by_name(callee)), args(std::move(args)) {}
 		FunctionCall(std::shared_ptr<AST::Function> function, std::vector<std::unique_ptr<AST::Expression>> args): Expression(function->getRetType()), function(function), args(std::move(args)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
 	};

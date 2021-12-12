@@ -15,33 +15,15 @@ AST::TypeInstance AST::Namespace::get_type_by_name(std::string type_name) {
 	}
 }
 
-/*std::shared_ptr<AST::Function> AST::Namespace::get_function_by_name(std::string func_name) {
-	try {
-		auto f = global_variables.at(func_name);
-		return f;
-	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find function {}::{}(...)", name, func_name));
-	}
-}*/
-
 std::shared_ptr<AST::Namespace> AST::Namespace::get_namespace_by_name(std::string namespace_name) {
 	try {
 		return namespaces.at(namespace_name);
 	} catch (std::out_of_range) {
-	/*	throw std::runtime_error(fmt::format("Cannot find namespace {}::{}", name, namespace_name));
-	}
-}
-
-std::shared_ptr<AST::MemoryLoc> AST::Namespace::get_global_var_by_name(std::string var_name) {
-	try {
-		return named_variables.at(var_name);
-	} catch (std::out_of_range) {
-		throw std::runtime_error(fmt::format("Cannot find variable {}:{}", name, var_name));*/
-		//std::cerr << fmt::format("Cannot find variable {}:{}", name, namespace_name) << std::endl;
 		try {
 			return std::dynamic_pointer_cast<AST::Namespace>(named_types.at(namespace_name).base_type);
-		} catch (std::out_of_range) {}
-		return nullptr;
+		} catch (std::out_of_range) {
+			return nullptr;
+		}
 	}
 }
 
@@ -80,7 +62,6 @@ AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::MemoryLoc> f) {
 }
 
 AST::Namespace* AST::Namespace::operator <<(std::shared_ptr<AST::Namespace> n) {
-	//std::cout << "Creating new global namespace called `" << n->get_name() << "`" << std::endl;
 	namespaces.insert({n->get_name(), std::move(n)});
 	return this;
 }

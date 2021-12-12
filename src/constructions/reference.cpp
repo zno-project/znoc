@@ -19,63 +19,13 @@
 // identifier_expr = identifier |
 //                   identifier '(' (binary_expr ',')* ')';
 std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
-	//std::vector<std::string> fields;
-
 	auto id = EXPECT_IDENTIFIER("identifier");
 
-	/*if (currentToken == '(') { // Function call
-		auto func_name = id;
+	auto v = AST::get_var(id);
+	if (v) return std::make_unique<AST::Reference>(v, id);
+	
+	auto n = GlobalNamespace->get_namespace_by_name(id);
+	if (n) return std::make_unique<AST::Reference>(n, id);
 
-		std::vector<std::unique_ptr<AST::Expression>> args;
-
-		LIST('(', ',', ')', {
-			args.push_back(parse_pratt_expression(f));
-		}, "function args");
-
-		return std::make_unique<AST::FunctionCall>(parsed_namespace.parsed_namespace->get_function_by_name(func_name), std::move(args));
-	} else if (parsed_namespace.next_token == '{' || parsed_namespace.next_token == '<') { // Aggregate type init
-		auto type_name = parsed_namespace.next_identifier;
-		return parse_struct_init(f, parsed_namespace.parsed_namespace->get_type_by_name(type_name));
-	} else {*/
-	//try {
-	//	auto v = AST::get_var(id);
-	//	return std::make_unique<AST::MemoryRef>(std::move(v));
-	//} catch (std::runtime_error) {
-		auto v = AST::get_var(id);
-		if (v) return std::make_unique<AST::Reference>(v, id);
-		
-		auto n = GlobalNamespace->get_namespace_by_name(id);
-		if (n) return std::make_unique<AST::Reference>(n, id);
-
-		return std::make_unique<AST::Reference>(id);
-	//}
-
-		/*UNTIL_NOT('.', {
-			auto field_name = EXPECT_IDENTIFIER("field name");
-			if (currentToken == '(') {
-				// Call to member function
-				std::vector<std::unique_ptr<AST::Expression>> args;
-				// TODO: This could probably be improved
-				args.push_back(std::make_unique<AST::UnaryExpression>('&', std::make_unique<AST::MemoryRef>(variable)));
-
-				LIST('(', ',', ')', {
-					args.push_back(parse_pratt_expression(f));
-				}, "function args");
-
-				return std::make_unique<AST::FunctionCall>(variable->underlying_type.get_function_by_name(field_name), std::move(args));
-			} else {
-				// Variable ref
-				auto field_info = variable->underlying_type.get_field_info_by_name(field_name);
-
-				if (std::holds_alternative<AST::FieldInfoField>(field_info)) {
-					variable = std::make_unique<AST::GEP>(variable, std::get<AST::FieldInfoField>(field_info).index);
-				} else {
-					auto constant = std::get<AST::FieldInfoConst>(field_info);
-					variable = std::make_unique<AST::StructConstAccess>(constant.linkage_name, constant.type);
-				}
-			}
-		});*/
-
-		//return std::make_unique<AST::MemoryRef>(variable);
-	//}
+	return std::make_unique<AST::Reference>(id);
 }

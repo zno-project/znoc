@@ -355,19 +355,6 @@ AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std
 	}
 
 	if (op == dot) {
-		/*AST::Reference* lhs_ref;
-		if (!(lhs_ref = dynamic_cast<AST::Reference*>(&*lhs))) {
-			AST::NewBinaryExpression* lhs_bin = dynamic_cast<AST::NewBinaryExpression*>(&*lhs);
-			lhs_ref = dynamic_cast<AST::Reference*>(&*(lhs_bin->rhs));
-		}
-
-		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
-
-		std::cout << "pratt_parser.cpp:354 lhs type " << (int)lhs_ref->type << std::endl;
-		std::cout << "pratt_parser.cpp:354 lhs name " << lhs_ref->name << std::endl;
-		assert(lhs_ref->type == AST::Reference::T::var);
-		auto lhs_var = lhs_ref->get_var();*/
-		
 		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
 
 		auto v = lhs->getType().base_type->get_var(rhs_ref->name);

@@ -26,16 +26,5 @@
 #include "../mangling.hpp"
 
 llvm::Value* AST::FunctionCall::codegen(llvm::IRBuilder<> *builder, std::string name) {
-	/*llvm::Function *F = function->generated;
-
-	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
-
-	for (auto &arg: args) {
-		auto aV = arg->codegen(builder, "");
-		fargs.push_back(aV);
-	}
-
-	auto funcCall = builder->CreateCall(F, llvm::ArrayRef<llvm::Value*>(fargs), name);
-	return funcCall;*/
 	return nullptr;
 }

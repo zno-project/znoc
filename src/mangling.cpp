@@ -51,20 +51,3 @@ std::string _mangle_name(std::vector<std::pair<ManglePart, std::string>> parts) 
 std::string full_mangle_name(std::vector<std::pair<ManglePart, std::string>> parts) {
 	return "_G" + _mangle_name(parts);
 }
-
-/*std::string vmangle_name(int partCount, va_list va) {
-	std::string out = "_G";
-	std::string namespaces;
-	std::string names;
-
-	for (int i = 0; i < partCount; i++) {
-		ManglePart t = va_arg(va, ManglePart);
-		std::string n = std::string(va_arg(va, char*));
-
-		names += std::to_string(n.length()) + n;
-		namespaces += part_to_id(t);
-	}
-
-	out += namespaces + names;
-	return out;
-}*/

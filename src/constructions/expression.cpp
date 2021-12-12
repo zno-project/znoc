@@ -8,18 +8,6 @@
 llvm::BasicBlock *mergeBB = nullptr; // Merge block of current control flow codegen
 llvm::BasicBlock *condBB = nullptr; // Condition block of current control flow codegen
 
-// PARENTHESIS EXPRESSION
-// parenthesis_expr = '(' binary_expr ')';
-/*std::unique_ptr<AST::Expression> Parser::parse_parentheses_expression(FILE* f) {
-	//get_next_token(f); // Trim (
-	EXPECT('(', "to start parenthesis expression");
-	auto E = parse_binary_expression(f);
-	EXPECT(')', "to end parenthesis expression");
-	//if (currentToken != ')') throw UNEXPECTED_CHAR(currentToken, ") to match opening (");
-	//get_next_token(f); // Trim )
-	return E;
-}*/
-
 // NON SEMICOLON STATEMENT
 // non_semicolon_statement = codeblock |
 //                           while_loop |
@@ -66,7 +54,6 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 			return parse_numeric_literal(f);
 		}
 		case tok_let: {
-			//throw std::runtime_error("variable def");
 			return parse_variable_def(f);
 		}
 		default: throw UNEXPECTED_CHAR(currentToken, "r-value");
@@ -104,8 +91,6 @@ std::unique_ptr<AST::Expression> Parser::parse_statement(FILE* f) {
 	statement = parse_semicolon_statement(f);
 	if (!statement) statement = parse_pratt_expression(f);
 
-	//if (currentToken != ';') throw UNEXPECTED_CHAR(currentToken, "; after statement");
-	//get_next_token(f); // trim ;
 	EXPECT(';', "after statement");
 	return statement;
 }

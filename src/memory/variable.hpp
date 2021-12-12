@@ -46,22 +46,4 @@ namespace AST {
 	};
 }
 
-/*extern std::deque<std::map<std::string, std::shared_ptr<AST::Variable>>> NamedValues;
-
-#include "reference.hpp"
-
-namespace AST {
-	class VariableRef: public ASTRef {
-		std::shared_ptr<AST::Variable> varRef;
-		std::vector<std::string> fields;
-
-		public:
-		VariableRef(std::string var, std::vector<std::string> fields): ASTRef(AST::get_var(var)->getVarType()), varRef(AST::get_var(var)), fields(fields) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
-		llvm::Value* getAlloca() { return varRef->getAlloca(); }
-		llvm::Value* getFieldAlloca(llvm::IRBuilder<> *builder);
-		virtual const std::string& get_name() { return varRef->getName(); }
-	};
-}*/
-
 #endif
