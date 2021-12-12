@@ -55,7 +55,7 @@ enum operators {
 	call
 };
 
-extern char *operator_to_string[];
+extern const char *operator_to_string[];
 
 #include "function_def.hpp"
 

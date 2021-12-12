@@ -53,7 +53,7 @@ llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder, __attribute__
 		builder->CreateStore(v, allocaV);
 	}
 	
-	return builder->CreateLoad(allocaV);
+	return builder->CreateLoad(var_ref->underlying_type.codegen(), allocaV);
 }
 
 // VARIABLE DEFINITION
