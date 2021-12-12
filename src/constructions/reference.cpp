@@ -10,7 +10,6 @@
 #include "../memory/gep.hpp"
 #include "construction_parse.hpp"
 #include "../memory/memory_ref.hpp"
-#include "function_call.hpp"
 #include "../parsing.hpp"
 #include "struct_init.hpp"
 #include "../main.hpp"
