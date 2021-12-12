@@ -159,7 +159,7 @@ bool has_searched_path(std::filesystem::path p) {
 
 int parse_file(std::filesystem::path path,
 	std::shared_ptr<AST::Namespace> &current_namespace,
-	bool insideUses) {
+	__attribute__((unused)) bool insideUses) {
 	searchedIncludes.push_back(path);
 
 	FILE *f;

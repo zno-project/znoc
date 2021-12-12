@@ -1,7 +1,7 @@
 #include "type_base.hpp"
 #include "../llvm_module.hpp"
 
-std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {
+std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, __attribute__((unused)) size_t template_instance_id) {
 	try {
 		auto f = functions.at(func_name);
 		return f;

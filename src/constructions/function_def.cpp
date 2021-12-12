@@ -28,7 +28,7 @@
 #include <fmt/format.h>
 #include "../types/type_base.hpp"
 
-llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
+llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *builder) {
 	if (allocaV) return allocaV;
 
 	codegen_prototype();
@@ -93,7 +93,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 		std::string name = EXPECT_IDENTIFIER("argument name");
 
 		if (argsP.size() == 0 && name == "self" && self_type.has_value()) {
-			auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
+			auto arg = arg_t("self", self_type.value().get_pointer_to());
 			argsP.push_back(std::move(arg));
 			is_member_func = true;
 		} else {

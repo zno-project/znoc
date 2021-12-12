@@ -16,10 +16,10 @@
 namespace AST {
 	class Reference: public AST::Expression {
 		public:
-		std::shared_ptr<AST::MemoryLoc> var;
-		std::shared_ptr<AST::Namespace> ns;
-		enum class T { ns, var, none } type;
 		std::string name;
+		std::shared_ptr<AST::Namespace> ns;
+		std::shared_ptr<AST::MemoryLoc> var;
+		enum class T { ns, var, none } type;
 		public:
 
 		Reference(std::string name): Expression(AST::get_fundamental_type("void")) {

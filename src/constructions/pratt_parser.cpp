@@ -11,6 +11,8 @@ const char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|"
 
 void advance_op(operators op, FILE *f) {
 	switch (op) {
+		case not_an_operator:
+			break;
 		case dot:
 		case plus:
 		case minus:
@@ -27,6 +29,7 @@ void advance_op(operators op, FILE *f) {
 		case compare_lt:
 		case compare_gt:
 		case call:
+		case is:
 			get_next_token(f);
 			break;
 		case double_colon:
@@ -467,7 +470,7 @@ llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 	}
 }
 
-llvm::Value* AST::UnaryExpressionPostfix::codegen(llvm::IRBuilder<> *builder) {
+llvm::Value* AST::UnaryExpressionPostfix::codegen(__attribute__((unused)) llvm::IRBuilder<> *builder) {
 	throw std::runtime_error(fmt::format("unimplemented postfix op {}", operator_to_string[op]));
 }
 

@@ -67,7 +67,7 @@ namespace AST {
 			operators op;
 			std::unique_ptr<Expression> expr;
 		public:
-			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(get_prefix_op_ret_type(op, expr)) {}
+			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : Expression(get_prefix_op_ret_type(op, expr)), op(op), expr(std::move(expr)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
 			std::string print() const override {
@@ -87,7 +87,7 @@ namespace AST {
 			operators op;
 			std::unique_ptr<Expression> expr;
 		public:
-			UnaryExpressionPostfix(operators op, std::unique_ptr<Expression> expr) : op(op), expr(std::move(expr)), Expression(expr->getType()) {}
+			UnaryExpressionPostfix(operators op, std::unique_ptr<Expression> expr) : Expression(expr->getType()), op(op), expr(std::move(expr)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
 			std::string print() const override {
@@ -100,7 +100,7 @@ namespace AST {
 			std::unique_ptr<Expression> func;
 			std::vector<std::unique_ptr<Expression>> args;
 		public:
-			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : func(std::move(func)), args(std::move(args)), Expression(func->getType().get_return_of_function()) {}
+			NewCallExpression(std::unique_ptr<Expression> func, std::vector<std::unique_ptr<Expression>> args) : Expression(func->getType().get_return_of_function()), func(std::move(func)), args(std::move(args)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 
 			std::string print() const override {
@@ -127,7 +127,7 @@ namespace AST {
 			operators op;
 			std::unique_ptr<Expression> lhs, rhs;
 		public:
-			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)), Expression(get_binop_ret_type(op, lhs, rhs)) {}
+			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : Expression(get_binop_ret_type(op, lhs, rhs)), op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 			
 			std::string print() const override {

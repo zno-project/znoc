@@ -29,7 +29,7 @@ namespace AST {
 		int getCol() const { return Loc.Col; }
 		AST::TypeInstance getType() { return expressionType; }
 
-		virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) {
+		virtual llvm::Value* codegen_to_ptr(__attribute__((unused)) llvm::IRBuilder<> *builder) {
 			throw std::runtime_error(fmt::format("Cannot codegen {} as ptr", typeid(*this).name()));
 		}
 

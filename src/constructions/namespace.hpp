@@ -12,13 +12,13 @@
 namespace AST {
 	class Namespace {
 		protected:
-		std::map<std::string, AST::TypeInstance> named_types;
-		std::map<std::string, std::shared_ptr<AST::MemoryLoc>> global_variables;
-		std::map<std::string, std::shared_ptr<AST::Namespace>> namespaces;
 		std::string name;
+		std::map<std::string, std::shared_ptr<AST::Namespace>> namespaces;
+		std::map<std::string, std::shared_ptr<AST::MemoryLoc>> global_variables;
+		std::map<std::string, AST::TypeInstance> named_types;
 
 		public:
-		Namespace(std::string name): name(name), named_types(), global_variables(), namespaces() {}
+		Namespace(std::string name): name(name), namespaces(), global_variables(), named_types() {}
 		~Namespace() {}
 		std::string get_name() { return name; }
 

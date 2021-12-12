@@ -14,17 +14,16 @@
 namespace AST {
 	class TypeBase: public AST::Namespace {
 		protected:
-		//std::string name;
-		std::map<size_t, llvm::Type*> generated;
 		std::map<std::string, size_t> fields_by_name;
 		std::vector<AST::field_type_t> fields_by_index;
 		std::vector<std::vector<AST::TypeInstance>> generic_types;
 		std::vector<Interface> generic_type_interfaces;
 		std::map<std::string, std::shared_ptr<AST::Function>> functions;
+		std::map<size_t, llvm::Type*> generated;
 
 		public:
-		TypeBase(std::string name): fields_by_name(), fields_by_index(), functions(), generic_types(), generated(), generic_type_interfaces(), Namespace(name) {}
-		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces): /*name(std::move(name)),*/ fields_by_name(std::move(fields_by_name)), generic_types(), fields_by_index(std::move(fields_by_index)), functions(), generic_type_interfaces(std::move(generic_type_interfaces)), generated(), Namespace(name) {}
+		TypeBase(std::string name): Namespace(name), fields_by_name(), fields_by_index(), generic_types(), generic_type_interfaces(), functions(), generated() {}
+		TypeBase(std::string name, std::map<std::string, size_t> fields_by_name, std::vector<AST::field_type_t> fields_by_index, std::vector<Interface> generic_type_interfaces): Namespace(name), fields_by_name(std::move(fields_by_name)), fields_by_index(std::move(fields_by_index)), generic_types(), generic_type_interfaces(std::move(generic_type_interfaces)), functions(), generated() {}
 
 		virtual llvm::Type* codegen(size_t template_instance);
 

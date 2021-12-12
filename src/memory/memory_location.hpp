@@ -16,9 +16,9 @@ namespace AST {
 	class MemoryLoc {
 		protected:
 		public:
+		std::string name;
 		llvm::Value *allocaV;
 		AST::TypeInstance underlying_type;
-		std::string name;
 		
 		MemoryLoc(AST::TypeInstance underlying_type, std::string name): name(name), allocaV(nullptr), underlying_type(underlying_type) {};
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) = 0;
