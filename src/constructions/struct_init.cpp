@@ -10,7 +10,7 @@
 #include "../memory/gep.hpp"
 #include <memory>
 
-std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeInstance to_init) {
+std::unique_ptr<AST::Expression> Parser::parse_struct_init(__attribute__((unused)) FILE* f, __attribute__((unused)) AST::TypeInstance to_init) {
 	/*std::vector<AST::TypeInstance> template_types;
 	OPTIONAL_LIST('<', ',', '>', {
 		template_types.push_back(Parser::parse_type(f));
@@ -32,4 +32,5 @@ std::unique_ptr<AST::Expression> Parser::parse_struct_init(FILE* f, AST::TypeIns
 	}, "struct fields");
 	cb_exprs.push_back(std::make_unique<AST::MemoryRef>(struct_var));
 	return std::make_unique<AST::CodeBlock>(std::move(cb_exprs));*/
+	return nullptr;
 }

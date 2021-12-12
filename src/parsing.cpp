@@ -16,12 +16,10 @@
 #include <string>
 #include <filesystem>
 
-//FILE *f;
 int currentToken;
 std::variant<std::string, double> currentTokenVal;
 
 int advance(FILE *f) {
-	//std::cout << "advance" << std::endl;
 	int LastChar = fgetc(f);
 
 	if (LastChar == '\n' || LastChar == '\r') {
@@ -34,10 +32,8 @@ int advance(FILE *f) {
 std::map<FILE*, char> lastChars;
 
 int get_token(FILE *f) {
-	//std::cout << "get_token" << std::endl;
 	if (lastChars[f] == 0) lastChars[f] = advance(f);
 	char &lastChar = lastChars[f];
-	//std::cout << "after advance should be called" << std::endl;
 
 	// skip whitespace
 	while (isspace(lastChar)) lastChar = advance(f);
@@ -148,9 +144,7 @@ int peek_next_token(FILE* f, int offset) {
 }
 
 int get_next_token(FILE *f) {
-	//std::cout << "getnexttoken" << std::endl;
 	currentToken = get_token(f);
-	//std::cout << "Tok: " << (char)currentToken << "(" << currentToken << ")" << std::endl;
 	return currentToken;
 }
 
@@ -165,7 +159,7 @@ bool has_searched_path(std::filesystem::path p) {
 
 int parse_file(std::filesystem::path path,
 	std::shared_ptr<AST::Namespace> &current_namespace,
-	bool insideUses) {
+	__attribute__((unused)) bool insideUses) {
 	searchedIncludes.push_back(path);
 
 	FILE *f;
@@ -173,7 +167,6 @@ int parse_file(std::filesystem::path path,
 
 	get_next_token(f);
 	while (1) {
-		//std::cout << "current token is " << currentToken << std::endl;
 		switch (currentToken) {
 			case '#': {
 				Parser::parse_attributes(f);
@@ -183,25 +176,17 @@ int parse_file(std::filesystem::path path,
 				fclose(f);
 				return 0;
 			}
-			//case ';': get_next_token(); break;
 			case tok_uses: {
 				get_next_token(f);
 				
 				EXPECT('\'', "\' for path to included file");
-				//if (currentToken != '\'') throw UNEXPECTED_CHAR(currentToken, "\' for path to included file");
+				
 				std::string filePath;
 				UNTIL('\'', {
 					if (currentToken == tok_identifier) filePath += std::get<std::string>(currentTokenVal);
 					else filePath += currentToken;
 					get_next_token(f);
 				});
-				/*while (1) {
-					get_next_token(f);
-					if (currentToken == '\'') break;
-					else if (currentToken == tok_identifier) filePath += std::get<std::string>(currentTokenVal);
-					else filePath += currentToken;
-				}
-				get_next_token(f);*/
 
 				auto newP = path;
 				newP.replace_filename(filePath.c_str());
@@ -222,7 +207,7 @@ int parse_file(std::filesystem::path path,
 
 				int old_current_token = currentToken;
 				parse_file(newP, new_namespace, true);
-				//std::cout << "Parsed include " << newP.string() << " as " << namespace_name << std::endl;
+
 				*current_namespace << std::move(new_namespace);
 				currentToken = old_current_token;
 
@@ -235,24 +220,6 @@ int parse_file(std::filesystem::path path,
 				Parser::clear_attributes();
 				break;
 			}
-			/*default: {
-				auto E = Parser::parse_non_semicolon_statement();
-
-				if (E) {
-					auto e = E.release();
-					if (typeid(*e) == typeid(AST::Function)) {
-						static_cast<AST::Function*>(e);
-					} else {
-						throw std::runtime_error(fmt::format("Cannot have {} as top level statement", typeid(e).name()));
-					}
-				} else {
-					/*std::cout << "global var" << std::endl;
-					auto var_def = Parser::parse_variable_def();
-					if (currentToken != ';') throw UNEXPECTED_CHAR(currentToken, "; after statement");
-					get_next_token(); // trim ;
-					variableDeclarations.push_back(std::pair<std::unique_ptr<AST::VariableDef>, bool>(static_cast<AST::VariableDef*>(var_def.get()), insideUses));
-					throw std::runtime_error("Unimplemented");
-				}*/
 			case tok_func: {
 				*current_namespace << Parser::parse_function(f);
 				Parser::clear_attributes();

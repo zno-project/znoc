@@ -6,9 +6,9 @@ CMAKE ?= cmake
 CMAKE_ARGS ?=
 
 ifeq ($(shell uname),Darwin)
-CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags | sed 's/-I/-isystem /g'` `$(PKG_CONFIG) --cflags fmt`
+CF = -Wsuggest-override -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags | sed 's/-I/-isystem /g'` `$(PKG_CONFIG) --cflags fmt`
 else
-CF = -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags` `$(PKG_CONFIG) --cflags fmt`
+CF = -Wsuggest-override -MMD -MP --std=gnu++17 `$(LLVM_CONFIG) --cppflags` `$(PKG_CONFIG) --cflags fmt`
 endif
 LDF = `$(LLVM_CONFIG) --ldflags --libs core native` `$(PKG_CONFIG) --libs fmt`
 

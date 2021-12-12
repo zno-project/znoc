@@ -17,13 +17,13 @@ namespace AST {
 		
 		public:
 		BreakExpression(std::unique_ptr<AST::Expression> value): Expression(value ? value->getType() : AST::get_fundamental_type("void")), value(std::move(value)) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "retVal");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 
 	class ContinueExpression: public AST::Expression {
 		public:
 		ContinueExpression(): Expression(AST::get_fundamental_type("void")) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "retVal");
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 	};
 }
 

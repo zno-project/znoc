@@ -9,11 +9,11 @@ namespace AST {
 		private:
 		std::shared_ptr<MemoryLoc> to_access;
 		public:
-		MemoryRef(std::shared_ptr<MemoryLoc> to_access): to_access(to_access), Expression(to_access->underlying_type) {}
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string _name = "") {
+		MemoryRef(std::shared_ptr<MemoryLoc> to_access): Expression(to_access->underlying_type), to_access(to_access) {}
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override {
 			return builder->CreateLoad(to_access->codegen(builder));
 		}
-		llvm::Value* codegen_to_underlying_ptr(llvm::IRBuilder<> *builder, std::string _name = "") {
+		llvm::Value* codegen_to_underlying_ptr(llvm::IRBuilder<> *builder) {
 			return to_access->codegen(builder);
 		}
 	};

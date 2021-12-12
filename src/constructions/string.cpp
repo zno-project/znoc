@@ -7,7 +7,7 @@
 
 uint64_t stringCounter = 0;
 
-llvm::Value* AST::String::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* AST::String::codegen(llvm::IRBuilder<> *builder) {
 	auto str = llvm::ConstantDataArray::getString(*TheContext, llvm::StringRef(s), true);
 	auto globalVar = new llvm::GlobalVariable(*TheModule, str->getType(), true, llvm::GlobalValue::PrivateLinkage, str, fmt::format("str.{}", stringCounter++));
 	return builder->CreateBitCast(globalVar, AST::get_fundamental_type("i8").get_pointer_to().codegen());

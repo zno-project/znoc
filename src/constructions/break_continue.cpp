@@ -11,13 +11,13 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/BasicBlock.h>
 
-llvm::Value* AST::BreakExpression::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* AST::BreakExpression::codegen(llvm::IRBuilder<> *builder) {
 	auto v = value ? value->codegen(builder) : nullptr;
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(mergeBB); // Jump to the merge block
 	return v;
 }
 
-llvm::Value* AST::ContinueExpression::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string name) {
+llvm::Value* AST::ContinueExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(condBB); // Jump to the condition block
 	return nullptr; // Cannot return from a `continue`
 }

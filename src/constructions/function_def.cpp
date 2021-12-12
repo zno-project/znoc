@@ -28,17 +28,13 @@
 #include <fmt/format.h>
 #include "../types/type_base.hpp"
 
-llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
-	//std::cout << "gen func " << this->name << std::endl;
+llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *builder) {
 	if (allocaV) return allocaV;
+
 	codegen_prototype();
 	llvm::Function *F = static_cast<llvm::Function*>(allocaV);
 
-	//std::cout << "no allocaV for " << this->name << std::endl;
-
 	if (body) {
-		//std::cout << "gen body for " << this->name << std::endl;
-
 		llvm::BasicBlock *block = llvm::BasicBlock::Create(*TheContext, "entry", F);
 		llvm::IRBuilder<> builder(block);
 
@@ -52,7 +48,7 @@ llvm::Value* AST::Function::codegen(llvm::IRBuilder<> *builder) {
 			builder.CreateStore(a, a_stack);
 		}
 
-		body->codegen(&builder, fmt::format("f_{}", name));
+		body->codegen(&builder);
 
 		if (!builder.GetInsertBlock()->getTerminator()) builder.CreateRetVoid(); // If no terminator, add a `ret void`
 
@@ -76,8 +72,6 @@ void AST::Function::codegen_prototype() {
 	auto f2 = (llvm::Function*)(f.getCallee());
 	f2->setCallingConv(llvm::CallingConv::C);
 
-	//std::cout << attributes << std::endl;
-
 	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
 	if (is_member_func) f2->addFnAttr("member_func");
 	allocaV = f2;
@@ -89,7 +83,6 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
-	//std::string name = self_type.has_value() ? self_type->base_type->get_name() + "::" : "";
 	std::string name = EXPECT_IDENTIFIER("function name after 'func'");
 
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
@@ -100,7 +93,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 		std::string name = EXPECT_IDENTIFIER("argument name");
 
 		if (argsP.size() == 0 && name == "self" && self_type.has_value()) {
-			auto arg = arg_t("self", std::move(self_type.value().get_pointer_to()));
+			auto arg = arg_t("self", self_type.value().get_pointer_to());
 			argsP.push_back(std::move(arg));
 			is_member_func = true;
 		} else {

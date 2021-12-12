@@ -16,9 +16,9 @@ namespace AST {
 	class MemoryLoc {
 		protected:
 		public:
+		std::string name;
 		llvm::Value *allocaV;
 		AST::TypeInstance underlying_type;
-		std::string name;
 		
 		MemoryLoc(AST::TypeInstance underlying_type, std::string name): name(name), allocaV(nullptr), underlying_type(underlying_type) {};
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) = 0;
@@ -37,7 +37,7 @@ class ScopeEnd: public AST::Expression {
 
 	public:
 	ScopeEnd(std::vector<std::shared_ptr<AST::Variable>> out_of_scope_vars) : Expression(AST::get_fundamental_type("void")), out_of_scope_vars(std::move(out_of_scope_vars)) {}
-	virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string name = "");
+	llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 };
 
 std::unique_ptr<ScopeEnd> pop_scope();

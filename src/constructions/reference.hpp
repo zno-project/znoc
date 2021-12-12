@@ -16,14 +16,11 @@
 namespace AST {
 	class Reference: public AST::Expression {
 		public:
-		std::shared_ptr<AST::MemoryLoc> var;
-		std::shared_ptr<AST::Namespace> ns;
-		enum class T { ns, var, none } type;
 		std::string name;
+		std::shared_ptr<AST::Namespace> ns;
+		std::shared_ptr<AST::MemoryLoc> var;
+		enum class T { ns, var, none } type;
 		public:
-		/*Reference(std::string name) : var(AST::get_var(name)), name(name), Expression(({auto v = AST::get_var(name); v ? v->underlying_type : AST::get_fundamental_type("void");})) {
-			std::cout << "reference to " << name << std::endl;
-		}*/
 
 		Reference(std::string name): Expression(AST::get_fundamental_type("void")) {
 			this->type = T::none;
@@ -54,7 +51,7 @@ namespace AST {
 			this->expressionType = AST::get_fundamental_type("namespace_ref");
 		}
 
-		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder, std::string _name = "") override {
+		llvm::Value* codegen(llvm::IRBuilder<> *builder) override {
 			if (this->type == T::var) {
 				auto codegenned_var = var->codegen(builder);
 				if (codegenned_var->getType()->getPointerElementType()->isFunctionTy()) return codegenned_var;
@@ -63,7 +60,7 @@ namespace AST {
 			else return (llvm::Value*)&*ns;
 		}
 
-		virtual llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
+		llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 			assert(this->type == T::var);
 			return var->codegen(builder);
 		}

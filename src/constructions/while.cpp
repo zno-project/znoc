@@ -8,14 +8,12 @@
 #include <string>
 #include <iostream>
 #include "../llvm_module.hpp"
-#include "../casting.hpp"
 #include "../macros.hpp"
 #include "../parsing.hpp"
 #include "expression.hpp"
 #include "construction_parse.hpp"
 
-llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
-	//emitLocation(builder, this);
+llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	condBB = llvm::BasicBlock::Create(*TheContext, "while_loop_condition");
 	llvm::BasicBlock *WhileLoopBodyBB = llvm::BasicBlock::Create(*TheContext, "while_loop_body");
@@ -27,7 +25,7 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder, __attribute__((u
 
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(condBB);
 	builder->SetInsertPoint(condBB);
-	auto conditionCond = condition->codegen(builder, "__while_condition");
+	auto conditionCond = condition->codegen(builder);
 	builder->CreateCondBr(conditionCond, WhileLoopBodyBB, mergeBB);
 
 	builder->SetInsertPoint(WhileLoopBodyBB);

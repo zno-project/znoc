@@ -1,7 +1,7 @@
 #include "type_base.hpp"
 #include "../llvm_module.hpp"
 
-std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, size_t template_instance_id) {
+std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string func_name, __attribute__((unused)) size_t template_instance_id) {
 	try {
 		auto f = functions.at(func_name);
 		return f;
@@ -12,16 +12,10 @@ std::shared_ptr<AST::Function> AST::TypeBase::get_function_by_name(std::string f
 
 AST::FieldInfo AST::TypeBase::get_field_info_by_name(std::string field_name, size_t template_instance_id) {
 	auto f_idx = fields_by_name.find(field_name);
-	//auto c_idx = constants.find(field_name);
 
 	if (f_idx != fields_by_name.end()) {
 		return get_field_info_by_index(f_idx->second, template_instance_id);
-	}/* else if (c_idx != constants.end()) {
-		return FieldInfoConst {
-			.type = c_idx->second.type,
-			.linkage_name = fmt::format("{}.{}", name, field_name)
-		};
-	}*/ else {
+	} else {
 		throw std::runtime_error(fmt::format("Cannot find field {}.{}", name, field_name));
 	}
 }
@@ -37,11 +31,6 @@ AST::FieldInfo AST::TypeBase::get_field_info_by_index(size_t idx, size_t templat
 
 llvm::Type* AST::TypeBase::codegen(size_t template_instance) {
 	if (!generated[template_instance]) {
-		/*for (auto &c: constants) {
-			std::cout << "gen const with linkage name " << fmt::format("{}.{}", name, c.first) << std::endl;
-			new llvm::GlobalVariable(*TheModule, c.second.type.codegen(), true, llvm::GlobalValue::PrivateLinkage, c.second.val->codegen_const(), fmt::format("{}.{}", name, c.first));
-		}*/
-
 		std::vector<llvm::Type*> f;
 		for (auto &fT : fields_by_index) {
 			if (std::holds_alternative<AST::TypeInstance>(fT)) {

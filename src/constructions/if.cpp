@@ -1,7 +1,6 @@
 #include "if.hpp"
 
 #include "../llvm_module.hpp"
-#include "../casting.hpp"
 #include "../macros.hpp"
 #include "../parsing.hpp"
 #include "reference.hpp"
@@ -16,12 +15,9 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/BasicBlock.h>
 
-llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unused)) std::string _name) {
-	//emitLocation(builder, this);
-	//push_new_scope(); // Create new scope
-	auto conditionCond = condition->codegen(builder, "__if_condition");
-	//auto condition = builder->CreateFCmpONE(conditionCond, llvm::ConstantFP::get(*TheContext, llvm::APFloat(0.0f)), "__if_condition_casted");
-
+llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder) {
+	auto conditionCond = condition->codegen(builder);
+	
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
 	llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(*TheContext, "then", TheFunction);
 	llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(*TheContext, "else");
@@ -43,8 +39,6 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder, __attribute__((unus
 		postElseBlockBlock = builder->GetInsertBlock();
 	}
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(MergeBB);
-
-	//pop_scope(); // Remove scope of condition
 
 	TheFunction->getBasicBlockList().push_back(MergeBB);
 	builder->SetInsertPoint(MergeBB);
