@@ -18,10 +18,11 @@ namespace AST {
 		AST::TypeInstance returnType;
 		std::unique_ptr<AST::CodeBlock> body;
 		bool is_member_func;
+		bool is_variadic;
 		attributes_t attributes;
 
 		public:
-		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body, bool is_member_func): MemoryLoc(returnType.get_function_returning(), name), args(args), returnType(returnType), body(std::move(body)), is_member_func(is_member_func), attributes(attributes) {}
+		Function(std::string name, std::vector<std::shared_ptr<AST::Variable>> args, AST::TypeInstance returnType, attributes_t attributes, std::unique_ptr<AST::CodeBlock> body, bool is_member_func, bool is_variadic): MemoryLoc(returnType.get_function_returning(), name), args(args), returnType(returnType), body(std::move(body)), is_member_func(is_member_func), is_variadic(is_variadic), attributes(attributes) {}
 		void codegen_prototype();
 		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
 		AST::TypeInstance getRetType() { return returnType; } ;

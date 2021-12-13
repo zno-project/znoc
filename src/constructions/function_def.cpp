@@ -66,7 +66,7 @@ void AST::Function::codegen_prototype() {
 		fargs.push_back(arg->underlying_type.codegen());
 	}
 
-	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, false);
+	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, is_variadic);
 	llvm::FunctionCallee f = TheModule->getOrInsertFunction(this->get_name(), ft);
 
 	auto f2 = (llvm::Function*)(f.getCallee());
@@ -88,6 +88,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;
 	bool is_member_func = false;
+	bool is_variadic = false;
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
@@ -98,9 +99,16 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 			is_member_func = true;
 		} else {
 			EXPECT(':', "after argument name");
-			AST::TypeInstance type = parse_type(f);
-			auto arg = arg_t(name, std::move(type));
-			argsP.push_back(std::move(arg));
+			if (currentToken == '.') {
+				EXPECT('.', "variadic");
+				EXPECT('.', "variadic");
+				EXPECT('.', "variadic");
+				is_variadic = true;
+			} else {
+				AST::TypeInstance type = parse_type(f);
+				auto arg = arg_t(name, std::move(type));
+				argsP.push_back(std::move(arg));
+			}
 		}
 	}, "argument list");
 
@@ -130,5 +138,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func);
+	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func, is_variadic);
 }
