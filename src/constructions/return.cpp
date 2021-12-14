@@ -22,7 +22,7 @@ llvm::Value* AST::ReturnExpression::codegen(llvm::IRBuilder<> *builder) {
 	return nullptr;
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_return(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_return(zno_ifile& f) {
 	EXPECT(tok_return, "in return statement")
 	if (currentToken == ';') return std::make_unique<AST::ReturnExpression>(nullptr);
 	else return std::make_unique<AST::ReturnExpression>(parse_pratt_expression(f));

@@ -5,14 +5,14 @@
 
 attributes_t currentAttributes;
 
-Attributes tok_to_attribute(FILE* f) {
+Attributes tok_to_attribute(zno_ifile& f) {
 	auto attr = EXPECT_IDENTIFIER("attribute name");
 	if (attr == "inline") return Attributes::AlwaysInline;
 	else if (attr == "extern") return Attributes::NoMangle;
 	else throw std::runtime_error(fmt::format("unknown attribute {}", attr));
 }
 
-void Parser::parse_attributes(FILE* f) {
+void Parser::parse_attributes(zno_ifile& f) {
 	EXPECT('#', "to start attribute list");
 
 	LIST('[', ',', ']', {

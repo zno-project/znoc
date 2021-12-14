@@ -19,7 +19,20 @@
 int currentToken;
 std::variant<std::string, double> currentTokenVal;
 
-int advance(FILE *f) {
+zno_ifile::operator FILE*() { return f; }
+
+zno_ifile::zno_ifile(std::string path) {
+	this->path = path;
+	f = fopen(path.c_str(), "r");
+}
+
+zno_ifile::~zno_ifile() {
+	fclose(f);
+}
+
+std::string zno_ifile::get_path() { return path; }
+
+int advance(zno_ifile& f) {
 	int LastChar = fgetc(f);
 
 	if (LastChar == '\n' || LastChar == '\r') {
@@ -29,11 +42,11 @@ int advance(FILE *f) {
 	return LastChar;
 }
 
-std::map<FILE*, char> lastChars;
+std::map<std::string, char> lastChars;
 
-int get_token(FILE *f) {
-	if (lastChars[f] == 0) lastChars[f] = advance(f);
-	char &lastChar = lastChars[f];
+int get_token(zno_ifile& f) {
+	if (lastChars[f.get_path()] == 0) lastChars[f.get_path()] = advance(f);
+	char& lastChar = lastChars[f.get_path()];
 
 	// skip whitespace
 	while (isspace(lastChar)) lastChar = advance(f);
@@ -125,9 +138,9 @@ int get_token(FILE *f) {
 	return thisChar;
 }
 
-int peek_next_token(FILE* f, int offset) {
+int peek_next_token(zno_ifile& f, int offset) {
 	auto currentPos = ftell(f);
-	char oldLastChar = lastChars[f];
+	char oldLastChar = lastChars[f.get_path()];
 	auto oldLexLoc = LexLoc;
 	auto oldCurrentToken = currentToken;
 	auto oldCurrentTokenVal = currentTokenVal;
@@ -135,7 +148,7 @@ int peek_next_token(FILE* f, int offset) {
 	for (int i = 0; i < offset; i++) {
 		ret = get_next_token(f);
 	}
-	lastChars[f] = oldLastChar;
+	lastChars[f.get_path()] = oldLastChar;
 	LexLoc = oldLexLoc;
 	fseek(f, currentPos, SEEK_SET);
 	currentToken = oldCurrentToken;
@@ -143,7 +156,7 @@ int peek_next_token(FILE* f, int offset) {
 	return ret;
 }
 
-int get_next_token(FILE *f) {
+int get_next_token(zno_ifile& f) {
 	currentToken = get_token(f);
 	return currentToken;
 }
@@ -162,8 +175,7 @@ int parse_file(std::filesystem::path path,
 	__attribute__((unused)) bool insideUses) {
 	searchedIncludes.push_back(path);
 
-	FILE *f;
-	if ((f = fopen(path.string().c_str(), "r")) == NULL) return 1;
+	zno_ifile f(path.string());
 
 	get_next_token(f);
 	while (1) {
@@ -173,7 +185,6 @@ int parse_file(std::filesystem::path path,
 				break;
 			}
 			case tok_eof: {
-				fclose(f);
 				return 0;
 			}
 			case tok_uses: {

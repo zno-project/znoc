@@ -5,6 +5,7 @@
 #include <llvm/IR/BasicBlock.h>
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
+#include "../llvm_module.hpp"
 
 // FALLTHROUGH
 // fallthrough = 'fallthrough';
@@ -25,7 +26,7 @@ llvm::Value* AST::FallthroughExpression::codegen(llvm::IRBuilder<> *builder) {
 	return nullptr;
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_fallthrough(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_fallthrough(zno_ifile& f) {
 	get_next_token(f);
 	return std::make_unique<AST::FallthroughExpression>();
 }

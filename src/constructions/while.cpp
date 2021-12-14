@@ -12,6 +12,7 @@
 #include "../parsing.hpp"
 #include "expression.hpp"
 #include "construction_parse.hpp"
+#include "../memory/memory_location.hpp"
 
 llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
@@ -42,7 +43,7 @@ llvm::Value* AST::WhileDef::codegen(llvm::IRBuilder<> *builder) {
 
 // WHILE LOOP
 // while_loop = 'while' binary_expr codeblock;
-std::unique_ptr<AST::Expression> Parser::parse_while(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_while(zno_ifile& f) {
 	EXPECT(tok_while, "to start while loop");
 	push_new_scope();
 	auto condition = parse_pratt_expression(f);

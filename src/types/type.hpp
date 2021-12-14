@@ -8,6 +8,7 @@
 #include <variant>
 #include <optional>
 #include <fmt/format.h>
+#include "../parsing.hpp"
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -114,8 +115,8 @@ namespace AST {
 }
 
 namespace Parser {
-	AST::TypeInstance parse_type(FILE* f);
-	AST::TypeInstance parse_aggregate_type_definition(FILE* f);
+	AST::TypeInstance parse_type(zno_ifile& f);
+	AST::TypeInstance parse_aggregate_type_definition(zno_ifile& f);
 }
 
 #endif

@@ -7,10 +7,23 @@
 #include <filesystem>
 #include "macros.hpp"
 
-int advance(FILE* f);
-int get_token(FILE* f);
-int peek_next_token(FILE* f, int offset = 1);
-int get_next_token(FILE* f);
+class zno_ifile {
+	private:
+	std::string path;
+	FILE *f;
+
+	public:
+	zno_ifile(const zno_ifile&) = delete;
+	operator FILE*();
+	zno_ifile(std::string path);
+	~zno_ifile();
+	std::string get_path();
+};
+
+int advance(zno_ifile& f);
+int get_token(zno_ifile& f);
+int peek_next_token(zno_ifile& f, int offset = 1);
+int get_next_token(zno_ifile& f);
 
 extern int currentToken;
 extern std::variant<std::string, double> currentTokenVal;
@@ -54,7 +67,7 @@ enum Token {
 	tok_string = -__LINE__
 };
 
-#include "constructions/namespace.hpp"
+namespace AST { class Namespace; }
 
 int parse_file(std::filesystem::path p,
 	std::shared_ptr<AST::Namespace> &current_namespace,

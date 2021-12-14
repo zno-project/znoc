@@ -13,7 +13,7 @@ llvm::Value* AST::String::codegen(llvm::IRBuilder<> *builder) {
 	return builder->CreateBitCast(globalVar, AST::get_fundamental_type("i8").get_pointer_to().codegen());
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_string(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_string(zno_ifile& f) {
 	if (currentToken != tok_string) UNEXPECTED_CHAR(currentToken, "string to begin string literal");
 	std::string s = std::get<std::string>(currentTokenVal);
 	get_next_token(f);

@@ -17,7 +17,7 @@
 // IDENTIFIER EXPRESSION
 // identifier_expr = identifier |
 //                   identifier '(' (binary_expr ',')* ')';
-std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(zno_ifile& f) {
 	auto id = EXPECT_IDENTIFIER("identifier");
 
 	auto v = AST::get_var(id);

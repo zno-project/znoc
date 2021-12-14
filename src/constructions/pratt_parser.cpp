@@ -3,13 +3,12 @@
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
 #include <memory>
-#include <stdio.h>
 #include "../memory/memory_ref.hpp"
 #include "reference.hpp"
 
 const char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|", "~", "^", "&&", "||", "!", "<<", ">>", "==", "!=", "<", ">", "<=", ">=", "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "is", "["};
 
-void advance_op(operators op, FILE *f) {
+void advance_op(operators op, zno_ifile& f) {
 	switch (op) {
 		case not_an_operator:
 			break;
@@ -61,7 +60,7 @@ void advance_op(operators op, FILE *f) {
 	}
 }
 
-operators parse_operator(FILE *f) {
+operators parse_operator(zno_ifile& f) {
 	switch (currentToken) {
 		case '.': {
 			return dot;
@@ -237,7 +236,7 @@ std::optional<PostfixBindingPower> get_binding_power_postfix(operators op) {
 	}
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(FILE* f, unsigned int min_bp) {
+std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(zno_ifile& f, unsigned int min_bp) {
 	std::unique_ptr<AST::Expression> lhs;
 
 	if (currentToken < 0 || currentToken == '{') {

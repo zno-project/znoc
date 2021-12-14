@@ -18,14 +18,14 @@
 
 #include <string.h>
 
-extern std::map<FILE*, char> lastChars;
+extern std::map<std::string, char> lastChars;
 
 class CompilerGlobals {
  public:
   CompilerGlobals() {
 		push_new_scope();
 		LexLoc = {1, 0};
-		lastChars = std::map<FILE*, char>();
+		lastChars = std::map<std::string, char>();
 		GlobalNamespace = std::make_shared<AST::Namespace>("_G");
 		AST::init_builtin_types();
   }

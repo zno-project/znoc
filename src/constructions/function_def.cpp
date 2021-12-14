@@ -79,7 +79,7 @@ void AST::Function::codegen_prototype() {
 
 // FUNCTION
 // function = function_prototype (codeblock | ';');
-std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST::TypeInstance> self_type) {
+std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optional<AST::TypeInstance> self_type) {
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");

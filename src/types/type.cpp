@@ -102,11 +102,12 @@ void AST::TypeInstance::get_or_create_template(std::vector<AST::TypeInstance> te
 	}
 }
 
-AST::TypeInstance Parser::parse_type(FILE* f) {
+AST::TypeInstance Parser::parse_type(zno_ifile& f) {
 	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "name of type");
 	auto parsed_namespace_data = Parser::parse_namespace(f);
 
 	std::string type_name = parsed_namespace_data.next_identifier;
+	if (!parsed_namespace_data.parsed_namespace) throw std::runtime_error("couldn't find thing");
 	auto type_base = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
 
 	std::vector<AST::TypeInstance> template_types;
@@ -156,7 +157,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 
 #include "../constructions/construction_parse.hpp"
 
-AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
+AST::TypeInstance Parser::parse_aggregate_type_definition(zno_ifile& f) {
 	EXPECT(tok_struct, "to begin struct definition");
 
 	std::string name = EXPECT_IDENTIFIER("for name of struct");

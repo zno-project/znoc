@@ -10,6 +10,7 @@
 
 #include "../location.hpp"
 #include "../types/type.hpp"
+#include "../parsing.hpp"
 
 extern llvm::BasicBlock *mergeBB; // Merge block of current control flow codegen
 extern llvm::BasicBlock *condBB; // Condition block of current control flow codegen
@@ -40,10 +41,10 @@ namespace AST {
 }
 
 namespace Parser {
-	std::unique_ptr<AST::Expression> parse_non_semicolon_statement(FILE* f);
-	std::unique_ptr<AST::Expression> parse_r_value(FILE* f);
-	std::unique_ptr<AST::Expression> parse_semicolon_statement(FILE* f);
-	std::unique_ptr<AST::Expression> parse_statement(FILE* f);
+	std::unique_ptr<AST::Expression> parse_non_semicolon_statement(zno_ifile& f);
+	std::unique_ptr<AST::Expression> parse_r_value(zno_ifile& f);
+	std::unique_ptr<AST::Expression> parse_semicolon_statement(zno_ifile& f);
+	std::unique_ptr<AST::Expression> parse_statement(zno_ifile& f);
 }
 
 #endif

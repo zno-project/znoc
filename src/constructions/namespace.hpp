@@ -5,9 +5,9 @@
 #include <string>
 #include "../types/type.hpp"
 #include "function_def.hpp"
-#include <stdio.h>
 #include <iostream>
 #include <fmt/format.h>
+#include "../parsing.hpp"
 
 namespace AST {
 	class Namespace {
@@ -61,7 +61,7 @@ namespace Parser {
 		std::string next_identifier;
 		int next_token;
 	};
-	NamespaceParseReturn parse_namespace(FILE* f);
+	NamespaceParseReturn parse_namespace(zno_ifile& f);
 }
 
 #endif
