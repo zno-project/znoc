@@ -6,6 +6,7 @@
 #include "expression.hpp"
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
+#include "../llvm_module.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
@@ -19,7 +20,7 @@ llvm::Value* AST::BreakExpression::codegen(llvm::IRBuilder<> *builder) {
 
 llvm::Value* AST::ContinueExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(condBB); // Jump to the condition block
-	return nullptr; // Cannot return from a `continue`
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext)); // Cannot return from a `continue`
 }
 
 // BREAK

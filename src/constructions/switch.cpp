@@ -48,7 +48,7 @@ llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder) {
 	TheFunction->getBasicBlockList().push_back(MergeBB);
 	builder->SetInsertPoint(MergeBB);
 
-	return nullptr;
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext));
 }
 
 // SWITCH STATEMENT

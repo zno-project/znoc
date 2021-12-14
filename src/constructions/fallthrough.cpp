@@ -23,7 +23,7 @@ llvm::Value* AST::FallthroughExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (!b) throw std::runtime_error("this really wasn't supposed to happen. or maybe you put a fallthrough with nothing following it or something");
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(b);
 
-	return nullptr;
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext));
 }
 
 std::unique_ptr<AST::Expression> Parser::parse_fallthrough(zno_ifile& f) {
