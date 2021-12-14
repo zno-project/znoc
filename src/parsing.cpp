@@ -217,9 +217,11 @@ int parse_file(std::filesystem::path path,
 				auto new_namespace = std::make_shared<AST::Namespace>(namespace_name);
 
 				int old_current_token = currentToken;
+
+				*current_namespace << new_namespace;
+
 				parse_file(newP, new_namespace, true);
 
-				*current_namespace << std::move(new_namespace);
 				currentToken = old_current_token;
 
 				Parser::clear_attributes();
