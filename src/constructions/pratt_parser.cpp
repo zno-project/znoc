@@ -461,9 +461,7 @@ llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 		case star:
 			return builder->CreateLoad(value);
 		case ampersand: {
-			auto expr_mem = dynamic_cast<AST::Reference*>(&*expr);
-			if (!expr_mem) throw std::runtime_error("Cannot get reference to non-referemce");
-			return expr_mem->codegen_to_ptr(builder);
+			return expr->codegen_to_ptr(builder);
 		}
 		default: throw std::runtime_error(fmt::format("unimplemented prefix op {}", operator_to_string[op]));
 	}
