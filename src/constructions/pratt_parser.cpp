@@ -478,6 +478,8 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
 	auto codegen_func = func->codegen(builder);
 
+	auto arg_types = func->getType().get_args_of_function();
+
 	if (auto lhs_dot_op = dynamic_cast<AST::NewBinaryExpression*>(&*func)) if (lhs_dot_op->op == dot && static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("member_func")) {
 		fargs.push_back(lhs_dot_op->lhs->codegen_to_ptr(builder));
 	}
@@ -485,6 +487,14 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	for (auto &arg: args) {
 		auto aV = arg->codegen(builder);
 		fargs.push_back(aV);
+	}
+
+	auto var_args_ty = AST::get_fundamental_type("var_args");
+	if (typeid(*arg_types.back().base_type) == typeid(*var_args_ty.base_type) && !static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("extern")) {
+		auto normal_args_count = arg_types.size() - 2; // subtract one for the implicit var_args count arg
+		auto var_args_count = fargs.size() - normal_args_count;
+		fargs.insert(fargs.begin() + normal_args_count, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*TheContext), var_args_count));
+		std::cout << "calling variadic function with " << normal_args_count << " normal args and " << var_args_count << " varargs" << std::endl;
 	}
 
 	auto llvm_function_ty = static_cast<llvm::FunctionType*>(codegen_func->getType()->getPointerElementType());
