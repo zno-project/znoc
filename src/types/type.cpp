@@ -108,19 +108,43 @@ void AST::TypeInstance::get_or_create_template(std::vector<AST::TypeInstance> te
 }
 
 AST::TypeInstance Parser::parse_type(zno_ifile& f) {
-	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "name of type");
-	auto parsed_namespace_data = Parser::parse_namespace(f);
+	if (currentToken != tok_identifier && currentToken != '(') throw UNEXPECTED_CHAR(currentToken, "name of type");
+	AST::TypeInstance ret;
+	if (currentToken == tok_identifier) {
+		// Normal type
+		auto parsed_namespace_data = Parser::parse_namespace(f);
 
-	std::string type_name = parsed_namespace_data.next_identifier;
-	if (!parsed_namespace_data.parsed_namespace) throw std::runtime_error("couldn't find thing");
-	auto type_base = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
+		std::string type_name = parsed_namespace_data.next_identifier;
+		if (!parsed_namespace_data.parsed_namespace) throw std::runtime_error("couldn't find thing");
+		ret = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
 
-	std::vector<AST::TypeInstance> template_types;
-	OPTIONAL_LIST('<', ',', '>', {
-		template_types.push_back(Parser::parse_type(f));
-	}, "template list");
+		std::vector<AST::TypeInstance> template_types;
+		OPTIONAL_LIST('<', ',', '>', {
+			template_types.push_back(Parser::parse_type(f));
+		}, "template list");
 
-	type_base.get_or_create_template(template_types);
+		ret.get_or_create_template(template_types);
+	} else {
+		std::vector<AST::TypeInstance> args_ts;
+		// Function type
+		bool variadic = false;
+		LIST('(', ',', ')', {
+			if (currentToken == '.') {
+				EXPECT('.', ".");
+				EXPECT('.', ".");
+				EXPECT('.', ".");
+				variadic = true;
+				args_ts.push_back(AST::get_fundamental_type("i32"));
+			} else {
+				auto type = parse_type(f);
+				args_ts.push_back(type);
+			}
+		}, "function argument types");
+		EXPECT('-', "after function argument types");
+		EXPECT('>', "after function argument types");
+		auto ret_type = parse_type(f);
+		ret = ret_type.get_function_returning(args_ts, variadic);
+	}
 
 	while (1) {
 		IF_TOK_ELSE('[', {
@@ -129,11 +153,11 @@ AST::TypeInstance Parser::parse_type(zno_ifile& f) {
 			std::tie(array_len, is_float) = EXPECT_NUMERIC_LITERAL("array length");
 			if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
 			EXPECT(']', "after array length");
-			type_base.array_lengths.push_back(array_len);
+			ret.array_lengths.push_back(array_len);
 		}, { break; });
 	}
 
-	return type_base;
+	return ret;
 }
 
 AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces, std::map<std::string, AST::Constant> constants) {
