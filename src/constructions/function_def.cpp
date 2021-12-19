@@ -8,6 +8,7 @@
 #include "../parsing.hpp"
 #include "../macros.hpp"
 #include "construction_parse.hpp"
+#include "../main.hpp"
 
 #include <map>
 #include <string>
@@ -48,7 +49,27 @@ llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *b
 			builder.CreateStore(a, a_stack);
 		}
 
+		llvm::Value *va_list_alloca;
+		if (varargs_name.has_value()) {
+			auto vastart = llvm::Intrinsic::getDeclaration(&*TheModule, llvm::Intrinsic::vastart);
+			
+			va_list_alloca = varargs_var->codegen(&builder);
+
+			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
+			auto va_list_arg = builder.CreateCall(vastart, {va_list_ptr});
+			auto va_iter_init_func = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_namespace_by_name("VariadicIterator")->get_var("init");
+			auto va_list_len = builder.CreateLoad(args[args.size()-1]->codegen(&builder));
+			builder.CreateCall(static_cast<llvm::Function*>(va_iter_init_func->codegen(&builder)), {va_list_alloca, va_list_len});
+		}
+
 		body->codegen(&builder);
+
+		if (varargs_name.has_value()) {
+			auto vaend = llvm::Intrinsic::getDeclaration(&*TheModule, llvm::Intrinsic::vaend);
+			auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator").codegen();
+			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
+			auto va_list_arg = builder.CreateCall(vaend, {va_list_ptr});
+		}
 
 		if (!builder.GetInsertBlock()->getTerminator()) builder.CreateRetVoid(); // If no terminator, add a `ret void`
 
@@ -66,7 +87,7 @@ void AST::Function::codegen_prototype() {
 		fargs.push_back(arg->underlying_type.codegen());
 	}
 
-	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, is_variadic);
+	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, varargs_name.has_value());
 	llvm::FunctionCallee f = TheModule->getOrInsertFunction(this->get_name(), ft);
 
 	auto f2 = (llvm::Function*)(f.getCallee());
@@ -88,7 +109,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 	typedef std::pair<std::string, AST::TypeInstance> arg_t;
 	std::vector<arg_t> argsP;
 	bool is_member_func = false;
-	bool is_variadic = false;
+	std::optional<std::string> varargs_name;
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
@@ -103,7 +124,9 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 				EXPECT('.', "variadic");
 				EXPECT('.', "variadic");
 				EXPECT('.', "variadic");
-				is_variadic = true;
+				varargs_name = name;
+				auto arg = arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32"));
+				argsP.push_back(std::move(arg));
 			} else {
 				AST::TypeInstance type = parse_type(f);
 				auto arg = arg_t(name, std::move(type));
@@ -115,6 +138,12 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 	std::vector<std::shared_ptr<AST::Variable>> args;
 	for (auto &a : argsP) {
 		args.push_back(AST::Variable::create_in_scope(a.first, a.second));
+	}
+
+	std::shared_ptr<AST::Variable> varargs_var = nullptr;
+	if (varargs_name.has_value()) {
+		auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator");
+		varargs_var = AST::Variable::create_in_scope(varargs_name.value(), valist_ty);
 	}
 
 	// CHECK FOR RETURN TYPE
@@ -138,5 +167,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func, is_variadic);
+	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func, varargs_name, varargs_var);
 }

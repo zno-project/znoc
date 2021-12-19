@@ -84,6 +84,11 @@ void AST::init_builtin_types() {
 		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_function_varargs>(),
+		.template_instance_id = std::nullopt,
+		.array_lengths = std::vector<size_t>()
+	};
 
 	*GlobalNamespace << std::move(fundamentals);
 }
@@ -247,9 +252,11 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 	return t;
 }
 
-AST::TypeInstance AST::TypeInstance::get_function_returning() {
+AST::TypeInstance AST::TypeInstance::get_function_returning(std::vector<AST::TypeInstance> args, bool variadic) {
 	auto t = AST::get_fundamental_type("function");
-	t.template_instance_id = t.base_type->add_generic_instance({*this});
+	args.insert(args.begin(), *this);
+	if (variadic) args.push_back(AST::get_fundamental_type("var_args"));
+	t.template_instance_id = t.base_type->add_generic_instance(args);
 	return t;
 }
 
