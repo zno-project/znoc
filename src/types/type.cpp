@@ -260,7 +260,7 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(zno_ifile& f) {
 					all_fields_defined = true;
 					ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces), std::move(constants));
 				}
-				*ret.base_type << Parser::parse_function(f, ret);
+				*ret.base_type << Parser::parse_function(f, 0, ret);
 			});
 		});
 	}, "struct fields and functions");

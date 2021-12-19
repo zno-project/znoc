@@ -107,6 +107,7 @@ int get_token(zno_ifile& f) {
 		else if (identifier == "class") return tok_class;
 		else if (identifier == "as") return tok_as;
 		else if (identifier == "typedef") return tok_typedef;
+		else if (identifier == "attributes") return tok_attributes;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
@@ -178,13 +179,16 @@ int parse_file(std::filesystem::path path,
 	zno_ifile f(path.string());
 
 	get_next_token(f);
+	attributes_t attributes = 0;
+
 	while (1) {
 		switch (currentToken) {
-			case '#': {
-				Parser::parse_attributes(f);
+			case tok_attributes: {
+				attributes = Parser::parse_attributes(f);
 				break;
 			}
 			case tok_eof: {
+				attributes = 0;
 				return 0;
 			}
 			case tok_uses: {
@@ -224,29 +228,28 @@ int parse_file(std::filesystem::path path,
 
 				currentToken = old_current_token;
 
-				Parser::clear_attributes();
+				attributes = 0;
 				break;
 			}
 			case tok_struct:
 			case tok_class: {
 				*current_namespace << Parser::parse_aggregate_type_definition(f);
-				Parser::clear_attributes();
+				attributes = 0;
 				break;
 			}
 			case tok_func: {
-				*current_namespace << Parser::parse_function(f);
-				Parser::clear_attributes();
+				*current_namespace << Parser::parse_function(f, attributes);
+				attributes = 0;
 				break;
 			}
 			case tok_typedef: {
 				Parser::parse_typedef(f, *current_namespace);
-				Parser::clear_attributes();
+				attributes = 0;
 				break;
 			}
 			default: {
 				throw std::runtime_error(fmt::format("Unimplemented {}", currentToken));
 			}
 		}
-		Parser::clear_attributes();
 	}
 }

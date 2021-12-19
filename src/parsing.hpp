@@ -64,7 +64,9 @@ enum Token {
 	tok_as = -__LINE__,
 	tok_typedef = -__LINE__,
 
-	tok_string = -__LINE__
+	tok_string = -__LINE__,
+
+	tok_attributes = -__LINE__
 };
 
 namespace AST { class Namespace; }

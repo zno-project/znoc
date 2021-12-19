@@ -42,7 +42,7 @@ namespace AST {
 }
 
 namespace Parser {
-	std::shared_ptr<AST::Function> parse_function(zno_ifile& f, std::optional<AST::TypeInstance> self_type = std::optional<AST::TypeInstance>());
+	std::shared_ptr<AST::Function> parse_function(zno_ifile& f, attributes_t attributes, std::optional<AST::TypeInstance> self_type = std::optional<AST::TypeInstance>());
 }
 
 #endif

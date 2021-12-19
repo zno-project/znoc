@@ -4,18 +4,18 @@
 #include <bitset>
 #include "parsing.hpp"
 
-enum class Attributes {
-	AlwaysInline,
-	NoMangle,
-	END
-};
+namespace Attributes {
+	enum Attributes {
+		AlwaysInline,
+		Extern,
+		END
+	};
+}
 
-typedef std::bitset<(unsigned long)Attributes::END> attributes_t;
-extern attributes_t currentAttributes;
+typedef std::bitset<Attributes::END> attributes_t;
 
 namespace Parser {
-	void parse_attributes(zno_ifile& f);
-	void clear_attributes();
+	attributes_t parse_attributes(zno_ifile& f);
 }
 
 #endif

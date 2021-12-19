@@ -93,14 +93,15 @@ void AST::Function::codegen_prototype() {
 	auto f2 = (llvm::Function*)(f.getCallee());
 	f2->setCallingConv(llvm::CallingConv::C);
 
-	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes[Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes[Attributes::Extern]) f2->addFnAttr("extern");
 	if (is_member_func) f2->addFnAttr("member_func");
 	allocaV = f2;
 }
 
 // FUNCTION
 // function = function_prototype (codeblock | ';');
-std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optional<AST::TypeInstance> self_type) {
+std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t attributes, std::optional<AST::TypeInstance> self_type) {
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
@@ -125,8 +126,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 				EXPECT('.', "variadic");
 				EXPECT('.', "variadic");
 				varargs_name = name;
-				auto arg = arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32"));
-				argsP.push_back(std::move(arg));
+				if (!attributes[Attributes::Extern]) argsP.push_back(arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32")));
 			} else {
 				AST::TypeInstance type = parse_type(f);
 				auto arg = arg_t(name, std::move(type));
@@ -167,5 +167,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, std::optiona
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func, varargs_name, varargs_var);
+	return std::make_unique<AST::Function>(name, args, returnType, attributes, std::move(body), is_member_func, varargs_name, varargs_var);
 }
