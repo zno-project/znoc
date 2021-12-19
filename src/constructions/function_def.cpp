@@ -93,8 +93,8 @@ void AST::Function::codegen_prototype() {
 	auto f2 = (llvm::Function*)(f.getCallee());
 	f2->setCallingConv(llvm::CallingConv::C);
 
-	if (attributes[Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
-	if (attributes[Attributes::Extern]) f2->addFnAttr("extern");
+	if (attributes.always_inline) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes.extern_) f2->addFnAttr("extern");
 	if (is_member_func) f2->addFnAttr("member_func");
 	allocaV = f2;
 }
@@ -126,7 +126,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 				EXPECT('.', "variadic");
 				EXPECT('.', "variadic");
 				varargs_name = name;
-				if (!attributes[Attributes::Extern]) argsP.push_back(arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32")));
+				if (!attributes.extern_) argsP.push_back(arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32")));
 			} else {
 				AST::TypeInstance type = parse_type(f);
 				auto arg = arg_t(name, std::move(type));

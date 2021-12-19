@@ -179,7 +179,7 @@ int parse_file(std::filesystem::path path,
 	zno_ifile f(path.string());
 
 	get_next_token(f);
-	attributes_t attributes = 0;
+	attributes_t attributes;
 
 	while (1) {
 		switch (currentToken) {
@@ -188,7 +188,7 @@ int parse_file(std::filesystem::path path,
 				break;
 			}
 			case tok_eof: {
-				attributes = 0;
+				attributes = attributes_t();
 				return 0;
 			}
 			case tok_uses: {
@@ -228,23 +228,23 @@ int parse_file(std::filesystem::path path,
 
 				currentToken = old_current_token;
 
-				attributes = 0;
+				attributes = attributes_t();
 				break;
 			}
 			case tok_struct:
 			case tok_class: {
 				*current_namespace << Parser::parse_aggregate_type_definition(f);
-				attributes = 0;
+				attributes = attributes_t();
 				break;
 			}
 			case tok_func: {
 				*current_namespace << Parser::parse_function(f, attributes);
-				attributes = 0;
+				attributes = attributes_t();
 				break;
 			}
 			case tok_typedef: {
 				Parser::parse_typedef(f, *current_namespace);
-				attributes = 0;
+				attributes = attributes_t();
 				break;
 			}
 			default: {
