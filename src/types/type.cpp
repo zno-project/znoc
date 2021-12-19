@@ -303,6 +303,12 @@ AST::TypeInstance AST::TypeInstance::get_return_of_function() {
 	return p->get_return_of_function(get_template_id());
 }
 
+std::vector<AST::TypeInstance> AST::TypeInstance::get_args_of_function() {
+	auto p = std::dynamic_pointer_cast<AST::fundamental_function>(base_type);
+	if (!p) throw std::runtime_error(fmt::format("Can only get arg types of function - attempted to get arg types of {}", this->base_type->get_name()));
+	return p->get_args_of_function(get_template_id());
+}
+
 llvm::Type* AST::TypeInstance::codegen() {
 	auto t = base_type->codegen(get_template_id());
 	for (auto& len : array_lengths) {

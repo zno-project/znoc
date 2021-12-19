@@ -87,6 +87,11 @@ namespace AST {
 		AST::TypeInstance get_return_of_function(size_t template_instance) {
 			return generic_types.at(template_instance).at(0);
 		}
+
+		std::vector<AST::TypeInstance> get_args_of_function(size_t template_instance) {
+			auto this_instance = generic_types.at(template_instance);
+			return std::vector<AST::TypeInstance>(this_instance.begin() + 1, this_instance.end());
+		}
 	};
 
 	class fundamental_function_varargs: public TypeBase {

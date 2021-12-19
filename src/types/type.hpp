@@ -96,6 +96,7 @@ namespace AST {
 
 		AST::TypeInstance get_function_returning(std::vector<AST::TypeInstance> args, bool variadic);
 		AST::TypeInstance get_return_of_function();
+		std::vector<AST::TypeInstance> get_args_of_function();
 
 		AST::TypeInstance get_array_elem_of();
 
