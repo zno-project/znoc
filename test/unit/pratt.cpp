@@ -1,8 +1,4 @@
 #include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "framework.hpp"
 
 #include <main.hpp>

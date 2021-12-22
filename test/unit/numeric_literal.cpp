@@ -1,19 +1,19 @@
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
-
 #include "framework.hpp"
 
 #include <main.hpp>
 #include <memory/memory_location.hpp>
 #include <types/type.hpp>
 #include <constructions/namespace.hpp>
-#include <constructions/numeric_literal.hpp>
 #include <constructions/construction_parse.hpp>
-
 #include <parsing.hpp>
 #include <cfloat>
+
+#define private public
+#define protected public
+
+#include <constructions/numeric_literal.hpp>
 
 testing::AssertionResult PredicateTypeEquality(const char* lhs_s, const char* rhs_s, AST::TypeInstance lhs, AST::TypeInstance rhs) {
 	if (lhs == rhs) {
