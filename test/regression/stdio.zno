@@ -1,4 +1,4 @@
-#[extern] func printI(x: _fundamentals::i32);
-#[extern] func allocate() -> _fundamentals::ptr<_fundamentals::i32>;
-#[extern] func deallocate(x: _fundamentals::ptr<_fundamentals::i32>);
-#[extern] func printf(s: _fundamentals::ptr<_fundamentals::i8>);
+attributes[extern] func printI(x: _fundamentals::i32);
+attributes[extern] func allocate() -> _fundamentals::ptr<_fundamentals::i32>;
+attributes[extern] func deallocate(x: _fundamentals::ptr<_fundamentals::i32>);
+attributes[extern] func printf(fmt: _fundamentals::ptr<_fundamentals::i8>, data: ...);
