@@ -39,6 +39,8 @@ UNIT_TEST_OBJS = $(patsubst test/unit/%.cpp, test/unit/build/%.o, $(SRCS_UNIT_TE
 
 GTEST_OUTPUT ?= xml:test/unit/build/out.xml
 
+DEPENDS_UNIT_TESTS = $(patsubst test/unit/%.cpp, test/unit/build/%.d, $(SRCS_UNIT_TEST))
+
 REGRESSION_TESTS_OBJ = $(patsubst test/regression/%.zno, test/regression/build/%.o, $(filter-out test/regression/stdio.zno, $(wildcard test/regression/*.zno)))
 REGRESSION_TESTS = $(patsubst test/regression/build/%.o, test/regression/build/tests/%, $(REGRESSION_TESTS_OBJ))
 REGRESSION_TESTS_LOG = test/regression/log.log
@@ -66,7 +68,7 @@ test-unit: $(UNIT_TESTS)
 test-regression: $(REGRESSION_TESTS)
 	bash test/regression/regressiontests
 
--include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY))
+-include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY) $(DEPENDS_UNIT_TESTS))
 
 ## directories
 
