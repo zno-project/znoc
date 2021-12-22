@@ -148,7 +148,9 @@ jobs:
     needs: [build]
     steps:
       - name: Set env
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+        run: |
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          echo "GITHUB_SHA=$(echo $GITHUB_SHA)" >> $GITHUB_ENV
       - name: Download executable (macos)
         uses: actions/cache@v2
         with:
