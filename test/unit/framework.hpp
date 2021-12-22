@@ -52,10 +52,6 @@ class CompilerMain: CompilerGlobals {
 		get_next_token(f);
   }
 
-  virtual ~CompilerMain() {
-	  fclose(f.f);
-  };
-
   // void TearDown() override {}
 };
 
