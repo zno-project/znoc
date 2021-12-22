@@ -11,6 +11,7 @@ class zno_ifile {
 	private:
 	std::string path;
 	FILE *f;
+	zno_ifile(FILE *f, std::string path) : f(f), path(path) {};
 
 	public:
 	zno_ifile(const zno_ifile&) = delete;

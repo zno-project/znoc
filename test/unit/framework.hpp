@@ -42,20 +42,18 @@ class CompilerGlobals {
 
 class CompilerMain: CompilerGlobals {
  public:
-	FILE *f;
+	zno_ifile f;
 
-  CompilerMain(char *test_data) {
-		f = fmemopen((void*)test_data, strlen(test_data), "r");
+  CompilerMain(char *test_data): f(fmemopen((void*)test_data, strlen(test_data), "r"), "test") {
 		get_next_token(f);
   }
 
-  CompilerMain(const char *test_data) {
-		f = fmemopen((void*)test_data, strlen(test_data), "r");
+  CompilerMain(const char *test_data): f(fmemopen((void*)test_data, strlen(test_data), "r"), "test") {
 		get_next_token(f);
   }
 
   virtual ~CompilerMain() {
-	  fclose(f);
+	  fclose(f->f);
   };
 
   // void TearDown() override {}
