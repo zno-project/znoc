@@ -1,9 +1,6 @@
 #ifndef _ZNO_TEST_FRAMEWORK_H
 #define _ZNO_TEST_FRAMEWORK_H
 
-#define private public
-#define protected public
-
 #include <main.hpp>
 #include <memory/memory_location.hpp>
 #include <types/type.hpp>

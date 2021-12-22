@@ -8,7 +8,7 @@
 #include "macros.hpp"
 
 class zno_ifile {
-	private:
+	public:
 	std::string path;
 	FILE *f;
 	zno_ifile(FILE *f, std::string path) : f(f), path(path) {};
