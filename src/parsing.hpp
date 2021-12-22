@@ -67,7 +67,9 @@ enum Token {
 
 	tok_string = -__LINE__,
 
-	tok_attributes = -__LINE__
+	tok_attributes = -__LINE__,
+
+	tok_module = -__LINE__
 };
 
 namespace AST { class Namespace; }

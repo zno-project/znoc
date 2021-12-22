@@ -108,6 +108,7 @@ int get_token(zno_ifile& f) {
 		else if (identifier == "as") return tok_as;
 		else if (identifier == "typedef") return tok_typedef;
 		else if (identifier == "attributes") return tok_attributes;
+		else if (identifier == "module") return tok_module;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
@@ -171,14 +172,7 @@ bool has_searched_path(std::filesystem::path p) {
 	return false;
 }
 
-int parse_file(std::filesystem::path path,
-	std::shared_ptr<AST::Namespace> &current_namespace,
-	__attribute__((unused)) bool insideUses) {
-	searchedIncludes.push_back(path);
-
-	zno_ifile f(path.string());
-
-	get_next_token(f);
+void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifile& f, std::filesystem::path path) {
 	attributes_t attributes;
 
 	while (1) {
@@ -187,9 +181,10 @@ int parse_file(std::filesystem::path path,
 				attributes = Parser::parse_attributes(f);
 				break;
 			}
+			case '}':
 			case tok_eof: {
 				attributes = attributes_t();
-				return 0;
+				return;
 			}
 			case tok_uses: {
 				get_next_token(f);
@@ -231,6 +226,16 @@ int parse_file(std::filesystem::path path,
 				attributes = attributes_t();
 				break;
 			}
+			case tok_module: {
+				get_next_token(f);
+				auto name = EXPECT_IDENTIFIER("after `module` statement");
+				auto new_namespace = std::make_shared<AST::Namespace>(name);
+				*current_namespace << new_namespace;
+				EXPECT('{', "`{` after module name");
+				parse_namespace(new_namespace, f, path);
+				EXPECT('}', "`}` after module body");
+				break;
+			}
 			case tok_struct:
 			case tok_class: {
 				*current_namespace << Parser::parse_aggregate_type_definition(f);
@@ -252,4 +257,16 @@ int parse_file(std::filesystem::path path,
 			}
 		}
 	}
+}
+
+int parse_file(std::filesystem::path path,
+	std::shared_ptr<AST::Namespace> &current_namespace,
+	__attribute__((unused)) bool insideUses) {
+	searchedIncludes.push_back(path);
+
+	zno_ifile f(path.string());
+
+	get_next_token(f);
+	parse_namespace(current_namespace, f, path);
+	return 0;
 }
