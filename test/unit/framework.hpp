@@ -1,14 +1,17 @@
 #ifndef _ZNO_TEST_FRAMEWORK_H
 #define _ZNO_TEST_FRAMEWORK_H
 
-#include "main.hpp"
-#include "memory/memory_location.hpp"
-#include "types/type.hpp"
-#include "types/type_base.hpp"
-#include "constructions/namespace.hpp"
-#include "parsing.hpp"
-#include "location.hpp"
-#include "constructions/expression.hpp"
+#define private public
+#define protected public
+
+#include <main.hpp>
+#include <memory/memory_location.hpp>
+#include <types/type.hpp>
+#include <types/type_base.hpp>
+#include <constructions/namespace.hpp>
+#include <parsing.hpp>
+#include <location.hpp>
+#include <constructions/expression.hpp>
 #include "win_posix.hpp"
 
 #include <deque>
