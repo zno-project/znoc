@@ -1,4 +1,3 @@
-uses '../../../zno-std/std.zno'
 uses 'stdio.zno'
 
 struct Thingy {
