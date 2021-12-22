@@ -490,7 +490,7 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	}
 
 	auto var_args_ty = AST::get_fundamental_type("var_args");
-	if (typeid(*arg_types.back().base_type) == typeid(*var_args_ty.base_type) && !static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("extern")) {
+	if (arg_types.size() > 0 && typeid(*arg_types.back().base_type) == typeid(*var_args_ty.base_type) && !static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("extern")) {
 		auto normal_args_count = arg_types.size() - 2; // subtract one for the implicit var_args count arg
 		auto var_args_count = fargs.size() - normal_args_count;
 		fargs.insert(fargs.begin() + normal_args_count, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*TheContext), var_args_count));
