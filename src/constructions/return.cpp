@@ -1,6 +1,7 @@
 #include "return.hpp"
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
+#include "../llvm_module.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
@@ -19,10 +20,10 @@ llvm::Value* AST::ReturnExpression::codegen(llvm::IRBuilder<> *builder) {
 	}
 	else if (!builder->GetInsertBlock()->getTerminator()) builder->CreateRetVoid();
 
-	return nullptr;
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext));
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_return(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_return(zno_ifile& f) {
 	EXPECT(tok_return, "in return statement")
 	if (currentToken == ';') return std::make_unique<AST::ReturnExpression>(nullptr);
 	else return std::make_unique<AST::ReturnExpression>(parse_pratt_expression(f));

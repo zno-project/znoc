@@ -2,7 +2,7 @@
 #include "../parsing.hpp"
 #include "../types/type.hpp"
 
-void Parser::parse_typedef(FILE *f, AST::Namespace &n) {
+void Parser::parse_typedef(zno_ifile& f, AST::Namespace &n) {
 	EXPECT(tok_typedef, "for type alias");
 	auto type = parse_type(f);
 	EXPECT(tok_as, "for type alias");

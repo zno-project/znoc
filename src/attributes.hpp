@@ -1,20 +1,25 @@
 #ifndef _ATTRIBUTES_H
 #define _ATTRIBUTES_H
 
-#include <bitset>
+#include "parsing.hpp"
+#include <optional>
 
-enum class Attributes {
-	AlwaysInline,
-	NoMangle,
-	END
+namespace Attributes {
+	enum Attributes {
+		AlwaysInline,
+		Extern,
+		END
+	};
+}
+
+struct attributes_t {
+	bool always_inline = false;
+	bool extern_ = false;
+	std::optional<std::string> mangle_name = std::nullopt;
 };
 
-typedef std::bitset<(unsigned long)Attributes::END> attributes_t;
-extern attributes_t currentAttributes;
-
 namespace Parser {
-	void parse_attributes(FILE* f);
-	void clear_attributes();
+	attributes_t parse_attributes(zno_ifile& f);
 }
 
 #endif

@@ -3,13 +3,12 @@
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
 #include <memory>
-#include <stdio.h>
 #include "../memory/memory_ref.hpp"
 #include "reference.hpp"
 
 const char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|", "~", "^", "&&", "||", "!", "<<", ">>", "==", "!=", "<", ">", "<=", ">=", "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "is", "["};
 
-void advance_op(operators op, FILE *f) {
+void advance_op(operators op, zno_ifile& f) {
 	switch (op) {
 		case not_an_operator:
 			break;
@@ -61,7 +60,7 @@ void advance_op(operators op, FILE *f) {
 	}
 }
 
-operators parse_operator(FILE *f) {
+operators parse_operator(zno_ifile& f) {
 	switch (currentToken) {
 		case '.': {
 			return dot;
@@ -237,7 +236,7 @@ std::optional<PostfixBindingPower> get_binding_power_postfix(operators op) {
 	}
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(FILE* f, unsigned int min_bp) {
+std::unique_ptr<AST::Expression> Parser::parse_pratt_expression(zno_ifile& f, unsigned int min_bp) {
 	std::unique_ptr<AST::Expression> lhs;
 
 	if (currentToken < 0 || currentToken == '{') {
@@ -462,9 +461,7 @@ llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 		case star:
 			return builder->CreateLoad(value);
 		case ampersand: {
-			auto expr_mem = dynamic_cast<AST::Reference*>(&*expr);
-			if (!expr_mem) throw std::runtime_error("Cannot get reference to non-referemce");
-			return expr_mem->codegen_to_ptr(builder);
+			return expr->codegen_to_ptr(builder);
 		}
 		default: throw std::runtime_error(fmt::format("unimplemented prefix op {}", operator_to_string[op]));
 	}
@@ -481,6 +478,8 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	std::vector<llvm::Value*> fargs = std::vector<llvm::Value*>();
 	auto codegen_func = func->codegen(builder);
 
+	auto arg_types = func->getType().get_args_of_function();
+
 	if (auto lhs_dot_op = dynamic_cast<AST::NewBinaryExpression*>(&*func)) if (lhs_dot_op->op == dot && static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("member_func")) {
 		fargs.push_back(lhs_dot_op->lhs->codegen_to_ptr(builder));
 	}
@@ -488,6 +487,14 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 	for (auto &arg: args) {
 		auto aV = arg->codegen(builder);
 		fargs.push_back(aV);
+	}
+
+	auto var_args_ty = AST::get_fundamental_type("var_args");
+	if (arg_types.size() > 0 && typeid(*arg_types.back().base_type) == typeid(*var_args_ty.base_type) && !static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("extern")) {
+		auto normal_args_count = arg_types.size() - 2; // subtract one for the implicit var_args count arg
+		auto var_args_count = fargs.size() - normal_args_count;
+		fargs.insert(fargs.begin() + normal_args_count, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*TheContext), var_args_count));
+		std::cout << "calling variadic function with " << normal_args_count << " normal args and " << var_args_count << " varargs" << std::endl;
 	}
 
 	auto llvm_function_ty = static_cast<llvm::FunctionType*>(codegen_func->getType()->getPointerElementType());

@@ -8,6 +8,7 @@
 #include "../parsing.hpp"
 #include "../macros.hpp"
 #include "construction_parse.hpp"
+#include "../main.hpp"
 
 #include <map>
 #include <string>
@@ -42,13 +43,33 @@ llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *b
 
 		for (unsigned long i = 0; i < args.size(); i++) {
 			llvm::Value *a = Fargs++;
-			a->setName(args[i]->getName());
+			a->setName(args[i].var_ref->getName());
 
-			auto a_stack = args[i]->codegen(&builder);
+			auto a_stack = args[i].var_ref->codegen(&builder);
 			builder.CreateStore(a, a_stack);
 		}
 
+		llvm::Value *va_list_alloca;
+		if (varargs_name.has_value()) {
+			auto vastart = llvm::Intrinsic::getDeclaration(&*TheModule, llvm::Intrinsic::vastart);
+			
+			va_list_alloca = varargs_var->codegen(&builder);
+
+			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
+			auto va_list_arg = builder.CreateCall(vastart, {va_list_ptr});
+			auto va_iter_init_func = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_namespace_by_name("VariadicIterator")->get_var("init");
+			auto va_list_len = builder.CreateLoad(args[args.size()-1].var_ref->codegen(&builder));
+			builder.CreateCall(static_cast<llvm::Function*>(va_iter_init_func->codegen(&builder)), {va_list_alloca, va_list_len});
+		}
+
 		body->codegen(&builder);
+
+		if (varargs_name.has_value()) {
+			auto vaend = llvm::Intrinsic::getDeclaration(&*TheModule, llvm::Intrinsic::vaend);
+			auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator").codegen();
+			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
+			auto va_list_arg = builder.CreateCall(vaend, {va_list_ptr});
+		}
 
 		if (!builder.GetInsertBlock()->getTerminator()) builder.CreateRetVoid(); // If no terminator, add a `ret void`
 
@@ -63,50 +84,74 @@ void AST::Function::codegen_prototype() {
 	std::vector<llvm::Type*> fargs = std::vector<llvm::Type*>();
 
 	for (auto &arg: args) {
-		fargs.push_back(arg->underlying_type.codegen());
+		fargs.push_back(arg.var_ref->underlying_type.codegen());
 	}
 
-	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, false);
+	llvm::FunctionType *ft = llvm::FunctionType::get(returnType.codegen(), fargs, varargs_name.has_value());
 	llvm::FunctionCallee f = TheModule->getOrInsertFunction(this->get_name(), ft);
 
 	auto f2 = (llvm::Function*)(f.getCallee());
 	f2->setCallingConv(llvm::CallingConv::C);
 
-	if (attributes[(unsigned long)Attributes::AlwaysInline]) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes.always_inline) f2->addFnAttr(llvm::Attribute::AlwaysInline);
+	if (attributes.extern_) f2->addFnAttr("extern");
 	if (is_member_func) f2->addFnAttr("member_func");
 	allocaV = f2;
 }
 
 // FUNCTION
 // function = function_prototype (codeblock | ';');
-std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST::TypeInstance> self_type) {
+std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t attributes, std::optional<AST::TypeInstance> self_type) {
 	push_new_scope(); // Create new scope
 
 	EXPECT(tok_func, "to start function definition");
 	std::string name = EXPECT_IDENTIFIER("function name after 'func'");
 
-	typedef std::pair<std::string, AST::TypeInstance> arg_t;
-	std::vector<arg_t> argsP;
+	/*struct arg_t {
+		std::string name;
+		AST::TypeInstance type;
+		std::unique_ptr<AST::Expression> default_val;
+
+		arg_t(std::string name, AST::TypeInstance type, std::unique_ptr<AST::Expression> default_val = nullptr): name(name), type(type), default_val(std::move(default_val)) {}
+	};*/
+
+	std::vector<AST::Function::arg_data_t> args;
 	bool is_member_func = false;
+	std::optional<std::string> varargs_name;
 
 	LIST('(', ',', ')', {
 		std::string name = EXPECT_IDENTIFIER("argument name");
 
-		if (argsP.size() == 0 && name == "self" && self_type.has_value()) {
-			auto arg = arg_t("self", self_type.value().get_pointer_to());
-			argsP.push_back(std::move(arg));
+		if (args.size() == 0 && name == "self" && self_type.has_value()) {
+			auto arg = AST::Function::arg_data_t { .var_ref = AST::Variable::create_in_scope("self", self_type.value().get_pointer_to()) };
+			args.push_back(std::move(arg));
 			is_member_func = true;
 		} else {
 			EXPECT(':', "after argument name");
-			AST::TypeInstance type = parse_type(f);
-			auto arg = arg_t(name, std::move(type));
-			argsP.push_back(std::move(arg));
+			if (currentToken == '.') {
+				EXPECT('.', "variadic");
+				EXPECT('.', "variadic");
+				EXPECT('.', "variadic");
+				varargs_name = name;
+				if (!attributes.extern_) args.push_back(std::move(AST::Function::arg_data_t { .var_ref = AST::Variable::create_in_scope(":zno_va_arg_count", AST::get_fundamental_type("i32")) }));
+			} else {
+				AST::TypeInstance type = parse_type(f);
+				std::unique_ptr<AST::Expression> default_val = nullptr;
+				OPTIONAL('=', {
+					default_val = Parser::parse_pratt_expression(f);
+				});
+				AST::Function::arg_data_t arg;
+				arg.var_ref = AST::Variable::create_in_scope(name, type);
+				arg.default_value = std::move(default_val);
+				args.push_back(std::move(arg));
+			}
 		}
 	}, "argument list");
 
-	std::vector<std::shared_ptr<AST::Variable>> args;
-	for (auto &a : argsP) {
-		args.push_back(AST::Variable::create_in_scope(a.first, a.second));
+	std::shared_ptr<AST::Variable> varargs_var = nullptr;
+	if (varargs_name.has_value() && !attributes.extern_) {
+		auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator");
+		varargs_var = AST::Variable::create_in_scope(varargs_name.value(), valist_ty);
 	}
 
 	// CHECK FOR RETURN TYPE
@@ -130,5 +175,5 @@ std::shared_ptr<AST::Function> Parser::parse_function(FILE* f, std::optional<AST
 	auto scope_pop = pop_scope();
 	if (body) body->push_before_return(std::move(scope_pop));  // End scope
 
-	return std::make_unique<AST::Function>(name, args, returnType, currentAttributes, std::move(body), is_member_func);
+	return std::make_unique<AST::Function>(name, std::move(args), returnType, attributes, std::move(body), is_member_func, varargs_name, varargs_var);
 }

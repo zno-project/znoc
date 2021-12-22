@@ -2,25 +2,23 @@
 #include "parsing.hpp"
 #include "macros.hpp"
 #include <exception>
+#include <iostream>
 
-attributes_t currentAttributes;
+attributes_t Parser::parse_attributes(zno_ifile& f) {
+	EXPECT(tok_attributes, "to start attribute list");
 
-Attributes tok_to_attribute(FILE* f) {
-	auto attr = EXPECT_IDENTIFIER("attribute name");
-	if (attr == "inline") return Attributes::AlwaysInline;
-	else if (attr == "extern") return Attributes::NoMangle;
-	else throw std::runtime_error(fmt::format("unknown attribute {}", attr));
-}
-
-void Parser::parse_attributes(FILE* f) {
-	EXPECT('#', "to start attribute list");
+	attributes_t attributes;
 
 	LIST('[', ',', ']', {
-		auto attr = tok_to_attribute(f);
-		currentAttributes[(unsigned long)attr] = 1;
+		auto attr_name = EXPECT_IDENTIFIER("attribute name");
+		if (attr_name == "extern") attributes.extern_ = true;
+		else if (attr_name == "always_inline") attributes.always_inline = true;
+		else if (attr_name == "mangle_name") {
+			EXPECT('(', "attributes arg");
+			attributes.mangle_name = EXPECT_IDENTIFIER("mangle_name");
+			EXPECT(')', "attributes arg");
+		}
 	}, "attribute list");
-}
 
-void Parser::clear_attributes() {
-	currentAttributes = 0;
+	return attributes;
 }

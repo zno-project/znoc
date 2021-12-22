@@ -12,6 +12,7 @@
 #include "../types/type.hpp"
 #include "construction_parse.hpp"
 #include "../llvm_module.hpp"
+#include "../memory/memory_location.hpp"
 
 llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder) {
 	llvm::Function *TheFunction = builder->GetInsertBlock()->getParent();
@@ -47,12 +48,12 @@ llvm::Value* AST::SwitchDef::codegen(llvm::IRBuilder<> *builder) {
 	TheFunction->getBasicBlockList().push_back(MergeBB);
 	builder->SetInsertPoint(MergeBB);
 
-	return nullptr;
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext));
 }
 
 // SWITCH STATEMENT
 // switch = 'switch' binary_expr '{' switch_case* | 'default' codeblock '}';
-std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_switch(zno_ifile& f) {
 	EXPECT(tok_switch, "in switch statement");
 
 	push_new_scope();
@@ -78,7 +79,7 @@ std::unique_ptr<AST::Expression> Parser::parse_switch(FILE* f) {
 
 // SWITCH CASE
 // switch_case = 'case' (numeric_const ',')+ codeblock;
-std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>> Parser::parse_switch_case(FILE* f) {
+std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>> Parser::parse_switch_case(zno_ifile& f) {
 	AST::SwitchDef::switch_case_metadata_t meta;
 
 	EXPECT(tok_case, "inside switch statement");

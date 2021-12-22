@@ -10,7 +10,7 @@
 #include "../memory/gep.hpp"
 #include <memory>
 
-std::unique_ptr<AST::Expression> Parser::parse_struct_init(__attribute__((unused)) FILE* f, __attribute__((unused)) AST::TypeInstance to_init) {
+std::unique_ptr<AST::Expression> Parser::parse_struct_init(__attribute__((unused)) zno_ifile& f, __attribute__((unused)) AST::TypeInstance to_init) {
 	/*std::vector<AST::TypeInstance> template_types;
 	OPTIONAL_LIST('<', ',', '>', {
 		template_types.push_back(Parser::parse_type(f));

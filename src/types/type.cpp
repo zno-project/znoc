@@ -84,6 +84,11 @@ void AST::init_builtin_types() {
 		.template_instance_id = std::nullopt,
 		.array_lengths = std::vector<size_t>()
 	};
+	*fundamentals << AST::TypeInstance {
+		.base_type = std::make_shared<AST::fundamental_function_varargs>(),
+		.template_instance_id = std::nullopt,
+		.array_lengths = std::vector<size_t>()
+	};
 
 	*GlobalNamespace << std::move(fundamentals);
 }
@@ -102,19 +107,44 @@ void AST::TypeInstance::get_or_create_template(std::vector<AST::TypeInstance> te
 	}
 }
 
-AST::TypeInstance Parser::parse_type(FILE* f) {
-	if (currentToken != tok_identifier) throw UNEXPECTED_CHAR(currentToken, "name of type");
-	auto parsed_namespace_data = Parser::parse_namespace(f);
+AST::TypeInstance Parser::parse_type(zno_ifile& f) {
+	if (currentToken != tok_identifier && currentToken != '(') throw UNEXPECTED_CHAR(currentToken, "name of type");
+	AST::TypeInstance ret;
+	if (currentToken == tok_identifier) {
+		// Normal type
+		auto parsed_namespace_data = Parser::parse_namespace(f);
 
-	std::string type_name = parsed_namespace_data.next_identifier;
-	auto type_base = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
+		std::string type_name = parsed_namespace_data.next_identifier;
+		if (!parsed_namespace_data.parsed_namespace) throw std::runtime_error("couldn't find thing");
+		ret = parsed_namespace_data.parsed_namespace->get_type_by_name(type_name);
 
-	std::vector<AST::TypeInstance> template_types;
-	OPTIONAL_LIST('<', ',', '>', {
-		template_types.push_back(Parser::parse_type(f));
-	}, "template list");
+		std::vector<AST::TypeInstance> template_types;
+		OPTIONAL_LIST('<', ',', '>', {
+			template_types.push_back(Parser::parse_type(f));
+		}, "template list");
 
-	type_base.get_or_create_template(template_types);
+		ret.get_or_create_template(template_types);
+	} else {
+		std::vector<AST::TypeInstance> args_ts;
+		// Function type
+		bool variadic = false;
+		LIST('(', ',', ')', {
+			if (currentToken == '.') {
+				EXPECT('.', ".");
+				EXPECT('.', ".");
+				EXPECT('.', ".");
+				variadic = true;
+				args_ts.push_back(AST::get_fundamental_type("i32"));
+			} else {
+				auto type = parse_type(f);
+				args_ts.push_back(type);
+			}
+		}, "function argument types");
+		EXPECT('-', "after function argument types");
+		EXPECT('>', "after function argument types");
+		auto ret_type = parse_type(f);
+		ret = ret_type.get_function_returning(args_ts, variadic);
+	}
 
 	while (1) {
 		IF_TOK_ELSE('[', {
@@ -123,11 +153,11 @@ AST::TypeInstance Parser::parse_type(FILE* f) {
 			std::tie(array_len, is_float) = EXPECT_NUMERIC_LITERAL("array length");
 			if (is_float) throw std::runtime_error("Array lengths cannot float. They are required to sink.");
 			EXPECT(']', "after array length");
-			type_base.array_lengths.push_back(array_len);
+			ret.array_lengths.push_back(array_len);
 		}, { break; });
 	}
 
-	return type_base;
+	return ret;
 }
 
 AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pair<std::string, AST::field_type_t>> fields, std::vector<AST::Interface> template_type_interfaces, std::map<std::string, AST::Constant> constants) {
@@ -156,7 +186,7 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 
 #include "../constructions/construction_parse.hpp"
 
-AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
+AST::TypeInstance Parser::parse_aggregate_type_definition(zno_ifile& f) {
 	EXPECT(tok_struct, "to begin struct definition");
 
 	std::string name = EXPECT_IDENTIFIER("for name of struct");
@@ -230,7 +260,7 @@ AST::TypeInstance Parser::parse_aggregate_type_definition(FILE* f) {
 					all_fields_defined = true;
 					ret = finalise_aggregate_type(name, std::move(fields), std::move(template_type_interfaces), std::move(constants));
 				}
-				*ret.base_type << Parser::parse_function(f, ret);
+				*ret.base_type << Parser::parse_function(f, attributes_t(), ret);
 			});
 		});
 	}, "struct fields and functions");
@@ -246,9 +276,11 @@ AST::TypeInstance AST::TypeInstance::get_pointer_to() {
 	return t;
 }
 
-AST::TypeInstance AST::TypeInstance::get_function_returning() {
+AST::TypeInstance AST::TypeInstance::get_function_returning(std::vector<AST::TypeInstance> args, bool variadic) {
 	auto t = AST::get_fundamental_type("function");
-	t.template_instance_id = t.base_type->add_generic_instance({*this});
+	args.insert(args.begin(), *this);
+	if (variadic) args.push_back(AST::get_fundamental_type("var_args"));
+	t.template_instance_id = t.base_type->add_generic_instance(args);
 	return t;
 }
 
@@ -269,6 +301,12 @@ AST::TypeInstance AST::TypeInstance::get_return_of_function() {
 	auto p = std::dynamic_pointer_cast<AST::fundamental_function>(base_type);
 	if (!p) throw std::runtime_error(fmt::format("Can only get ret type of function - attempted to get ret type of {}", this->base_type->get_name()));
 	return p->get_return_of_function(get_template_id());
+}
+
+std::vector<AST::TypeInstance> AST::TypeInstance::get_args_of_function() {
+	auto p = std::dynamic_pointer_cast<AST::fundamental_function>(base_type);
+	if (!p) throw std::runtime_error(fmt::format("Can only get arg types of function - attempted to get arg types of {}", this->base_type->get_name()));
+	return p->get_args_of_function(get_template_id());
 }
 
 llvm::Type* AST::TypeInstance::codegen() {

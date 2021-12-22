@@ -3,10 +3,9 @@
 
 #include "../parsing.hpp"
 #include "namespace.hpp"
-#include <stdio.h>
 
 namespace Parser {
-	void parse_typedef(FILE *f, AST::Namespace &n);
+	void parse_typedef(zno_ifile& f, AST::Namespace &n);
 }
 
 #endif

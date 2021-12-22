@@ -13,7 +13,7 @@ llvm::BasicBlock *condBB = nullptr; // Condition block of current control flow c
 //                           while_loop |
 //                           switch |
 //                           if;
-std::unique_ptr<AST::Expression> Parser::parse_non_semicolon_statement(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_non_semicolon_statement(zno_ifile& f) {
 	switch (currentToken) {
 		case '{': {
 			return parse_code_block(f);
@@ -38,7 +38,7 @@ std::unique_ptr<AST::Expression> Parser::parse_non_semicolon_statement(FILE* f) 
 //           numeric_const |
 //           variable_def |
 //           parenthesis_expr;
-std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_r_value(zno_ifile& f) {
 	auto non_semicolon_statement = parse_non_semicolon_statement(f);
 	if (non_semicolon_statement) return non_semicolon_statement;
 
@@ -64,7 +64,7 @@ std::unique_ptr<AST::Expression> Parser::parse_r_value(FILE* f) {
 // semicolon_statement = break |
 //                       return |
 //                       fallthrough;
-std::unique_ptr<AST::Expression> Parser::parse_semicolon_statement(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_semicolon_statement(zno_ifile& f) {
 	switch (currentToken) {
 		case tok_break: {
 			return parse_break(f);
@@ -84,7 +84,7 @@ std::unique_ptr<AST::Expression> Parser::parse_semicolon_statement(FILE* f) {
 
 // STATEMENT
 // statement = non_semicolon_statement | semicolon_statement ';' | binary_expr ';' ;
-std::unique_ptr<AST::Expression> Parser::parse_statement(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_statement(zno_ifile& f) {
 	auto statement = parse_non_semicolon_statement(f);
 	if (statement) return statement;
 

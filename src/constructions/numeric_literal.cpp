@@ -20,7 +20,7 @@ llvm::Value* AST::NumericLiteral::codegen(llvm::IRBuilder<> *builder) {
 
 // NUMERIC LITERAL
 // numeric_literal = NUMBER+;
-std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_numeric_literal(zno_ifile& f) {
 	auto [ val, contains_dp ] = EXPECT_NUMERIC_LITERAL("to start numeric literal");
 
 	IF_TOK_ELSE_IDENTIFIER(post_num_modifier, {

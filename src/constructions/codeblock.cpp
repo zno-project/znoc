@@ -28,7 +28,7 @@ llvm::Value* AST::CodeBlock::codegen(llvm::IRBuilder<> *builder) {
 
 // CODE BLOCK
 // codeblock = '{' statement* '}';
-std::unique_ptr<AST::Expression> Parser::parse_code_block(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_code_block(zno_ifile& f) {
 	std::vector<std::unique_ptr<AST::Expression>> body;
 	push_new_scope();
 

@@ -1,20 +1,14 @@
 #include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "framework.hpp"
 
-#include "main.hpp"
-#include "memory/memory_location.hpp"
-#include "types/type.hpp"
-#include "types/type.hpp"
-#include "constructions/namespace.hpp"
-#include "constructions/numeric_literal.hpp"
-#include "constructions/construction_parse.hpp"
-#include "constructions/pratt_parser.hpp"
+#include <main.hpp>
+#include <memory/memory_location.hpp>
+#include <types/type.hpp>
+#include <constructions/namespace.hpp>
+#include <constructions/numeric_literal.hpp>
+#include <constructions/construction_parse.hpp>
 
-#include <stdio.h>
+#include <parsing.hpp>
 #include <iostream>
 #include <cfloat>
 

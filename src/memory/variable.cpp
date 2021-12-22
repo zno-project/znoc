@@ -58,7 +58,7 @@ llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder) {
 
 // VARIABLE DEFINITION
 // variable_def = 'let' identifier (':' type)? ('=' binary_expr)?;
-std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_variable_def(zno_ifile& f) {
 	EXPECT(tok_let, "for variable definition");
 	
 	std::string name = EXPECT_IDENTIFIER("variable name");
@@ -76,6 +76,8 @@ std::unique_ptr<AST::Expression> Parser::parse_variable_def(FILE* f) {
 	if (!type) type = val->getType();
 	return std::make_unique<AST::VariableDef>(name, std::move(*type), std::move(val));
 }
+
+#include "../constructions/namespace.hpp"
 
 std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {
 	for (auto &scope_vars: stack_allocations) {

@@ -8,6 +8,7 @@
 #include <variant>
 #include <optional>
 #include <fmt/format.h>
+#include "../parsing.hpp"
 
 /**
  * THE TYPE AND TEMPLATING SYSTEM
@@ -93,8 +94,9 @@ namespace AST {
 		AST::TypeInstance get_pointer_to();
 		AST::TypeInstance get_pointed_to();
 
-		AST::TypeInstance get_function_returning();
+		AST::TypeInstance get_function_returning(std::vector<AST::TypeInstance> args, bool variadic);
 		AST::TypeInstance get_return_of_function();
+		std::vector<AST::TypeInstance> get_args_of_function();
 
 		AST::TypeInstance get_array_elem_of();
 
@@ -114,8 +116,8 @@ namespace AST {
 }
 
 namespace Parser {
-	AST::TypeInstance parse_type(FILE* f);
-	AST::TypeInstance parse_aggregate_type_definition(FILE* f);
+	AST::TypeInstance parse_type(zno_ifile& f);
+	AST::TypeInstance parse_aggregate_type_definition(zno_ifile& f);
 }
 
 #endif

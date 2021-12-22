@@ -55,7 +55,7 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder) {
 
 // IF STATEMENT
 // if = 'if' binary_expr codeblock ('else' (codeblock | if))?;
-std::unique_ptr<AST::Expression> Parser::parse_if_def(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_if_def(zno_ifile& f) {
 	EXPECT(tok_if, "to start if statement");
 
 	push_new_scope();

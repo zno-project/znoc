@@ -6,6 +6,7 @@
 #include "expression.hpp"
 #include "../parsing.hpp"
 #include "construction_parse.hpp"
+#include "../llvm_module.hpp"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
@@ -19,12 +20,12 @@ llvm::Value* AST::BreakExpression::codegen(llvm::IRBuilder<> *builder) {
 
 llvm::Value* AST::ContinueExpression::codegen(llvm::IRBuilder<> *builder) {
 	if (!builder->GetInsertBlock()->getTerminator()) builder->CreateBr(condBB); // Jump to the condition block
-	return nullptr; // Cannot return from a `continue`
+	return llvm::UndefValue::get(llvm::Type::getVoidTy(*TheContext)); // Cannot return from a `continue`
 }
 
 // BREAK
 // break = 'break' binary_expr?;
-std::unique_ptr<AST::Expression> Parser::parse_break(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_break(zno_ifile& f) {
 	EXPECT(tok_break, "in break statement");
 	if (currentToken == ';') return std::make_unique<AST::BreakExpression>(nullptr);
 	else return std::make_unique<AST::BreakExpression>(parse_pratt_expression(f));
@@ -32,7 +33,7 @@ std::unique_ptr<AST::Expression> Parser::parse_break(FILE* f) {
 	// NOTE: Can't use OPTIONAL or IF_TOK_ELSE since can't trim semicolon
 }
 
-std::unique_ptr<AST::Expression> Parser::parse_continue(FILE* f) {
+std::unique_ptr<AST::Expression> Parser::parse_continue(zno_ifile& f) {
 	EXPECT(tok_continue, "in continue statement");
 	return std::make_unique<AST::ContinueExpression>();
 }

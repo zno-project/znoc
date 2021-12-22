@@ -29,7 +29,7 @@ namespace AST {
 }
 
 namespace Parser {
-	std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>> parse_switch_case(FILE* f);
+	std::pair<AST::SwitchDef::switch_case_metadata_t, std::unique_ptr<AST::CodeBlock>> parse_switch_case(zno_ifile& f);
 }
 
 #endif
