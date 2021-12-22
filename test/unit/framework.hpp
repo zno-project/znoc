@@ -27,12 +27,14 @@ class CompilerGlobals {
 		LexLoc = {1, 0};
 		lastChars = std::map<std::string, char>();
 		GlobalNamespace = std::make_shared<AST::Namespace>("_G");
+		CurrentNamespace = GlobalNamespace;
 		AST::init_builtin_types();
   }
 
   virtual ~CompilerGlobals() {
 	  stack_allocations.clear();
 	  GlobalNamespace = nullptr;
+	  CurrentNamespace = nullptr;
 	  mergeBB = nullptr;
 	  condBB = nullptr;
   }

@@ -8,6 +8,7 @@
 #include "constructions/typedef.hpp"
 #include "macros.hpp"
 #include "location.hpp"
+#include "main.hpp"
 #include <fmt/format.h>
 
 #include <stdio.h>
@@ -175,6 +176,9 @@ bool has_searched_path(std::filesystem::path p) {
 void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifile& f, std::filesystem::path path) {
 	attributes_t attributes;
 
+	auto old_namespace = CurrentNamespace;
+	CurrentNamespace = current_namespace;
+
 	while (1) {
 		switch (currentToken) {
 			case tok_attributes: {
@@ -184,7 +188,7 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 			case '}':
 			case tok_eof: {
 				attributes = attributes_t();
-				return;
+				goto end_namespace;
 			}
 			case tok_uses: {
 				get_next_token(f);
@@ -231,6 +235,7 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 				auto name = EXPECT_IDENTIFIER("after `module` statement");
 				auto new_namespace = std::make_shared<AST::Namespace>(name);
 				*current_namespace << new_namespace;
+
 				EXPECT('{', "`{` after module name");
 				parse_namespace(new_namespace, f, path);
 				EXPECT('}', "`}` after module body");
@@ -257,6 +262,9 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 			}
 		}
 	}
+
+	end_namespace:;
+	CurrentNamespace = old_namespace;
 }
 
 int parse_file(std::filesystem::path path,

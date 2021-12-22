@@ -23,7 +23,8 @@ std::unique_ptr<AST::Expression> Parser::parse_identifier_expression(zno_ifile& 
 	auto v = AST::get_var(id);
 	if (v) return std::make_unique<AST::Reference>(v, id);
 	
-	auto n = GlobalNamespace->get_namespace_by_name(id);
+	auto n = CurrentNamespace->get_namespace_by_name(id);
+	if (!n) n = GlobalNamespace->get_namespace_by_name(id);
 	if (n) return std::make_unique<AST::Reference>(n, id);
 
 	return std::make_unique<AST::Reference>(id);
