@@ -107,7 +107,14 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 	EXPECT(tok_func, "to start function definition");
 	std::string name = EXPECT_IDENTIFIER("function name after 'func'");
 
-	typedef std::pair<std::string, AST::TypeInstance> arg_t;
+	struct arg_t {
+		std::string name;
+		AST::TypeInstance type;
+		std::unique_ptr<AST::Expression> default_val;
+
+		arg_t(std::string name, AST::TypeInstance type, std::unique_ptr<AST::Expression> default_val = nullptr): name(name), type(type), default_val(std::move(default_val)) {}
+	};
+
 	std::vector<arg_t> argsP;
 	bool is_member_func = false;
 	std::optional<std::string> varargs_name;
@@ -129,7 +136,11 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 				if (!attributes.extern_) argsP.push_back(arg_t(":zno_va_arg_count", AST::get_fundamental_type("i32")));
 			} else {
 				AST::TypeInstance type = parse_type(f);
-				auto arg = arg_t(name, std::move(type));
+				std::unique_ptr<AST::Expression> default_val = nullptr;
+				OPTIONAL('=', {
+					default_val = Parser::parse_pratt_expression(f);
+				});
+				auto arg = arg_t(name, type, std::move(default_val));
 				argsP.push_back(std::move(arg));
 			}
 		}
@@ -137,7 +148,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 
 	std::vector<std::shared_ptr<AST::Variable>> args;
 	for (auto &a : argsP) {
-		args.push_back(AST::Variable::create_in_scope(a.first, a.second));
+		args.push_back(AST::Variable::create_in_scope(a.name, a.type));
 	}
 
 	std::shared_ptr<AST::Variable> varargs_var = nullptr;
