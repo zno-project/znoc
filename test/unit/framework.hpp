@@ -56,7 +56,7 @@ class CompilerMain: CompilerGlobals {
   }
 
   virtual ~CompilerMain() {
-	  fclose(f->f);
+	  fclose(f.f);
   };
 
   // void TearDown() override {}
