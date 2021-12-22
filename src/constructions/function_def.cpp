@@ -149,7 +149,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 	}, "argument list");
 
 	std::shared_ptr<AST::Variable> varargs_var = nullptr;
-	if (varargs_name.has_value()) {
+	if (varargs_name.has_value() && !attributes.extern_) {
 		auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator");
 		varargs_var = AST::Variable::create_in_scope(varargs_name.value(), valist_ty);
 	}
