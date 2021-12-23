@@ -257,6 +257,12 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 				attributes = attributes_t();
 				break;
 			}
+			case tok_let: {
+				std::shared_ptr<AST::MemoryLoc> gv = Parser::parse_global_variable_def(f);
+				*current_namespace << gv;
+				attributes = attributes_t();
+				break;
+			}
 			default: {
 				throw std::runtime_error(fmt::format("Unimplemented {}", currentToken));
 			}

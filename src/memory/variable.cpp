@@ -77,6 +77,26 @@ std::unique_ptr<AST::Expression> Parser::parse_variable_def(zno_ifile& f) {
 	return std::make_unique<AST::VariableDef>(name, std::move(*type), std::move(val));
 }
 
+std::unique_ptr<AST::GlobalVariable> Parser::parse_global_variable_def(zno_ifile& f) {
+	EXPECT(tok_let, "for variable definition");
+	
+	std::string name = EXPECT_IDENTIFIER("variable name");
+
+	std::optional<AST::TypeInstance> type;
+
+	/*OPTIONAL(':', {
+		type = parse_type(f);
+	});*/
+
+	EXPECT('=', "initialiser for global variable");
+
+	std::unique_ptr<AST::Expression> val = parse_pratt_expression(f);
+
+	EXPECT(';', "after global variable definition");
+	if (!type) type = val->getType();
+	return std::make_unique<AST::GlobalVariable>(name, name, std::move(val));
+}
+
 #include "../constructions/namespace.hpp"
 
 std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {

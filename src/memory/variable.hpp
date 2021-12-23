@@ -46,4 +46,8 @@ namespace AST {
 	};
 }
 
+namespace Parser {
+	std::unique_ptr<AST::GlobalVariable> parse_global_variable_def(zno_ifile& f);
+}
+
 #endif
