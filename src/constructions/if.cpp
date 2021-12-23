@@ -53,6 +53,11 @@ llvm::Value* AST::IfDef::codegen(llvm::IRBuilder<> *builder) {
 	return thenBlockReturn;
 }
 
+llvm::Constant* AST::IfDef::codegen_const() {
+	auto cond = condition->codegen_const();
+	return llvm::ConstantExpr::getSelect(cond, thenClause->codegen_const(), elseClause->codegen_const());
+}
+
 // IF STATEMENT
 // if = 'if' binary_expr codeblock ('else' (codeblock | if))?;
 std::unique_ptr<AST::Expression> Parser::parse_if_def(zno_ifile& f) {

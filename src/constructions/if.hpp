@@ -13,6 +13,7 @@ namespace AST {
 		public:
 		IfDef(std::unique_ptr<AST::Expression> condition, std::unique_ptr<AST::Expression> thenClause, std::unique_ptr<AST::Expression> elseClause): Expression(thenClause->getType()), condition(std::move(condition)), thenClause(std::move(thenClause)), elseClause(std::move(elseClause)) {}
 		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
+		llvm::Constant* codegen_const() override;
 	};
 }
 
