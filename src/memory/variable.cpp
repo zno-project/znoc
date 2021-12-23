@@ -56,6 +56,10 @@ llvm::Value* AST::VariableDef::codegen(llvm::IRBuilder<> *builder) {
 	return builder->CreateLoad(var_ref->underlying_type.codegen(), allocaV);
 }
 
+llvm::Constant* AST::GlobalVariable::codegen_const_initialiser() {
+	return initializer->codegen_const();
+}
+
 // VARIABLE DEFINITION
 // variable_def = 'let' identifier (':' type)? ('=' binary_expr)?;
 std::unique_ptr<AST::Expression> Parser::parse_variable_def(zno_ifile& f) {

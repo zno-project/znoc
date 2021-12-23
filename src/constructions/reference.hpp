@@ -60,6 +60,13 @@ namespace AST {
 			else return (llvm::Value*)&*ns;
 		}
 
+		llvm::Constant* codegen_const() override {
+			assert(this->type == T::var);
+			assert(typeid(*this->var) == typeid(AST::GlobalVariable));
+			auto gv = std::dynamic_pointer_cast<AST::GlobalVariable>(this->var);
+			return gv->codegen_const_initialiser();
+		}
+
 		llvm::Value* codegen_to_ptr(llvm::IRBuilder<> *builder) override {
 			assert(this->type == T::var);
 			return var->codegen(builder);

@@ -29,6 +29,7 @@ namespace AST {
 		public:
 		GlobalVariable(std::string name, std::string link_name, std::unique_ptr<AST::Expression> initializer): MemoryLoc(initializer->getType(), name), link_name(link_name), initializer(std::move(initializer)) {}
 		llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
+		llvm::Constant* codegen_const_initialiser();
 	};
 }
 
