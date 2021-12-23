@@ -24,7 +24,7 @@ namespace AST {
 		public:
 		Expression(AST::TypeInstance t, SourceLocation Loc = LexLoc) : Loc(Loc), expressionType(std::move(t)) {}
 		virtual llvm::Value* codegen(llvm::IRBuilder<> *builder) = 0;
-		virtual llvm::Constant* codegen_const() { throw std::runtime_error(fmt::format("Cannot create constexpr of type {}", typeid(this).name())); };
+		virtual llvm::Constant* codegen_const() { throw std::runtime_error(fmt::format("Cannot create constexpr of type {}", typeid(*this).name())); };
 		virtual ~Expression() = default;
 		int getLine() const { return Loc.Line; }
 		int getCol() const { return Loc.Col; }
