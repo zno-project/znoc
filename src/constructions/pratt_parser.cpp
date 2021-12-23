@@ -391,7 +391,6 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder) {
 
 	if (op == dot) {
 		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
-
 		return rhs_ref->codegen(builder);
 	}
 
@@ -450,6 +449,55 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder) {
 	}
 }
 
+llvm::Constant* AST::NewBinaryExpression::codegen_const() {
+	auto LHS_value = lhs->codegen_const();
+	auto RHS_value = rhs->codegen_const();
+
+	switch (op) {
+		case plus:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFAdd(LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getAdd(LHS_value, RHS_value);
+		case minus:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFSub(LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getSub(LHS_value, RHS_value);
+		case star:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFMul(LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getMul(LHS_value, RHS_value);
+		case divide:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFDiv(LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getUDiv(LHS_value, RHS_value);
+		case mod:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFRem(LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getURem(LHS_value, RHS_value);
+
+		case shift_left: return llvm::ConstantExpr::getShl(LHS_value, RHS_value);
+		case shift_right: return llvm::ConstantExpr::getAShr(LHS_value, RHS_value);
+
+		case ampersand: return llvm::ConstantExpr::getAnd(LHS_value, RHS_value);
+		case bitwise_or: return llvm::ConstantExpr::getOr(LHS_value, RHS_value);
+
+		case compare_eq:
+			if (LHS_value->getType()->isFloatingPointTy()) llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_UEQ, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_EQ, LHS_value, RHS_value);
+		case compare_neq:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_UNE, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_NE, LHS_value, RHS_value);
+		case compare_lt:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_ULT, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_ULT, LHS_value, RHS_value);
+		case compare_lte:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_ULE, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_ULE, LHS_value, RHS_value);
+		case compare_gt:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_UGT, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_UGT, LHS_value, RHS_value);
+		case compare_gte:
+			if (LHS_value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFCmp(llvm::CmpInst::FCMP_UGE, LHS_value, RHS_value);
+			else return llvm::ConstantExpr::getICmp(llvm::CmpInst::ICMP_UGE, LHS_value, RHS_value);
+		default: throw std::runtime_error(fmt::format("unimplemented constexpr binary op {}", operator_to_string[op]));
+	}
+}
+
 llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 	auto value = expr->codegen(builder);
 	switch (op) {
@@ -464,6 +512,18 @@ llvm::Value* AST::UnaryExpressionPrefix::codegen(llvm::IRBuilder<> *builder) {
 			return expr->codegen_to_ptr(builder);
 		}
 		default: throw std::runtime_error(fmt::format("unimplemented prefix op {}", operator_to_string[op]));
+	}
+}
+
+llvm::Constant* AST::UnaryExpressionPrefix::codegen_const() {
+	auto value = expr->codegen_const();
+	switch (op) {
+		case plus:
+			return value;
+		case minus:
+			if (value->getType()->isFloatingPointTy()) return llvm::ConstantExpr::getFNeg(value);
+			else return llvm::ConstantExpr::getNeg(value);
+		default: throw std::runtime_error(fmt::format("unimplemented constexpr prefix op {}", operator_to_string[op]));
 	}
 }
 

@@ -69,6 +69,7 @@ namespace AST {
 		public:
 			UnaryExpressionPrefix(operators op, std::unique_ptr<Expression> expr) : Expression(get_prefix_op_ret_type(op, expr)), op(op), expr(std::move(expr)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
+			llvm::Constant* codegen_const() override;
 			
 			std::string print() const override {
 				return std::string("(") + operator_to_string[op] + " " + expr->print() + ")";
@@ -129,6 +130,7 @@ namespace AST {
 		public:
 			NewBinaryExpression(operators op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) : Expression(get_binop_ret_type(op, lhs, rhs)), op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 			llvm::Value* codegen(llvm::IRBuilder<> *builder) override;
+			llvm::Constant* codegen_const() override;
 			
 			std::string print() const override {
 				return std::string("(") + lhs->print() + " " + operator_to_string[op] + " " + rhs->print() + ")";
