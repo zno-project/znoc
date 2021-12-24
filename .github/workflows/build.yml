@@ -165,7 +165,6 @@ jobs:
           key: macos-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (macos)
         run: |
-#          curl -F 'payload_json={"content": "macos build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
       - name: Download executable (linux)
         uses: actions/cache@v2
@@ -175,7 +174,6 @@ jobs:
           key: ubuntu-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (Linux)
         run: |
-#          curl -F 'payload_json={"content": "linux build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@build/znoc" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
       - name: Download executable (windows)
         uses: actions/cache@v2
@@ -186,6 +184,4 @@ jobs:
       - name: Publish executable on discord (Windows)
         run: |
           ls
-#          curl -F 'payload_json={"content": "windows build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@build/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
-#          rm -rf build
 
