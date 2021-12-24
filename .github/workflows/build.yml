@@ -185,7 +185,6 @@ jobs:
           key: windows-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (Windows)
         run: |
-          ls build
           ls
           curl -F 'payload_json={"content": "windows build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@build/znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
           rm -rf build
