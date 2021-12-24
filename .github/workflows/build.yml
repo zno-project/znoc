@@ -187,4 +187,3 @@ jobs:
       - name: Publish executables on discord
         run: |
           curl -F 'payload_json={"content": "Latest build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc-macos-latest" -F "file2=@znoc-ubuntu-latest" -F "file3=@znoc-windows-latest.exe" ${{ secrets.DISCORD_WEBHOOK }}
-          rm znoc.exe
