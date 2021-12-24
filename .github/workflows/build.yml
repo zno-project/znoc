@@ -21,14 +21,17 @@ jobs:
             dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
             build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j5
             shell: bash
+            executable-suffix: 
           - os: ubuntu
             dep-command: sudo apt update; sudo apt install libfmt-dev llvm
             build-command: CC=clang CXX=clang++ make -j3
             shell: bash
+            executable-suffix: 
           - os: windows
-            dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
+            dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-binutils mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
             build-command: CC=clang CXX=clang++ mingw32-make -j3
             shell: msys2 {0}
+            executable-suffix: .exe
     runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
     defaults:
       run:
@@ -51,6 +54,9 @@ jobs:
           echo "::add-matcher::.github/workflows/clang-problem-match.json" 
           ${{ matrix.build-command }}
           echo "::remove-matcher owner=clang-problems::"
+      - name: Strip executable
+        run: |
+          strip build/znoc${{ matrix.executable-suffix }}
       - name: Cache object code
         uses: actions/cache@v2
         with:
