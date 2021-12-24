@@ -238,6 +238,11 @@ int parse_file(std::filesystem::path path,
 				attributes = attributes_t();
 				break;
 			}
+			case tok_extension: {
+				Parser::parse_extension(f);
+				attributes = attributes_t();
+				break;
+			}
 			case tok_func: {
 				*current_namespace << Parser::parse_function(f, attributes);
 				attributes = attributes_t();

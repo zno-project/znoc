@@ -117,6 +117,7 @@ namespace AST {
 
 namespace Parser {
 	AST::TypeInstance parse_type(zno_ifile& f);
+	void parse_extension(zno_ifile& f);
 	AST::TypeInstance parse_aggregate_type_definition(zno_ifile& f);
 }
 
