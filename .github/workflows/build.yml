@@ -63,6 +63,13 @@ jobs:
           path: |
             build/
           key: ${{ matrix.os }}-${{ matrix.os-version }}-build-${{ github.run_id }}
+      - name: Upload executable
+        if: ${{ matrix.test-type == 'unit' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: znoc-${{ matrix.os }}-${{ matrix.os-version }}
+          path: build/znoc${{ matrix.executable-suffix }}
+          retention-days: 5
 
   test:
     strategy:
@@ -158,31 +165,29 @@ jobs:
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "GITHUB_SHA=$(echo $GITHUB_SHA)" >> $GITHUB_ENV
       - name: Download executable (macos)
-        uses: actions/cache@v2
+        uses: actions/download-artifact@v2
         with:
-          path: |
-            build/
-          key: macos-latest-build-${{ github.run_id }}
+          name: znoc-macos-latest
+          path: znoc
       - name: Publish executable on discord (macos)
         run: |
-          ls
-          rm -rf build
+          curl -F 'payload_json={"content": "macos build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          rm znoc
       - name: Download executable (linux)
-        uses: actions/cache@v2
+        uses: actions/download-artifact@v2
         with:
-          path: |
-            build/
-          key: ubuntu-latest-build-${{ github.run_id }}
+          name: znoc-ubuntu-latest
+          path: znoc
       - name: Publish executable on discord (Linux)
         run: |
-          rm -rf build
+          curl -F 'payload_json={"content": "linux build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc" ${{ secrets.DISCORD_WEBHOOK }}
+          rm znoc
       - name: Download executable (windows)
-        uses: actions/cache@v2
+        uses: actions/download-artifact@v2
         with:
-          path: |
-            build/
-          key: windows-latest-build-${{ github.run_id }}
+          name: znoc-windows-latest
+          path: znoc.exe
       - name: Publish executable on discord (Windows)
         run: |
-          ls
-
+          curl -F 'payload_json={"content": "windows build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
+          rm znoc.exe
