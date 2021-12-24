@@ -173,11 +173,8 @@ bool has_searched_path(std::filesystem::path p) {
 	return false;
 }
 
-void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifile& f, std::filesystem::path path) {
+void parse_namespace(std::shared_ptr<AST::Namespace> current_namespace, zno_ifile& f, std::filesystem::path path) {
 	attributes_t attributes;
-
-	auto old_namespace = CurrentNamespace;
-	CurrentNamespace = current_namespace;
 
 	while (1) {
 		switch (currentToken) {
@@ -188,7 +185,7 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 			case '}':
 			case tok_eof: {
 				attributes = attributes_t();
-				goto end_namespace;
+				return;
 			}
 			case tok_uses: {
 				get_next_token(f);
@@ -222,9 +219,11 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 				int old_current_token = currentToken;
 
 				*current_namespace << new_namespace;
+				NamespaceStack.push_back(new_namespace);
 
 				parse_file(newP, new_namespace, true);
 
+				NamespaceStack.pop_back();
 				currentToken = old_current_token;
 
 				attributes = attributes_t();
@@ -236,9 +235,13 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 				auto new_namespace = std::make_shared<AST::Namespace>(name);
 				*current_namespace << new_namespace;
 
+				NamespaceStack.push_back(new_namespace);
+
 				EXPECT('{', "`{` after module name");
 				parse_namespace(new_namespace, f, path);
 				EXPECT('}', "`}` after module body");
+
+				NamespaceStack.pop_back();
 				break;
 			}
 			case tok_struct:
@@ -268,13 +271,10 @@ void parse_namespace(std::shared_ptr<AST::Namespace> &current_namespace, zno_ifi
 			}
 		}
 	}
-
-	end_namespace:;
-	CurrentNamespace = old_namespace;
 }
 
 int parse_file(std::filesystem::path path,
-	std::shared_ptr<AST::Namespace> &current_namespace,
+	std::shared_ptr<AST::Namespace> current_namespace,
 	__attribute__((unused)) bool insideUses) {
 	searchedIncludes.push_back(path);
 

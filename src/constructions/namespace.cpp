@@ -28,7 +28,7 @@ std::shared_ptr<AST::Namespace> AST::Namespace::get_namespace_by_name(std::strin
 }
 
 Parser::NamespaceParseReturn Parser::parse_namespace(zno_ifile& f) {
-	auto n = GlobalNamespace;
+	auto n = NamespaceStack[0];
 	std::string identifier;
 	while (1) {
 		identifier = std::get<std::string>(currentTokenVal);

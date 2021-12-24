@@ -75,7 +75,7 @@ enum Token {
 namespace AST { class Namespace; }
 
 int parse_file(std::filesystem::path p,
-	std::shared_ptr<AST::Namespace> &current_namespace,
+	std::shared_ptr<AST::Namespace> current_namespace,
 	bool insideUses = false);
 
 #define EXPECT(tok, err) { \

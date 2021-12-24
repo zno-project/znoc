@@ -57,7 +57,7 @@ llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *b
 
 			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
 			auto va_list_arg = builder.CreateCall(vastart, {va_list_ptr});
-			auto va_iter_init_func = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_namespace_by_name("VariadicIterator")->get_var("init");
+			auto va_iter_init_func = NamespaceStack[0]->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_namespace_by_name("VariadicIterator")->get_var("init");
 			auto va_list_len = builder.CreateLoad(args[args.size()-1].var_ref->codegen(&builder));
 			builder.CreateCall(static_cast<llvm::Function*>(va_iter_init_func->codegen(&builder)), {va_list_alloca, va_list_len});
 		}
@@ -66,7 +66,7 @@ llvm::Value* AST::Function::codegen(__attribute__((unused)) llvm::IRBuilder<> *b
 
 		if (varargs_name.has_value()) {
 			auto vaend = llvm::Intrinsic::getDeclaration(&*TheModule, llvm::Intrinsic::vaend);
-			auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator").codegen();
+			auto valist_ty = NamespaceStack[0]->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator").codegen();
 			auto va_list_ptr = builder.CreateBitCast(va_list_alloca, llvm::Type::getInt8PtrTy(*TheContext));
 			auto va_list_arg = builder.CreateCall(vaend, {va_list_ptr});
 		}
@@ -150,7 +150,7 @@ std::shared_ptr<AST::Function> Parser::parse_function(zno_ifile& f, attributes_t
 
 	std::shared_ptr<AST::Variable> varargs_var = nullptr;
 	if (varargs_name.has_value() && !attributes.extern_) {
-		auto valist_ty = GlobalNamespace->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator");
+		auto valist_ty = NamespaceStack[0]->get_namespace_by_name("std")->get_namespace_by_name("variadic")->get_type_by_name("VariadicIterator");
 		varargs_var = AST::Variable::create_in_scope(varargs_name.value(), valist_ty);
 	}
 

@@ -113,9 +113,10 @@ std::shared_ptr<AST::MemoryLoc> AST::get_var(std::string var) {
 		}
 	}
 
-	auto gv = CurrentNamespace->get_var(var);
-	if (!gv) gv = GlobalNamespace->get_var(var);
-	if (gv) return gv;
+	for (auto i = NamespaceStack.rbegin(); i != NamespaceStack.rend(); ++i) {
+		auto m = (*i)->get_var(var);
+		if (m) return m;
+	}
 
 	return nullptr;
 }

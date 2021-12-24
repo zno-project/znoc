@@ -19,8 +19,7 @@
 
 #include "llvm_module.hpp"
 
-std::shared_ptr<AST::Namespace> GlobalNamespace;
-std::shared_ptr<AST::Namespace> CurrentNamespace;
+std::vector<std::shared_ptr<AST::Namespace>> NamespaceStack;
 
 int main(int argc, char *argv[]) {
 	std::string out_name = "output.o";
@@ -32,15 +31,14 @@ int main(int argc, char *argv[]) {
 	make_llvm_module(path.string());
 
 	push_new_scope();
-	GlobalNamespace = std::make_shared<AST::Namespace>("_G");
-	CurrentNamespace = GlobalNamespace;
+	NamespaceStack = { std::make_shared<AST::Namespace>("_G") };
 	AST::init_builtin_types();
 
-	parse_file(path, GlobalNamespace);
+	parse_file(path, NamespaceStack[0]);
 
 	init_objcode_producer();
 
-	GlobalNamespace->codegen();
+	NamespaceStack[0]->codegen();
 
 	produce_objcode(out_name);
 	return 0;

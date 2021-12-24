@@ -90,7 +90,7 @@ void AST::init_builtin_types() {
 		.array_lengths = std::vector<size_t>()
 	};
 
-	*GlobalNamespace << std::move(fundamentals);
+	*NamespaceStack[0] << std::move(fundamentals);
 }
 
 void AST::TypeInstance::get_or_create_template(std::vector<AST::TypeInstance> template_types) {
