@@ -165,6 +165,7 @@ jobs:
           key: macos-latest-build-${{ github.run_id }}
       - name: Publish executable on discord (macos)
         run: |
+          ls
           rm -rf build
       - name: Download executable (linux)
         uses: actions/cache@v2
