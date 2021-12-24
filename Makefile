@@ -53,7 +53,7 @@ compiler: $(ZNOC)
 
 all: $(ZNOC) $(UNIT_TESTS) $(REGRESSION_TESTS)
 
-clean: clean-compiler clean-test clean-check
+clean: clean-compiler clean-unit-tests clean-regression-tests
 	
 clean-compiler:
 	rm -rf build
