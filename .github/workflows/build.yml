@@ -64,7 +64,6 @@ jobs:
             build/
           key: ${{ matrix.os }}-${{ matrix.os-version }}-build-${{ github.run_id }}
       - name: Upload executable
-        if: ${{ matrix.test-type == 'unit' }}
         uses: actions/upload-artifact@v2
         with:
           name: znoc-${{ matrix.os }}-${{ matrix.os-version }}
