@@ -23,6 +23,12 @@ struct ThingyContainer {
 	thingy: _fundamentals::ptr<Thingy>
 }
 
+extension Thingy {
+	func printANumber(self) {
+		stdio::printI(63729);
+	}
+}
+
 func print3 () {
 	stdio::printI(3);
 }
@@ -36,6 +42,7 @@ func main() {
 	s[0].printA();
 	s[0].c = print3;
 	s[0].c();
+	s[0].printANumber();
 	let p: (_fundamentals::i32) -> _fundamentals::void = stdio::printI;
 	p(1);
 }

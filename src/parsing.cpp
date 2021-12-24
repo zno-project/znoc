@@ -108,6 +108,7 @@ int get_token(zno_ifile& f) {
 		else if (identifier == "as") return tok_as;
 		else if (identifier == "typedef") return tok_typedef;
 		else if (identifier == "attributes") return tok_attributes;
+		else if (identifier == "extension") return tok_extension;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
@@ -234,6 +235,11 @@ int parse_file(std::filesystem::path path,
 			case tok_struct:
 			case tok_class: {
 				*current_namespace << Parser::parse_aggregate_type_definition(f);
+				attributes = attributes_t();
+				break;
+			}
+			case tok_extension: {
+				Parser::parse_extension(f);
 				attributes = attributes_t();
 				break;
 			}

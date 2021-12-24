@@ -184,6 +184,15 @@ AST::TypeInstance finalise_aggregate_type(std::string name, std::vector<std::pai
 	};
 }
 
+void Parser::parse_extension(zno_ifile& f) {
+	EXPECT(tok_extension, "extension");
+	auto t = parse_type(f);
+	
+	LIST('{', ',', '}', {
+		*t.base_type << parse_function(f, attributes_t(), t);
+	}, "extension functions");
+}
+
 #include "../constructions/construction_parse.hpp"
 
 AST::TypeInstance Parser::parse_aggregate_type_definition(zno_ifile& f) {
