@@ -47,7 +47,7 @@ REGRESSION_TESTS_LOG = test/regression/log.log
 
 ZNOC = build/znoc
 
-.PHONY: all compiler test check clean clean-compiler clean-test clean-check
+.PHONY: all tests clean compiler clean-compiler unit-tests clean-unit-tests regression-tests clean-regression-tests
 
 compiler: $(ZNOC)
 
@@ -62,10 +62,12 @@ clean-unit-tests:
 clean-regression-tests:
 	rm -rf test/regression/build
 
-test-unit: $(UNIT_TESTS)
+tests: unit-tests regression-tests
+
+unit-tests: $(UNIT_TESTS)
 	./test/unit/build/znoc-test --gtest_output="$(GTEST_OUTPUT)"
 
-test-regression: $(REGRESSION_TESTS)
+regression-tests: $(REGRESSION_TESTS)
 	bash test/regression/regressiontests
 
 -include ($(DEPENDS) $(DEPENDS_CONSTRUCT) $(DEPENDS_TYPES) $(DEPENDS_MEMORY) $(DEPENDS_UNIT_TESTS))
