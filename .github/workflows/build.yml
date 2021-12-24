@@ -167,7 +167,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: znoc-macos-latest
-          path: znoc
       - name: Publish executable on discord (macos)
         run: |
           curl -F 'payload_json={"content": "macos build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc" ${{ secrets.DISCORD_WEBHOOK }}
@@ -176,7 +175,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: znoc-ubuntu-latest
-          path: znoc
       - name: Publish executable on discord (Linux)
         run: |
           curl -F 'payload_json={"content": "linux build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc" ${{ secrets.DISCORD_WEBHOOK }}
@@ -185,7 +183,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: znoc-windows-latest
-          path: znoc.exe
       - name: Publish executable on discord (Windows)
         run: |
           curl -F 'payload_json={"content": "windows build - [commit ${{ env.GITHUB_SHA_SHORT }}](https://github.com/egkoppel/znoc/commit/${{ env.GITHUB_SHA }})"}' -F "file1=@znoc.exe" ${{ secrets.DISCORD_WEBHOOK }}
