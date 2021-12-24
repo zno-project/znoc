@@ -45,6 +45,7 @@ enum Token {
 
 	// typedef
 	tok_struct = -__LINE__,
+	tok_extension = -__LINE__,
 
 	// control flow
 	tok_if = -__LINE__,

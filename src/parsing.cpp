@@ -108,6 +108,7 @@ int get_token(zno_ifile& f) {
 		else if (identifier == "as") return tok_as;
 		else if (identifier == "typedef") return tok_typedef;
 		else if (identifier == "attributes") return tok_attributes;
+		else if (identifier == "extension") return tok_extension;
 		else {
 			currentTokenVal = identifier;
 			return tok_identifier;
