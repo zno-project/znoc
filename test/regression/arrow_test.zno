@@ -1,0 +1,16 @@
+uses 'stdio.zno'
+
+struct TestStruct {
+	a: _fundamentals::i32,
+	func print_a(self) {
+		stdio::printI(self->a);
+	}
+}
+
+func main() {
+	let test: TestStruct;
+	test.a = 5;
+	test.print_a();
+	let tp = &test;
+	tp->print_a();
+}

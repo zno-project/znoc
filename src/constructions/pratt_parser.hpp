@@ -10,6 +10,7 @@ enum operators {
 	not_an_operator = -1,
 
 	dot,
+	arrow,
 	double_colon,
 
 	plus,
