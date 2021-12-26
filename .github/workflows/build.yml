@@ -127,7 +127,7 @@ jobs:
       - name: Run tests
         run: |
           echo "::add-matcher::.github/workflows/diff-problem-match.json" 
-          ${{ matrix.make-command }} test-${{ matrix.test-type }}
+          ${{ matrix.make-command }} ${{ matrix.test-type }}-tests
           echo "::remove-matcher owner=diff-problems::"
           echo "::remove-matcher owner=diff-warnings::"
       - name: Upload test results
