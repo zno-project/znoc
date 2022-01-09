@@ -22,17 +22,20 @@ jobs:
             build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j16
             shell: bash
             executable-suffix: 
+            host: self-hosted
           - os: ubuntu
             dep-command: sudo apt update; sudo apt install libfmt-dev llvm
             build-command: CC=clang CXX=clang++ make -j3
             shell: bash
             executable-suffix: 
+            host:
           - os: windows
             dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-binutils mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
             build-command: CC=clang CXX=clang++ mingw32-make -j3
             shell: msys2 {0}
             executable-suffix: .exe
-    runs-on: ${{ matrix.os }}-${{ matrix.os-version }}
+            host:
+    runs-on: [${{ matrix.os }}-${{ matrix.os-version }}, ${{ matrix.host }}]
     defaults:
       run:
         shell: ${{ matrix.shell }}
