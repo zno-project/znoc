@@ -28,13 +28,13 @@ jobs:
             build-command: CC=clang CXX=clang++ make -j3
             shell: bash
             executable-suffix: 
-            host:
+            host: 
           - os: windows
             dep-command: mingw-w64-x86_64-make mingw-w64-x86_64-pkgconf mingw-w64-x86_64-llvm mingw-w64-x86_64-binutils mingw-w64-x86_64-clang mingw-w64-x86_64-fmt
             build-command: CC=clang CXX=clang++ mingw32-make -j3
             shell: msys2 {0}
             executable-suffix: .exe
-            host:
+            host: 
     runs-on: [${{ matrix.os }}-${{ matrix.os-version }}, ${{ matrix.host }}]
     defaults:
       run:
