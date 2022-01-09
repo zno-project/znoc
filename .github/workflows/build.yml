@@ -19,7 +19,7 @@ jobs:
         include:
           - os: macos
             dep-command: env HOMEBREW_NO_AUTO_UPDATE=1 brew install fmt llvm make pkg-config
-            build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j5
+            build-command: LLVM_CONFIG=`brew --prefix llvm`/bin/llvm-config CC=clang CXX=clang++ gmake -j16
             shell: bash
             executable-suffix: 
           - os: ubuntu
