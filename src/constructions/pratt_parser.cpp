@@ -6,12 +6,23 @@
 #include "../memory/memory_ref.hpp"
 #include "reference.hpp"
 
-const char *operator_to_string[] = {".", "::", "+", "-", "*", "/", "%", "&", "|", "~", "^", "&&", "||", "!", "<<", ">>", "==", "!=", "<", ">", "<=", ">=", "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "is", "["};
+const char *operator_to_string[] = {
+	".", "->", "::",
+	"+", "-", "*", "/", "%",
+	"&", "|", "~", "^",
+	"&&", "||", "!",
+	"<<", ">>",
+	"==", "!=", "<", ">", "<=", ">=",
+	"=", "+=", "-=", "*=", "/=", "%=",
+	"&=", "|=", "^=", "<<=", ">>=",
+	"is", "["
+};
 
 void advance_op(operators op, zno_ifile& f) {
 	switch (op) {
 		case not_an_operator:
 			break;
+		// 1 char ops
 		case dot:
 		case plus:
 		case minus:
@@ -31,6 +42,8 @@ void advance_op(operators op, zno_ifile& f) {
 		case is:
 			get_next_token(f);
 			break;
+		// 2 char ops
+		case arrow:
 		case double_colon:
 		case logical_and:
 		case logical_or:
@@ -51,6 +64,7 @@ void advance_op(operators op, zno_ifile& f) {
 			get_next_token(f);
 			get_next_token(f);
 			break;
+		// 3 char ops
 		case assign_shift_left:
 		case assign_shift_right:
 			get_next_token(f);
@@ -61,56 +75,61 @@ void advance_op(operators op, zno_ifile& f) {
 }
 
 operators parse_operator(zno_ifile& f) {
+	auto t = peek_next_token(f);
+	auto t2 = peek_next_token(f, 2);
+
 	switch (currentToken) {
 		case '.': {
 			return dot;
 		}
 		case ':': {
-			if (peek_next_token(f) != ':') throw std::runtime_error("Expected '::'");
+			if (t != ':') throw std::runtime_error("Expected '::'");
 			return double_colon;
 		}
 		case '+': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_add;
 			}
 			return plus;
 		}
 		case '-': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_sub;
+			} else if (t == '>') {
+				return arrow;
 			}
 			return minus;
 		}
 		case '*': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_mul;
 			}
 			return star;
 		}
 		case '/': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_div;
 			}
 			return divide;
 		}
 		case '%': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_mod;
 			}
 			return mod;
 		}
 		case '&': {
-			if (peek_next_token(f) == '&') {
+			if (t == '&') {
 				return logical_and;
-			} else if (peek_next_token(f) == '=') {
+			} else if (t == '=') {
 				return assign_bitwise_and;
 			}
 			return ampersand;
 		}
 		case '|': {
-			if (peek_next_token(f) == '|') {
+			if (t == '|') {
 				return logical_or;
-			} else if (peek_next_token(f) == '=') {
+			} else if (t == '=') {
 				return assign_bitwise_or;
 			}
 			return bitwise_or;
@@ -119,41 +138,41 @@ operators parse_operator(zno_ifile& f) {
 			return bitwise_not;
 		}
 		case '^': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return assign_bitwise_xor;
 			}
 			return bitwise_xor;
 		}
 		case '<': {
-			if (peek_next_token(f) == '<') {
-				if (peek_next_token(f, 2) == '=') {
+			if (t == '<') {
+				if (t2 == '=') {
 					return assign_shift_left;
 				}
 				return shift_left;
-			} else if (peek_next_token(f) == '=') {
+			} else if (t == '=') {
 				return compare_lte;
 			}
 			return compare_lt;
 		}
 		case '>': {
-			if (peek_next_token(f) == '>') {
-				if (peek_next_token(f, 2) == '=') {
+			if (t == '>') {
+				if (t2 == '=') {
 					return assign_shift_right;
 				}
 				return shift_right;
-			} else if (peek_next_token(f) == '=') {
+			} else if (t == '=') {
 				return compare_gte;
 			}
 			return compare_gt;
 		}
 		case '!': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return compare_neq;
 			}
 			return logical_not;
 		}
 		case '=': {
-			if (peek_next_token(f) == '=') {
+			if (t == '=') {
 				return compare_eq;
 			}
 			return assign;
@@ -184,6 +203,7 @@ PrefixBindingPower get_binding_power_prefix(operators op) {
 std::optional<InfixBindingPower> get_binding_power_infix(operators op) {
 	switch (op) {
 		case dot:
+		case arrow:
 		case double_colon:
 			return InfixBindingPower { .lhs = 200, .rhs = 201 };
 		case shift_left:
@@ -356,18 +376,32 @@ AST::TypeInstance AST::NewBinaryExpression::get_binop_ret_type(operators op, std
 		throw std::runtime_error(fmt::format("couldn't find {} in {}", rhs_ref->name, lhs_ns->get_name()));
 	}
 
-	if (op == dot) {
+	if (op == dot || op == arrow) {
 		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
 
-		auto v = lhs->getType().base_type->get_var(rhs_ref->name);
-		if (v) {
-			rhs_ref->add_var(v);
-			return v->underlying_type;
+		// a.b
+		// rhs_ref->name = "b"
+		// lhs_ref == 
+
+		// lhs = struct
+		// lhs = ptr<struct>
+
+		auto lhs_type = lhs->getType();
+		if (op == arrow) {
+			lhs_type = lhs_type.get_pointed_to();
+		}
+		auto var = lhs_type.base_type->get_var(rhs_ref->name);
+		if (var) {
+			rhs_ref->add_var(var);
+			return var->underlying_type;
 		}
 
-		auto field_info = lhs->getType().get_field_info_by_name(rhs_ref->get_name());
+		auto field_info = lhs_type.get_field_info_by_name(rhs_ref->get_name());
 
 		if (std::holds_alternative<AST::FieldInfoField>(field_info)) {
+			if (op == arrow) {
+				lhs = std::make_unique<AST::UnaryExpressionPrefix>(star, std::move(lhs));
+			}
 			auto gep = std::make_shared<AST::GEP>(&*lhs, std::get<AST::FieldInfoField>(field_info).index);
 			rhs_ref->add_var(gep);
 			return std::get<AST::FieldInfoField>(field_info).type;
@@ -389,14 +423,8 @@ llvm::Value* AST::NewBinaryExpression::codegen(llvm::IRBuilder<> *builder) {
 	auto LHS_value = lhs->codegen(builder);
 	auto RHS_value = rhs->codegen(builder);
 
-	if (op == dot) {
-		auto rhs_ref = dynamic_cast<AST::Reference*>(&*rhs);
-
-		return rhs_ref->codegen(builder);
-	}
-
-	if (op == double_colon) {
-		return rhs->codegen(builder);
+	if (op == dot || op == arrow || op == double_colon) {
+		return RHS_value;
 	}
 
 	if (op == assign) {
@@ -480,8 +508,8 @@ llvm::Value* AST::NewCallExpression::codegen(llvm::IRBuilder<> *builder) {
 
 	auto arg_types = func->getType().get_args_of_function();
 
-	if (auto lhs_dot_op = dynamic_cast<AST::NewBinaryExpression*>(&*func)) if (lhs_dot_op->op == dot && static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("member_func")) {
-		fargs.push_back(lhs_dot_op->lhs->codegen_to_ptr(builder));
+	if (auto lhs_dot_op = dynamic_cast<AST::NewBinaryExpression*>(&*func)) if ((lhs_dot_op->op == dot || lhs_dot_op->op == arrow) && static_cast<llvm::Function*>(codegen_func)->hasFnAttribute("member_func")) {
+		fargs.push_back(lhs_dot_op->op == arrow ? lhs_dot_op->lhs->codegen(builder) : lhs_dot_op->lhs->codegen_to_ptr(builder));
 	}
 
 	for (auto &arg: args) {
